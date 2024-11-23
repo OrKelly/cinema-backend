@@ -58,7 +58,7 @@ class BaseOrmService(BaseService):
         if not db_obj:
             raise NotFoundException(
                 message=f"{self.model_class.__tablename__.title()} "
-                        f"с id: {id} не существует"
+                f"с id: {id} не существует"
             )
 
         return db_obj

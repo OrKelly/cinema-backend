@@ -17,6 +17,7 @@ class BaseS3Storage(ABC):
     :param secure: установить безопасное подключение или нет.
     :param _client_type: SDK (пакет) для создания инстанса хранилища
     """
+
     endpoint: str = config.S3_ENDPOINT
     access_key: str = config.S3_ACCESS_KEY
     secret_key: str = config.S3_SECRET_KEY
@@ -30,12 +31,12 @@ class BaseS3Storage(ABC):
                 self.endpoint,
                 access_key=self.access_key,
                 secret_key=self.secret_key,
-                secure=self.secure
+                secure=self.secure,
             )
             if self.bucket_name:
                 self._ensure_bucket_exists()
-        except Exception as e:
-            print(f"Ошибка при создании клиента S3: {e}")
+        except Exception:
+            pass
 
     @abstractmethod
     def _ensure_bucket_exists(self):

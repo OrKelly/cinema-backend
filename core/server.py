@@ -10,7 +10,6 @@ from core.middlewares import SQLAlchemyMiddleware
 from core.storages.s3 import MinioS3Storage
 
 
-
 def init_routers(app_: FastAPI) -> None:
     """Функция для регистрации роутов"""
     app_.include_router(router=v1_router, prefix="/api")

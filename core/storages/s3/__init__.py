@@ -1,1 +1,1 @@
-from .minio import MinioS3Storage
+from .minio import MinioS3Storage  # noqa: F401
