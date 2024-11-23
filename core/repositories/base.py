@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass
 from functools import reduce
-from typing import Any, Generic, Type, Iterable
+from typing import Any
 
 from sqlalchemy import Select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,28 +14,25 @@ from core.generics import ModelType
 @dataclass
 class BaseRepository(ABC):
     @abstractmethod
-    async def create(self, attributes: dict[str, Any] = None):
-        ...
+    async def create(self, attributes: dict[str, Any] = None): ...
 
     @abstractmethod
-    async def get_all(self, skip: int = 0, limit: int = 100):
-        ...
+    async def get_all(self, skip: int = 0, limit: int = 100): ...
 
     @abstractmethod
-    async def get_by(self, field: str, value: Any):
-        ...
+    async def get_by(self, field: str, value: Any): ...
 
     @abstractmethod
-    async def delete(self, instance: Any) -> None:
-        ...
+    async def delete(self, instance: Any) -> None: ...
 
 
 # ToDO: добавить filter_by и update методы
 @dataclass
 class BaseOrmRepository(BaseRepository):
     """Базовый класс для репозиториев данных"""
+
     session: AsyncSession
-    model_class: Type[ModelType]
+    model_class: type[ModelType]
 
     async def create(self, attributes: dict[str, Any] = None) -> ModelType:
         """
@@ -50,7 +48,7 @@ class BaseOrmRepository(BaseRepository):
         return model
 
     async def get_all(
-            self, skip: int = 0, limit: int = 100, join_: set[str] | None = None
+        self, skip: int = 0, limit: int = 100, join_: set[str] | None = None
     ) -> Iterable[ModelType]:
         """
         Метод для получения всех инстансов модели.
@@ -69,14 +67,15 @@ class BaseOrmRepository(BaseRepository):
         return await self._all(query)
 
     async def get_by(
-            self,
-            field: str,
-            value: Any,
-            join_: set[str] | None = None,
-            unique: bool = False,
+        self,
+        field: str,
+        value: Any,
+        join_: set[str] | None = None,
+        unique: bool = False,
     ) -> Iterable[ModelType] | ModelType:
         """
-        Метод возвращает инстансы модели, отфильтрованные по определенному полю и значению
+        Метод возвращает инстансы модели, отфильтрованные
+        по определенному полю и значению
 
         :param field: поле для фильтрации.
         :param value: значение для фильтрации.
@@ -104,22 +103,21 @@ class BaseOrmRepository(BaseRepository):
         await self.session.delete(instance)
 
     def _query(
-            self,
-            join_: set[str] | None = None,
-            order_: dict | None = None,
+        self,
+        join_: set[str] | None = None,
+        order_: dict | None = None,
     ) -> Select:
         """
         Метод создает и возвращает query запрос для дальнейшего выполнения.
 
         :param join_: список моделей для джоина.
         :param order_: сортировка по полям (asc, desc)
-        :return: объект query (Select) который используется в других методах для доп.фильтрации или запроса
+        :return: объект query (Select) который используется
+        в других методах для доп.фильтрации или запроса
         """
         query = select(self.model_class)
         query = self._maybe_join(query, join_)
-        query = self._maybe_ordered(query, order_)
-
-        return query
+        return self._maybe_ordered(query, order_)
 
     async def _all(self, query: Select) -> Iterable[ModelType]:
         """
@@ -163,7 +161,8 @@ class BaseOrmRepository(BaseRepository):
 
     async def _one(self, query: Select) -> ModelType:
         """
-        Метод для получения первого инстанса из запроса. Если он не найдет - рейзится NotFound
+        Метод для получения первого инстанса из запроса.
+        Если он не найдет - рейзится NotFound
 
         :param query: запрос к бд.
         :return: инстанс модели
@@ -179,16 +178,18 @@ class BaseOrmRepository(BaseRepository):
         :return: кол-во инстансов
         """
         query = query.subquery()
-        query = await self.session.scalars(select(func.count()).select_from(query))
+        query = await self.session.scalars(
+            select(func.count()).select_from(query)
+        )
         return query.one()
 
     async def _sort_by(
-            self,
-            query: Select,
-            sort_by: str,
-            order: str | None = "asc",
-            model: Type[ModelType] | None = None,
-            case_insensitive: bool = False,
+        self,
+        query: Select,
+        sort_by: str,
+        order: str | None = "asc",
+        model: type[ModelType] | None = None,
+        case_insensitive: bool = False,
     ) -> Select:
         """
         Метод для сортировки выборки
@@ -197,7 +198,8 @@ class BaseOrmRepository(BaseRepository):
         :param sort_by: колонка для сортировки.
         :param order: тип сортировки (asc, desc).
         :param model: модель, по полям которых идет сортировка.
-        :param case_insensitive: учитываем ли мы регистр или нет при сортировке.
+        :param case_insensitive: учитываем ли мы регистр
+        или нет при сортировке.
         :return: отсортированный запрос.
         """
         model = model or self.model_class
@@ -225,7 +227,9 @@ class BaseOrmRepository(BaseRepository):
         """
         return query.where(getattr(self.model_class, field) == value)
 
-    def _maybe_join(self, query: Select, join_: set[str] | None = None) -> Select:
+    def _maybe_join(
+        self, query: Select, join_: set[str] | None = None
+    ) -> Select:
         """
         Метод возвращает запрос с указанными соединениями (JOIN).
 
@@ -241,21 +245,29 @@ class BaseOrmRepository(BaseRepository):
         # reduce формирует готовый запрос из всех joinoв
         return reduce(self._add_join_to_query, join_, query)
 
-    def _maybe_ordered(self, query: Select, order_: dict | None = None) -> Select:
+    def _maybe_ordered(
+        self, query: Select, order_: dict | None = None
+    ) -> Select:
         """
         Метод возвращает запрос, отсортированный по указанной колонке.
 
         :param query: запрос, который нужно отсортировать.
-        :param order_: словарь, указывающий порядок сортировки.  Должен содержать ключи "asc" (по возрастанию) или "desc" (по убыванию) со списками имён полей для сортировки.
+        :param order_: словарь, указывающий порядок сортировки.
+         Должен содержать ключи "asc" (по возрастанию) или "desc" (по убыванию)
+         со списками имён полей для сортировки.
         :return: отсортированный запрос.
         """
         if order_:
             if order_["asc"]:
                 for order in order_["asc"]:
-                    query = query.order_by(getattr(self.model_class, order).asc())
+                    query = query.order_by(
+                        getattr(self.model_class, order).asc()
+                    )
             else:
                 for order in order_["desc"]:
-                    query = query.order_by(getattr(self.model_class, order).desc())
+                    query = query.order_by(
+                        getattr(self.model_class, order).desc()
+                    )
 
         return query
 

@@ -1,11 +1,10 @@
-from fastapi.routing import APIRouter
 from fastapi.requests import Request
+from fastapi.routing import APIRouter
 
 from core.schemas.extras.health import HealthSchema
 from core.schemas.responses.api_response import ApiResponse
 
-router = APIRouter(
-)
+router = APIRouter()
 
 
 @router.get("/health")

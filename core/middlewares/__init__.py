@@ -1,1 +1,1 @@
-from .sqlalchemy import SQLAlchemyMiddleware
+from .sqlalchemy import SQLAlchemyMiddleware  # noqa: F401, I001

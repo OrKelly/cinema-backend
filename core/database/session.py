@@ -26,7 +26,8 @@ def reset_session_context(context: Token) -> None:
     session_context.reset(context)
 
 
-# создаем два энджина - один для записи, второй для чтения для более высокой производительности
+# создаем два энджина - один для записи,
+# второй для чтения для более высокой производительности
 engines = {
     "writer": create_async_engine(config.DATABASE_URL, pool_recycle=3600),
     "reader": create_async_engine(config.DATABASE_URL, pool_recycle=3600),
@@ -36,7 +37,8 @@ engines = {
 class RoutingSession(Session):
     """Класс переопределяет метод get_bind у Session
 
-    Операции Update, Delete и Insert используют движок writer (для записи), а Read - reader
+    Операции Update,
+    Delete и Insert используют движок writer (для записи), а Read - reader
 
     """
 

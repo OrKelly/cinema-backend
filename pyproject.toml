@@ -18,6 +18,40 @@ psycopg2 = "^2.9.10"
 asyncpg = "^0.30.0"
 
 
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.0.1"
+ruff = "^0.8.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+line-length = 79
+show-fixes = true
+
+extend-exclude =[
+    "migrations",
+    "config.py",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "B",    # flake8-bugbear
+    "I",    # isort
+    "ICN",  # flake8-import-conventions
+    "PGH",  # pygrep-hooks
+    "PIE",  # flake8-pie
+    "PT",   # flake8-pytest-style
+    "RET",  # flake8-return
+    "T20",  # flake8-print
+    "UP",   # pyupgrade
+    "YTT",  # flake8-2020
+]
+
+[tool.ruff.format]
+quote-style = "double"

@@ -7,5 +7,4 @@ class BaseUseCase(ABC):
     """Базовый класс юз кейса"""
 
     @abstractmethod
-    def execute(self):
-        ...
+    def execute(self): ...

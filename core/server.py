@@ -1,12 +1,12 @@
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from fastapi.requests import Request
 from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.requests import Request
+from fastapi.responses import JSONResponse
 
+from api.v1.urls import router as v1_router
 from core.exceptions.base import ServerException
 from core.middlewares import SQLAlchemyMiddleware
-from api.v1.urls import router as v1_router
 
 
 def init_routers(app_: FastAPI) -> None:
@@ -16,7 +16,7 @@ def init_routers(app_: FastAPI) -> None:
 
 def make_middleware() -> list[Middleware]:
     """Функция для ининциализации middlewares"""
-    middleware = [
+    return [
         Middleware(
             CORSMiddleware,
             allow_origins=["*"],
@@ -26,7 +26,6 @@ def make_middleware() -> list[Middleware]:
         ),
         Middleware(SQLAlchemyMiddleware),
     ]
-    return middleware
 
 
 def init_listeners(app_: FastAPI) -> None:
@@ -43,9 +42,7 @@ def init_listeners(app_: FastAPI) -> None:
 
 def create_app():
     app_ = FastAPI(
-        title="Cinema Backend",
-        version="1.0.0",
-        middleware=make_middleware()
+        title="Cinema Backend", version="1.0.0", middleware=make_middleware()
     )
     init_routers(app_=app_)
     init_listeners(app_=app_)
