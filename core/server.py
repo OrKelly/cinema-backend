@@ -7,6 +7,8 @@ from fastapi.responses import JSONResponse
 from api.v1.urls import router as v1_router
 from core.exceptions.base import ServerException
 from core.middlewares import SQLAlchemyMiddleware
+from core.storages.s3 import MinioS3Storage
+
 
 
 def init_routers(app_: FastAPI) -> None:
@@ -40,12 +42,17 @@ def init_listeners(app_: FastAPI) -> None:
         )
 
 
+def init_storages():
+    MinioS3Storage()
+
+
 def create_app():
     app_ = FastAPI(
         title="Cinema Backend", version="1.0.0", middleware=make_middleware()
     )
     init_routers(app_=app_)
     init_listeners(app_=app_)
+    init_storages()
     return app_
 
 
