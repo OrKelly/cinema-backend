@@ -17,11 +17,16 @@ uvicorn = "^0.32.1"
 psycopg2 = "^2.9.10"
 asyncpg = "^0.30.0"
 minio = "^7.2.11"
+setuptools = "^75.6.0"
 
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.1"
 ruff = "^0.8.0"
+pytest = "^8.3.3"
+pytest-asyncio = "^0.24.0"
+faker = "^33.0.0"
+pytest-shutil = "^1.8.0"
 
 [build-system]
 requires = ["poetry-core"]
