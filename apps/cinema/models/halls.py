@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Integer, String, Text
+from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from core.database.mixins.id import IntegerIdMixin
 from core.database.base import Base
 
 # условие для обхода цикличного импорта
@@ -11,9 +12,9 @@ if TYPE_CHECKING:
     from films import Film
 
 
-class Hall(Base):
+class Hall(Base, IntegerIdMixin):
     __tablename__ = 'halls'
-    id_hall: Mapped[int] = mapped_column(Integer, primary_key=True)
+
     title: Mapped[str] = mapped_column(String(45))
     description: Mapped[str] = mapped_column(Text)
 
