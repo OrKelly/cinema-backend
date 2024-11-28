@@ -13,9 +13,9 @@ router = APIRouter()
 
 @router.post("/register")
 async def user_register_handler(
-        request: Request,
-        user_data: UserRegisterSchema,
-        container=Depends(get_container),  # noqa: B008
+    request: Request,
+    user_data: UserRegisterSchema,
+    container=Depends(get_container),  # noqa: B008
 ) -> ApiResponse[UserRegisterCompleteSchema]:
     use_case: RegisterUserUseCase = container.resolve(RegisterUserUseCase)
     user_data = user_data.dict()

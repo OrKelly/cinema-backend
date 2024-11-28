@@ -46,7 +46,7 @@ class BaseFactory(Generic[ModelType, InstanceSchemaType]):
     async def _get_instance_data(self) -> dict:
         instance_data = await self.__get_fake_instance_data()
         if self.kwargs:
-            for attr, value in self.kwargs:
+            for attr, value in self.kwargs.items():
                 if attr in instance_data:
                     instance_data[attr] = value
         return instance_data

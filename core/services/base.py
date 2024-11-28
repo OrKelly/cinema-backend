@@ -55,7 +55,6 @@ class BaseOrmService(BaseService):
             field=field, value=value, join_=join_, order_=order_
         )
 
-
     async def delete(self, instance: Any) -> None: ...
 
     async def get_by_id(

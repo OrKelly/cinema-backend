@@ -26,7 +26,7 @@ def event_loop(request):
     loop.close()
 
 
-@pytest.fixture(scope="function", autouse=True)   # noqa: PT003
+@pytest.fixture(scope="function", autouse=True)  # noqa: PT003
 def session_context():
     session_id = str(uuid4())
     context = set_session_context(session_id=session_id)
@@ -34,7 +34,7 @@ def session_context():
     reset_session_context(context=context)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture
 async def prepare_database():
     assert config.MODE == "TEST"
 

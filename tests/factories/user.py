@@ -1,4 +1,3 @@
-
 from faker import Faker
 from pydantic import BaseModel, Field
 
