@@ -123,6 +123,56 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         async with get_session() as session:
             await session.delete(instance)
 
+    async def filter_by(self,
+        fields: list,
+        values: list,
+        join_: set[str] | None = None,
+        unique: bool = False,
+    ) -> Iterable[ModelType] | ModelType:
+        """
+        Метод возвращает инстансы модели, отфильтрованные
+        по значению одного или нескольких полей
+
+        :param fields: поля для фильтрации.
+        :param values: значения для фильтрации.
+        :param join_: список джоинов для связи.
+        :param unique: нужно ли вернуть одно значение (первое) или их список
+        :return: список инстансов или инстанс
+        """
+        query = self._query(join_)
+        query = await self._filter_by(query, fields, values)
+
+        if join_ is not None:
+            return await self._all_unique(query)
+        if unique:
+            return await self._one(query)
+
+        return await self._all(query)
+
+    async def update(self, model_id, attributes: dict[str, Any] = None) -> ModelType:
+        """
+        Метод для обновления инстанса модели.
+        Если он не найдет - рейзится NotFound
+
+        :param model_id: id обновляемого инстанса
+        :param attributes: аттрибуты обновляемого инстанса
+        :return: возвращает обновлённый инстанс
+        """
+        query = self._query()
+        query = await self._get_by(query, field='id', value=model_id)
+        model = await self._one(query)
+
+        if attributes is None:
+            return model
+
+        model = model(**attributes)
+
+        async with get_session() as session:
+            session.add(model)
+            await session.commit()
+            await session.refresh(model)
+            return model
+
     def _query(
         self,
         join_: set[str] | None = None,
@@ -253,6 +303,17 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :return: отфильтрованный запрос.
         """
         return query.where(getattr(self.model_class, field) == value)
+
+    async def _filter_by(self, query: Select, fields: list, values: list) -> Select:
+        """
+        Метод возвращает запрос, отфильтрованный по указанным колонкам.
+
+        :param query: запрос, который нужно отфильтровать.
+        :param fields: список колонок, по которым нужно фильтровать.
+        :param values: список значений, по которым нужно фильтровать.
+        :return: отфильтрованный запрос.
+        """
+        return query.filter(*[getattr(self.model_class, f) == v for f, v in zip(fields, values)])
 
     def _maybe_join(
         self, query: Select, join_: set[str] | None = None
