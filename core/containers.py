@@ -32,8 +32,8 @@ def _initialize_services(container: punq.Container) -> None:
             ],
         )
 
-    (container.register(UniqueEmailValidatorService),)
-    (container.register(PasswordIncorrectValidatorService),)
+    container.register(UniqueEmailValidatorService)
+    container.register(PasswordIncorrectValidatorService)
     container.register(BaseUserService, ORMUserService)
     container.register(BaseRegisterValidatorService, factory=build_validators)
 

@@ -20,5 +20,4 @@ async def user_register_handler(
     use_case: RegisterUserUseCase = container.resolve(RegisterUserUseCase)
     user_data = user_data.dict()
     user = await use_case.execute(user_data=user_data)
-    container.resolve(BaseUserService)
     return ApiResponse(data=UserRegisterCompleteSchema(id=user.id))
