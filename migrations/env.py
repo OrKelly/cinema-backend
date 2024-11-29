@@ -25,6 +25,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 # target_metadata = mymodel.Base.metadata
 from core.database import Base
 from apps.users.models.users import User
+from apps.films.models import Film, FilmSession, Genre, film_genre_association
+from apps.cinema.models import Hall, Row, Place
 # For auto generate schemas
 from core.config import config as app_config
 
