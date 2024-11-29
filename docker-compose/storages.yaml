@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: db
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    env_file:
+      - ../.env
+    networks:
+      - backend
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server --console-address ":9001" /data/
+    ports:
+      - "9001:9001"  # Web UI
+      - "9000:9000"  # API
+    env_file: ../.env
+    volumes:
+      - minio_storage:/data
+    logging:
+      driver: none
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+  minio_storage:
+
+
+networks:
+  backend:
+    driver: bridge

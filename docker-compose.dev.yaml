@@ -1,0 +1,76 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    command: uvicorn core.server:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - minio
+    networks:
+      - backend
+
+  postgres:
+    image: postgres:latest
+    container_name: db
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    networks:
+      - backend
+
+  postgres-test:
+    image: postgres:latest
+    container_name: db-test
+    ports:
+      - "${DB_TEST_PORT}:${DB_TEST_PORT}"
+    environment:
+      POSTGRES_USER: ${DB_TEST_USER}
+      POSTGRES_PASSWORD: ${DB_TEST_PASS}
+      POSTGRES_DB: ${DB_TEST_NAME}
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/test_data
+    env_file:
+      - .env
+    networks:
+      - backend
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server --console-address ":9001" /data
+    ports:
+      - "9001:9001"  # Web UI
+      - "9000:9000"  # API
+    env_file:
+      - .env
+    volumes:
+      - minio_storage:/data
+    logging:
+      driver: none
+    networks:
+      - backend
+
+
+volumes:
+  test_postgres_data:
+  postgres_data:
+  minio_storage:
+
+networks:
+  backend:
+    driver: bridge

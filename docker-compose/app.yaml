@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: app
+    ports:
+      - "8000:8000"
+    command: uvicorn core.server:app --host 0.0.0.0 --port 8000 --reload
+    env_file:
+      - ../.env
+    volumes:
+      - ..:/app/
+
+
+networks:
+  backend:
+    driver: bridge
