@@ -19,7 +19,7 @@ class Row(Base, IntegerIdMixin):
 
     hall_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey('rows.id_row', onupdate='CASCADE', ndelete='CASCADE'),
+        ForeignKey('rows.id_row', onupdate='CASCADE', ondelete='CASCADE'),
         nullable=False
     )
     number: Mapped[int] = mapped_column(Integer, nullable=False)
