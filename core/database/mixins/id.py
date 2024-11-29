@@ -1,11 +1,10 @@
-from sqlalchemy import Integer
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Column, Integer
+from sqlalchemy.ext.declarative import declared_attr
 
 
 class IntegerIdMixin:
     """Миксин, добавляющий id pk"""
 
-    __mapper_args__ = {"always_refresh": False}
-    id: Mapped[int] = mapped_column(
-        Integer, primary_key=True, autoincrement=True
-    )
+    @declared_attr
+    def id(self):
+        return Column(Integer, primary_key=True, autoincrement=True)

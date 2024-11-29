@@ -1,11 +1,7 @@
-from typing import Literal
-
 from pydantic_settings import BaseSettings
 
 
 class Config(BaseSettings):
-    MODE: Literal["DEV", "TEST"]
-
     DB_HOST: str
     DB_PORT: int
     DB_USER: str
@@ -13,8 +9,7 @@ class Config(BaseSettings):
     DB_NAME: str
 
     SECRET_KEY: str
-    JWT_ALGORYTHM: str
-    JWT_EXPIRE_MINUTES: int
+    ALGORYTHM: str
 
     S3_ENDPOINT: str
     S3_SECRET_KEY: str

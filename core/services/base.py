@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
+from core.exceptions import NotFoundException
 from core.generics import ModelType
 from core.repositories import BaseRepository
 
@@ -16,13 +16,7 @@ class BaseService(ABC):
     async def get_all(self, skip: int = 0, limit: int = 100): ...
 
     @abstractmethod
-    async def get_filter(
-        self,
-        field: str,
-        value: Any,
-        join_: set[str, Any] = None,
-        order_: dict | None = None,
-    ): ...
+    async def get_filter(self, field: str, value: Any): ...
 
     @abstractmethod
     async def delete(self, instance: Any) -> None: ...
@@ -36,23 +30,14 @@ class BaseService(ABC):
 class BaseOrmService(BaseService):
     """Базовый класс сервисов для работы с данными"""
 
+    model_class: type[ModelType]
     repository: BaseRepository
 
-    async def create(self, attributes: dict[str, Any] = None) -> ModelType:
-        return await self.repository.create(attributes)
+    async def create(self, attributes: dict[str, Any] = None): ...
 
     async def get_all(self, skip: int = 0, limit: int = 100): ...
 
-    async def get_filter(
-        self,
-        field: str,
-        value: Any,
-        join_: set[str, Any] = None,
-        order_: dict | None = None,
-    ) -> Iterable[ModelType] | list[None]:
-        return await self.repository.get_by(
-            field=field, value=value, join_=join_, order_=order_
-        )
+    async def get_filter(self, field: str, value: Any): ...
 
     async def delete(self, instance: Any) -> None: ...
 
@@ -67,6 +52,13 @@ class BaseOrmService(BaseService):
         :return: найденный инстанс
         """
 
-        return await self.repository.get_by(
+        db_obj = await self.repository.get_by(
             field="id", value=id_, join_=join_, unique=True
         )
+        if not db_obj:
+            raise NotFoundException(
+                message=f"{self.model_class.__tablename__.title()} "
+                f"с id: {id} не существует"
+            )
+
+        return db_obj
