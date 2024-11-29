@@ -28,7 +28,19 @@ class BaseService(ABC):
     async def delete(self, instance: Any) -> None: ...
 
     @abstractmethod
+    async def filter_by(
+        self,
+        fields: list,
+        values: list,
+        join_: set[str] | None = None,
+        unique: bool = False,
+    ): ...
+
+    @abstractmethod
     async def get_by_id(self, id_: int): ...
+
+    @abstractmethod
+    async def update(self, id_: int, attributes: dict[str, Any] = None): ...
 
 
 # ToDo добавить другие базовые crud методы
