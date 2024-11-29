@@ -70,3 +70,36 @@ class BaseOrmService(BaseService):
         return await self.repository.get_by(
             field="id", value=id_, join_=join_, unique=True
         )
+
+    async def filter_by(
+            self,
+            fields: list,
+            values: list,
+            join_: set[str] | None = None,
+            unique: bool = False,
+    ) -> Iterable[ModelType] | ModelType:
+        """
+        Метод возвращает инстансы модели, отфильтрованные
+        по значению одного или нескольких полей
+
+        :param fields: поля для фильтрации.
+        :param values: значения для фильтрации.
+        :param join_: список джоинов для связи.
+        :param unique: нужно ли вернуть одно значение (первое) или их список
+        :return: список инстансов или инстанс
+        """
+        query = self.repository.filer_by(fields, values, join_, unique)
+
+        return query
+
+    async def update(self, id_: int, attributes: dict[str, Any] = None) -> ModelType:
+        """
+        Метод для обновления инстанса модели.
+
+        :param id_: id обновляемого инстанса
+        :param attributes: аттрибуты обновляемого инстанса
+        :return: возвращает обновлённый инстанс
+        """
+        db_obj = await self.repository.update(id_, attributes)
+
+        return db_obj

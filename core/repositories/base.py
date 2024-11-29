@@ -38,6 +38,22 @@ class BaseRepository(ABC):
     @abstractmethod
     async def delete(self, instance: Any) -> None: ...
 
+    @abstractmethod
+    async def filter_by(
+            self,
+            fields: list,
+            values: list,
+            join_: set[str] | None = None,
+            unique: bool = False,
+    ): ...
+
+    @abstractmethod
+    async def update(
+            self,
+            instance_id: int,
+            attributes: dict[str, Any] = None
+    ): ...
+
 
 # ToDO: добавить filter_by и update методы
 @dataclass
@@ -149,17 +165,17 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
 
         return await self._all(query)
 
-    async def update(self, model_id, attributes: dict[str, Any] = None) -> ModelType:
+    async def update(self, instance_id: int, attributes: dict[str, Any] = None) -> ModelType:
         """
         Метод для обновления инстанса модели.
         Если он не найдет - рейзится NotFound
 
-        :param model_id: id обновляемого инстанса
+        :param instance_id: id обновляемого инстанса
         :param attributes: аттрибуты обновляемого инстанса
         :return: возвращает обновлённый инстанс
         """
         query = self._query()
-        query = await self._get_by(query, field='id', value=model_id)
+        query = await self._get_by(query, field='id', value=instance_id)
         model = await self._one(query)
 
         if attributes is None:
