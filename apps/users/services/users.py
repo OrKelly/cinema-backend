@@ -2,6 +2,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
+from apps.users.exceptions.users import UserNotFoundException
 from apps.users.models.users import User
 from apps.users.repositories.users import BaseUserRepository
 from core.security.password import PasswordHandler
@@ -67,6 +68,9 @@ class ORMUserService(BaseUserService, BaseOrmService):
     async def get_by_id(
         self, id_: int, join_: set[str] | None = None
     ) -> User | None:
-        return await super(BaseUserService, self).get_by_id(
+        user = await super(BaseUserService, self).get_by_id(
             id_=id_, join_=join_
         )
+        if not user:
+            raise UserNotFoundException(user_id=id_)
+        return user

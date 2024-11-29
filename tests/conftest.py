@@ -50,6 +50,6 @@ def app() -> Generator[FastAPI, Any, None]:
 
 
 @pytest.fixture(scope="function")  # noqa: PT003
-async def client(app: FastAPI, prepare_database):
+async def client(app: FastAPI):
     async with AsyncClient(app=app, base_url="http://test") as ac:
         yield ac

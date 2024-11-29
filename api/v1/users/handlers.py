@@ -3,7 +3,6 @@ from fastapi.requests import Request
 from fastapi.routing import APIRouter
 
 from api.v1.users.schemas import UserRegisterCompleteSchema, UserRegisterSchema
-from apps.users.services.users import BaseUserService
 from apps.users.use_cases.register import RegisterUserUseCase
 from core.containers import get_container
 from core.schemas.responses.api_response import ApiResponse

@@ -3,7 +3,6 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
-from core.exceptions import NotFoundException
 from core.generics import ModelType
 from core.repositories import BaseRepository
 
@@ -68,13 +67,6 @@ class BaseOrmService(BaseService):
         :return: найденный инстанс
         """
 
-        instance = await self.repository.get_by(
+        return await self.repository.get_by(
             field="id", value=id_, join_=join_, unique=True
         )
-        if not instance:
-            raise NotFoundException(
-                message=f"{self.repository.model_class.__tablename__.title()} "
-                f"с id: {id_} не существует"
-            )
-
-        return instance
