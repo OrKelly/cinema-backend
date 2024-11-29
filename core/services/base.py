@@ -88,7 +88,7 @@ class BaseOrmService(BaseService):
         :param unique: нужно ли вернуть одно значение (первое) или их список
         :return: список инстансов или инстанс
         """
-        query = self.repository.filer_by(fields, values, join_, unique)
+        query = self.repository.filter_by(fields, values, join_, unique)
 
         return query
 
