@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Generic
 
-from sqlalchemy import Select, func
+from sqlalchemy import Select, func, insert, select, update
 from sqlalchemy.sql.expression import select
 
 from core.database import get_session
@@ -174,19 +174,11 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :param attributes: аттрибуты обновляемого инстанса
         :return: возвращает обновлённый инстанс
         """
-        query = self._query()
-        query = await self._get_by(query, field='id', value=instance_id)
-        model = await self._one(query)
-
-        if attributes is None:
-            return model
-
-        model = model(**attributes)
-
         async with get_session() as session:
-            session.add(model)
+            await session.execute(update(self.model_class).where(self.model_class.id == instance_id).values(**attributes))
             await session.commit()
-            await session.refresh(model)
+            model = await session.scalar(select(self.model_class).where(self.model_class.id == instance_id))
+
             return model
 
     def _query(
