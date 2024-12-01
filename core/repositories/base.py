@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Generic
 
-from sqlalchemy import Select, func, insert, select, update
+from sqlalchemy import Select, func
 from sqlalchemy.sql.expression import select
 
 from core.database import get_session
@@ -321,8 +321,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         Метод возвращает запрос, отфильтрованный по указанным колонкам.
 
         :param query: запрос, который нужно отфильтровать.
-        :param fields: список колонок, по которым нужно фильтровать.
-        :param values: список значений, по которым нужно фильтровать.
+        :param filter_params: поля и значения для фильтрации. Передаются в виде словаря поле:значение
         :return: отфильтрованный запрос.
         """
         return query.filter(
