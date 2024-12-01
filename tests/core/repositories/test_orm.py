@@ -73,7 +73,7 @@ class TestBaseORMRepository:
         "new_attrs",
         [
             {"first_name": faker.first_name(), "last_name": faker.last_name()},
-        ]
+        ],
     )
     async def test_update(self, new_attrs):
         attrs = await UserFactory()._get_instance_data()

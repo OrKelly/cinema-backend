@@ -41,7 +41,7 @@ class BaseRepository(ABC):
     @abstractmethod
     async def filter_by(
         self,
-        fielter_params: dict,
+        filter_params: dict,
         join_: set[str] | None = None,
         unique: bool = False,
     ): ...
@@ -146,7 +146,8 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         Метод возвращает инстансы модели, отфильтрованные
         по значению одного или нескольких полей
 
-        :param filter_params: поля и значения для фильтрации. Передаются в виде словаря поле:значение
+        :param filter_params: поля и значения для фильтрации.
+        Передаются в виде словаря поле:значение
         :param join_: список джоинов для связи.
         :param unique: нужно ли вернуть одно значение (первое) или их список
         :return: список инстансов или инстанс
@@ -321,7 +322,8 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         Метод возвращает запрос, отфильтрованный по указанным колонкам.
 
         :param query: запрос, который нужно отфильтровать.
-        :param filter_params: поля и значения для фильтрации. Передаются в виде словаря поле:значение
+        :param filter_params: поля и значения для фильтрации.
+        Передаются в виде словаря поле:значение
         :return: отфильтрованный запрос.
         """
         return query.filter(

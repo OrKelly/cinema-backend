@@ -30,8 +30,7 @@ class BaseService(ABC):
     @abstractmethod
     async def filter_by(
         self,
-        fields: list,
-        values: list,
+        filter_params: dict,
         join_: set[str] | None = None,
         unique: bool = False,
     ): ...
@@ -85,8 +84,7 @@ class BaseOrmService(BaseService):
 
     async def filter_by(
         self,
-        fields: list,
-        values: list,
+        filter_params: dict,
         join_: set[str] | None = None,
         unique: bool = False,
     ) -> Iterable[ModelType] | ModelType:
@@ -94,15 +92,13 @@ class BaseOrmService(BaseService):
         Метод возвращает инстансы модели, отфильтрованные
         по значению одного или нескольких полей
 
-        :param fields: поля для фильтрации.
-        :param values: значения для фильтрации.
+        :param filter_params: поля и значения для фильтрации.
+        Передаются в виде словаря поле:значение
         :param join_: список джоинов для связи.
         :param unique: нужно ли вернуть одно значение (первое) или их список
         :return: список инстансов или инстанс
         """
-        query = self.repository.filter_by(fields, values, join_, unique)
-
-        return query
+        return self.repository.filter_by(filter_params, join_, unique)
 
     async def update(
         self, id_: int, attributes: dict[str, Any] = None
@@ -114,6 +110,4 @@ class BaseOrmService(BaseService):
         :param attributes: аттрибуты обновляемого инстанса
         :return: возвращает обновлённый инстанс
         """
-        db_obj = await self.repository.update(id_, attributes)
-
-        return db_obj
+        return await self.repository.update(id_, attributes)
