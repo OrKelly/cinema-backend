@@ -84,11 +84,11 @@ class BaseOrmService(BaseService):
         )
 
     async def filter_by(
-            self,
-            fields: list,
-            values: list,
-            join_: set[str] | None = None,
-            unique: bool = False,
+        self,
+        fields: list,
+        values: list,
+        join_: set[str] | None = None,
+        unique: bool = False,
     ) -> Iterable[ModelType] | ModelType:
         """
         Метод возвращает инстансы модели, отфильтрованные
@@ -104,7 +104,9 @@ class BaseOrmService(BaseService):
 
         return query
 
-    async def update(self, id_: int, attributes: dict[str, Any] = None) -> ModelType:
+    async def update(
+        self, id_: int, attributes: dict[str, Any] = None
+    ) -> ModelType:
         """
         Метод для обновления инстанса модели.
 

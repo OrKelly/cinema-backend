@@ -40,18 +40,15 @@ class BaseRepository(ABC):
 
     @abstractmethod
     async def filter_by(
-            self,
-            fields: list,
-            values: list,
-            join_: set[str] | None = None,
-            unique: bool = False,
+        self,
+        fielter_params: dict,
+        join_: set[str] | None = None,
+        unique: bool = False,
     ): ...
 
     @abstractmethod
     async def update(
-            self,
-            instance_id: int,
-            attributes: dict[str, Any] = None
+        self, instance_id: int, attributes: dict[str, Any] = None
     ): ...
 
 
@@ -139,9 +136,9 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         async with get_session() as session:
             await session.delete(instance)
 
-    async def filter_by(self,
-        fields: list,
-        values: list,
+    async def filter_by(
+        self,
+        filter_params: dict,
         join_: set[str] | None = None,
         unique: bool = False,
     ) -> Iterable[ModelType] | ModelType:
@@ -149,14 +146,13 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         Метод возвращает инстансы модели, отфильтрованные
         по значению одного или нескольких полей
 
-        :param fields: поля для фильтрации.
-        :param values: значения для фильтрации.
+        :param filter_params: поля и значения для фильтрации. Передаются в виде словаря поле:значение
         :param join_: список джоинов для связи.
         :param unique: нужно ли вернуть одно значение (первое) или их список
         :return: список инстансов или инстанс
         """
         query = self._query(join_)
-        query = await self._filter_by(query, fields, values)
+        query = await self._filter_by(query, filter_params)
 
         if join_ is not None:
             return await self._all_unique(query)
@@ -165,7 +161,9 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
 
         return await self._all(query)
 
-    async def update(self, instance_id: int, attributes: dict[str, Any] = None) -> ModelType:
+    async def update(
+        self, instance_id: int, attributes: dict[str, Any] = None
+    ) -> ModelType:
         """
         Метод для обновления инстанса модели.
         Если он не найдет - рейзится NotFound
@@ -186,12 +184,6 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
             await session.commit()
 
         return instance
-        # async with get_session() as session:
-        #     await session.execute(update(self.model_class).where(self.model_class.id == instance_id).values(**attributes))
-        #     await session.commit()
-        #     model = await session.scalar(select(self.model_class).where(self.model_class.id == instance_id))
-        #
-        #     return model
 
     def _query(
         self,
@@ -324,7 +316,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         """
         return query.where(getattr(self.model_class, field) == value)
 
-    async def _filter_by(self, query: Select, fields: list, values: list) -> Select:
+    async def _filter_by(self, query: Select, filter_params: dict) -> Select:
         """
         Метод возвращает запрос, отфильтрованный по указанным колонкам.
 
@@ -333,7 +325,12 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :param values: список значений, по которым нужно фильтровать.
         :return: отфильтрованный запрос.
         """
-        return query.filter(*[getattr(self.model_class, f) == v for f, v in zip(fields, values)])
+        return query.filter(
+            *[
+                getattr(self.model_class, field) == value
+                for field, value in filter_params.items()
+            ]
+        )
 
     def _maybe_join(
         self, query: Select, join_: set[str] | None = None
