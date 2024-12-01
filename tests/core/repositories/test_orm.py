@@ -6,6 +6,7 @@ from faker import Faker
 from apps.users.models.users import User
 from core.repositories.base import BaseORMRepository
 from tests.factories.user import UserFactory
+from tests.conftest import prepare_database
 
 faker = Faker(locale="ru_RU")
 
@@ -47,31 +48,49 @@ class TestBaseORMRepository:
         assert users
         assert len(users) == instances_count
 
-    # async def test_filter(self):
-    #     attrs = await UserFactory()._get_instance_data()
-    #     repository = BaseORMRepository(model_class=User)
-    #
-    #     first_name = faker.first_name()
-    #     last_name = faker.last_name()
-    #     common_first_name_group_attrs = dict(attrs)
-    #     common_first_name_group_attrs.update({"first_name": first_name})
-    #     common_first_name_and_last_name_attrs = dict(common_first_name_group_attrs)
-    #     common_first_name_and_last_name_attrs.update({"last_name": last_name})
-    #
-    #     for num in range(10):
-    #         if num % 3:
-    #             await repository.create(attributes=common_first_name_group_attrs)
-    #         else:
-    #             await repository.create(attributes=common_first_name_and_last_name_attrs)
-    #
-    #     common_first_name_users = await repository.filter_by(fields=["first_name"], values=[first_name])
-    #     common_first_name_and_last_name_users = await repository.filter_by(
-    #         fields=["first_name", "last_name"],
-    #         values=[first_name, last_name],
-    #     )
-    #
-    #     assert len(common_first_name_users) == 10
-    #     assert len(common_first_name_and_last_name_users) == 4
+    @pytest.mark.parametrize(
+        ("field", "value"),
+        [
+            ("first_name", faker.first_name()),
+            ("last_name", faker.last_name()),
+            ("patronymic", faker.middle_name()),
+        ],
+    )
+    async def test_filter(self, field, value, prepare_database):
+        extras_instances_count = random.randint(5, 10)
+        common_first_name_instance_count = 13
+        common_first_name_and_last_name_instance_count = 7
+        common_first_name = faker.first_name()
+        common_last_name = faker.last_name()
+        repository = BaseORMRepository(model_class=User)
+        await UserFactory(kwargs={field: value}).create_batch(
+            instances_count=extras_instances_count
+        )
+        await UserFactory(kwargs={
+            field: value,
+            "first_name": common_first_name,
+        }).create_batch(
+            instances_count=common_first_name_instance_count
+        )
+        await UserFactory(kwargs={
+            field: value,
+            "first_name": common_first_name,
+            "last_name": common_last_name,
+        }).create_batch(
+            instances_count=common_first_name_and_last_name_instance_count
+        )
+
+        common_first_name_users = await repository.filter_by(
+            fields=["first_name"],
+            values=[common_first_name]
+        )
+        common_first_name_and_last_name_users = await repository.filter_by(
+            fields=["first_name", "last_name"],
+            values=[common_first_name, common_last_name],
+        )
+
+        assert len(common_first_name_users) == common_first_name_instance_count + common_first_name_and_last_name_instance_count
+        assert len(common_first_name_and_last_name_users) == common_first_name_and_last_name_instance_count
 
     async def test_update(self):
         attrs = await UserFactory()._get_instance_data()

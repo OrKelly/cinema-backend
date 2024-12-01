@@ -174,12 +174,24 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :param attributes: аттрибуты обновляемого инстанса
         :return: возвращает обновлённый инстанс
         """
-        async with get_session() as session:
-            await session.execute(update(self.model_class).where(self.model_class.id == instance_id).values(**attributes))
-            await session.commit()
-            model = await session.scalar(select(self.model_class).where(self.model_class.id == instance_id))
+        query = self._query()
+        query = await self._get_by(query=query, field="id", value=instance_id)
+        instance = await self._one(query)
 
-            return model
+        for attr, value in attributes.items():
+            if hasattr(instance, attr) and value:
+                setattr(instance, attr, value)
+
+        async with get_session() as session:
+            await session.commit()
+
+        return instance
+        # async with get_session() as session:
+        #     await session.execute(update(self.model_class).where(self.model_class.id == instance_id).values(**attributes))
+        #     await session.commit()
+        #     model = await session.scalar(select(self.model_class).where(self.model_class.id == instance_id))
+        #
+        #     return model
 
     def _query(
         self,
