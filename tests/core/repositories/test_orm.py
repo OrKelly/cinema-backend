@@ -69,26 +69,21 @@ class TestBaseORMRepository:
         users = await repository.filter_by(filter_params=filter_param)
         assert len(users) == instances_count
 
-    async def test_update(self):
+    @pytest.mark.parametrize(
+        "new_attrs",
+        [
+            {"first_name": faker.first_name(), "last_name": faker.last_name()},
+        ]
+    )
+    async def test_update(self, new_attrs):
         attrs = await UserFactory()._get_instance_data()
         repository = BaseORMRepository(model_class=User)
         user = await repository.create(attributes=attrs)
 
         current_user_id = user.id
-        initial_first_name_user = user.first_name
-        initial_last_name_user = user.last_name
-        new_first_name_user = faker.first_name()
-        new_last_name_user = faker.last_name()
+        update_user = await repository.update(current_user_id, new_attrs)
 
-        attrs.update(
-            {
-                "first_name": new_first_name_user,
-                "last_name": new_last_name_user,
-            }
-        )
-        update_user = await repository.update(current_user_id, attrs)
-
-        assert initial_first_name_user != update_user.first_name
-        assert initial_last_name_user != update_user.last_name
-        assert new_first_name_user == update_user.first_name
-        assert new_last_name_user == update_user.last_name
+        assert attrs["first_name"] != update_user.first_name
+        assert attrs["last_name"] != update_user.last_name
+        assert new_attrs["first_name"] == update_user.first_name
+        assert new_attrs["last_name"] == update_user.last_name
