@@ -38,6 +38,19 @@ class BaseRepository(ABC):
     @abstractmethod
     async def delete(self, instance: Any) -> None: ...
 
+    @abstractmethod
+    async def filter_by(
+        self,
+        filter_params: dict,
+        join_: set[str] | None = None,
+        unique: bool = False,
+    ): ...
+
+    @abstractmethod
+    async def update(
+        self, instance_id: int, attributes: dict[str, Any] = None
+    ): ...
+
 
 # ToDO: добавить filter_by и update методы
 @dataclass
@@ -122,6 +135,56 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         """
         async with get_session() as session:
             await session.delete(instance)
+
+    async def filter_by(
+        self,
+        filter_params: dict,
+        join_: set[str] | None = None,
+        unique: bool = False,
+    ) -> Iterable[ModelType] | ModelType:
+        """
+        Метод возвращает инстансы модели, отфильтрованные
+        по значению одного или нескольких полей
+
+        :param filter_params: поля и значения для фильтрации.
+        Передаются в виде словаря поле:значение
+        :param join_: список джоинов для связи.
+        :param unique: нужно ли вернуть одно значение (первое) или их список
+        :return: список инстансов или инстанс
+        """
+        query = self._query(join_)
+        query = await self._filter_by(query, filter_params)
+
+        if join_ is not None:
+            return await self._all_unique(query)
+        if unique:
+            return await self._one(query)
+
+        return await self._all(query)
+
+    async def update(
+        self, instance_id: int, attributes: dict[str, Any] = None
+    ) -> ModelType:
+        """
+        Метод для обновления инстанса модели.
+        Если он не найдет - рейзится NotFound
+
+        :param instance_id: id обновляемого инстанса
+        :param attributes: аттрибуты обновляемого инстанса
+        :return: возвращает обновлённый инстанс
+        """
+        query = self._query()
+        query = await self._get_by(query=query, field="id", value=instance_id)
+        instance = await self._one(query)
+
+        for attr, value in attributes.items():
+            if hasattr(instance, attr) and value:
+                setattr(instance, attr, value)
+
+        async with get_session() as session:
+            await session.commit()
+
+        return instance
 
     def _query(
         self,
@@ -253,6 +316,22 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :return: отфильтрованный запрос.
         """
         return query.where(getattr(self.model_class, field) == value)
+
+    async def _filter_by(self, query: Select, filter_params: dict) -> Select:
+        """
+        Метод возвращает запрос, отфильтрованный по указанным колонкам.
+
+        :param query: запрос, который нужно отфильтровать.
+        :param filter_params: поля и значения для фильтрации.
+        Передаются в виде словаря поле:значение
+        :return: отфильтрованный запрос.
+        """
+        return query.filter(
+            *[
+                getattr(self.model_class, field) == value
+                for field, value in filter_params.items()
+            ]
+        )
 
     def _maybe_join(
         self, query: Select, join_: set[str] | None = None
