@@ -12,7 +12,8 @@ from apps.users.services.register import (
 )
 from apps.users.services.users import BaseUserService, ORMUserService
 from apps.users.use_cases.register import RegisterUserUseCase
-
+from apps.cinema.models.halls import Hall
+from apps.cinema.repositories.halls import BaseHallsRepository, ORMHallRepository
 
 @lru_cache(1)
 def get_container() -> punq.Container:
@@ -21,6 +22,7 @@ def get_container() -> punq.Container:
 
 def _initialize_repositories(container: punq.Container) -> None:
     container.register(BaseUserRepository, ORMUserRepository, model_class=User)
+    container.register(BaseHallsRepository, ORMHallRepository, model_class=Hall)
 
 
 def _initialize_services(container: punq.Container) -> None:
