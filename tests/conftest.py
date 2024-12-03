@@ -8,12 +8,12 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 
 from core.config import config
-from core.database.session import (
+from core.database import (
     Base,
-    engines,
     reset_session_context,
     set_session_context,
 )
+from core.database.session import engines
 from core.server import create_app
 
 from .fixtures import *  # noqa: F403, I001

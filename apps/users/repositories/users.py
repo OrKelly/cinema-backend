@@ -16,18 +16,15 @@ class BaseUserRepository:
     ) -> User | None: ...
 
     @abstractmethod
-    async def get_by_email(self, email: str) -> Iterable[User] | None: ...
-
-    @abstractmethod
     async def get_by_id(self, id_: int) -> User | None: ...
 
     @abstractmethod
-    async def get_by_filter(
+    async def filter(
         self,
-        field: str,
-        value: Any,
+        filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        unique: bool = False,
     ) -> Iterable[User] | list[None]: ...
 
 
@@ -39,17 +36,19 @@ class ORMUserRepository(BaseUserRepository, BaseORMRepository[User]):
             attributes=attributes
         )
 
-    async def get_by_email(self, email: str) -> Iterable[User] | None:
-        return await self.get_by(field="email", value=email)
-
     async def get_by_id(self, id_: int) -> User | None:
         return await self.get_by(field="id", value=id_)
 
-    async def get_by_filter(
+    async def filter(
         self,
-        field: str,
-        value: Any,
+        filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        unique: bool = False,
     ) -> Iterable[User] | list[None]:
-        return await self.get_by(field=field, value=value, join_=join_)
+        return await super(BaseUserRepository, self).filter(
+            filter_params=filter_params,
+            join_=join_,
+            order_=order_,
+            unique=unique,
+        )

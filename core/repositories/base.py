@@ -5,6 +5,7 @@ from functools import reduce
 from typing import Any, Generic
 
 from sqlalchemy import Select, func
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.sql.expression import select
 
 from core.database import get_session
@@ -39,7 +40,7 @@ class BaseRepository(ABC):
     async def delete(self, instance: Any) -> None: ...
 
     @abstractmethod
-    async def filter_by(
+    async def filter(
         self,
         filter_params: dict,
         join_: set[str] | None = None,
@@ -90,7 +91,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :param join_: список моделей, к которым необходимо заджоиниться
         :return: список инстансов
         """
-        query = self._query(join_)
+        query = self._query(join_, order_)
         query = query.offset(skip).limit(limit)
 
         if join_ is not None:
@@ -116,7 +117,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :param unique: нужно ли вернуть одно значение (первое) или их список
         :return: список инстансов или инстанс
         """
-        query = self._query(join_)
+        query = self._query(join_, order_)
         query = await self._get_by(query, field, value)
 
         if join_ is not None:
@@ -136,10 +137,11 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         async with get_session() as session:
             await session.delete(instance)
 
-    async def filter_by(
+    async def filter(
         self,
         filter_params: dict,
         join_: set[str] | None = None,
+        order_: dict | None = None,
         unique: bool = False,
     ) -> Iterable[ModelType] | ModelType:
         """
@@ -152,7 +154,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :param unique: нужно ли вернуть одно значение (первое) или их список
         :return: список инстансов или инстанс
         """
-        query = self._query(join_)
+        query = self._query(join_, order_)
         query = await self._filter_by(query, filter_params)
 
         if join_ is not None:
@@ -255,9 +257,12 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :param query: запрос к бд.
         :return: инстанс модели
         """
-        async with get_session() as session:
-            query = await session.scalars(query)
-            return query.one()
+        try:
+            async with get_session() as session:
+                query = await session.scalars(query)
+                return query.one()
+        except NoResultFound:
+            return None
 
     async def _count(self, query: Select) -> int:
         """

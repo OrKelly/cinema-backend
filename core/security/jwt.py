@@ -20,38 +20,34 @@ class JWTExpiredError(ServerException):
 
 @dataclass
 class JWTHandler:
-    secret_key: config.SECRET_KEY
-    algorithm: config.JWT_ALGORITHM
-    expire_minutes: config.JWT_EXPIRE_MINUTES
+    secret_key: config.SECRET_KEY = config.SECRET_KEY
+    algorythm: config.JWT_ALGORYTHM = config.JWT_ALGORYTHM
+    expire_minutes: config.JWT_EXPIRE_MINUTES = config.JWT_EXPIRE_MINUTES
 
-    @staticmethod
-    def encode(payload: dict) -> str:
-        expire = datetime.utcnow() + timedelta(
-            minutes=JWTHandler.expire_minutes
-        )
+    @classmethod
+    def encode(cls, payload: dict) -> str:
+        expire = datetime.now() + timedelta(minutes=cls.expire_minutes)
         payload.update({"exp": expire})
-        return jwt.encode(
-            payload, JWTHandler.secret_key, algorithm=JWTHandler.algorithm
-        )
+        return jwt.encode(payload, cls.secret_key, algorithm=cls.algorythm)
 
-    @staticmethod
-    def decode(token: str) -> dict:
+    @classmethod
+    def decode(cls, token: str) -> dict:
         try:
             return jwt.decode(
-                token, JWTHandler.secret_key, algorithms=[JWTHandler.algorithm]
+                token, cls.secret_key, algorithms=[cls.algorythm]
             )
         except ExpiredSignatureError as exception:
             raise JWTExpiredError() from exception
         except JWTError as exception:
             raise JWTDecodeError() from exception
 
-    @staticmethod
-    def decode_expired(token: str) -> dict:
+    @classmethod
+    def decode_expired(cls, token: str) -> dict:
         try:
             return jwt.decode(
                 token,
                 JWTHandler.secret_key,
-                algorithms=[JWTHandler.algorithm],
+                algorithms=[cls.algorythm],
                 options={"verify_exp": False},
             )
         except JWTError as exception:

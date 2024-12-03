@@ -11,7 +11,14 @@ from apps.users.services.register import (
     UniqueEmailValidatorService,
 )
 from apps.users.services.users import BaseUserService, ORMUserService
-from apps.users.use_cases.register import RegisterUserUseCase
+from apps.users.use_cases.auth import (
+    BaseAuthUserUseCase,
+    JwtBasedAuthUserUseCase,
+)
+from apps.users.use_cases.register import (
+    BaseRegisterUserUseCase,
+    RegisterUserUseCase,
+)
 
 
 @lru_cache(1)
@@ -39,7 +46,8 @@ def _initialize_services(container: punq.Container) -> None:
 
 
 def _initialize_use_cases(container: punq.Container) -> None:
-    container.register(RegisterUserUseCase)
+    container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
+    container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
 
 
 def _initialize_container() -> punq.Container:

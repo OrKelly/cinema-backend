@@ -20,10 +20,10 @@ class BaseFactory(Generic[ModelType, InstanceSchemaType]):
     model_class: ModelType
     schema: InstanceSchemaType
 
-    def __init__(self, kwargs: dict = None):
+    def __init__(self, **kwargs):
         self.kwargs = kwargs
 
-    async def create(self, **kwargs) -> type[ModelType]:
+    async def create(self) -> type[ModelType]:
         async with get_session() as session:
             instance_data = await self._get_instance_data()
             instance = self.model_class(**instance_data)

@@ -7,6 +7,14 @@ from apps.users.services.users import BaseUserService
 
 
 @dataclass
+class BaseRegisterUserUseCase:
+    user_service: BaseUserService
+    validator: BaseRegisterValidatorService
+
+    async def execute(self, user_data: dict[str, Any]) -> User: ...
+
+
+@dataclass
 class RegisterUserUseCase:
     user_service: BaseUserService
     validator: BaseRegisterValidatorService

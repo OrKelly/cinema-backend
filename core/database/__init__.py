@@ -5,4 +5,4 @@ from .session import (  # noqa: F401, I001
     set_session_context,
 )
 from .transactional import Transactional, Propagation  # noqa: F401, I001
-from .base import Base
+from .base import Base  # noqa: F401, I001

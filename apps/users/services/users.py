@@ -31,13 +31,9 @@ class BaseUserService:
     ) -> User | None: ...
 
     @abstractmethod
-    async def get_by_filter(
-        self,
-        field: str,
-        value: Any,
-        join_: set[str, Any] = None,
-        order_: dict | None = None,
-    ): ...
+    async def get_by_email(
+        self, email: str, join_: set[str] | None = None, unique: bool = True
+    ) -> User | None: ...
 
 
 @dataclass
@@ -54,17 +50,6 @@ class ORMUserService(BaseUserService, BaseOrmService):
         order_: dict | None = None,
     ): ...
 
-    async def get_by_filter(
-        self,
-        field: str,
-        value: Any,
-        join_: set[str, Any] = None,
-        order_: dict | None = None,
-    ):
-        return await super(BaseUserService, self).get_filter(
-            field=field, value=value, join_=join_, order_=order_
-        )
-
     async def get_by_id(
         self, id_: int, join_: set[str] | None = None
     ) -> User | None:
@@ -72,5 +57,12 @@ class ORMUserService(BaseUserService, BaseOrmService):
             id_=id_, join_=join_
         )
         if not user:
-            raise UserNotFoundException(user_id=id_)
+            raise UserNotFoundException()
         return user
+
+    async def get_by_email(
+        self, email: str, join_: set[str] | None = None, unique: bool = True
+    ) -> User | None:
+        return await super(BaseUserService, self).get_by_filter(
+            filter_params={"email": email}, join_=join_, unique=unique
+        )

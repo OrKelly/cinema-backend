@@ -39,7 +39,7 @@ class TestBaseORMRepository:
     )
     async def test_get_by_many(self, field, value, prepare_database):
         instances_count = random.randint(5, 10)
-        await UserFactory(kwargs={field: value}).create_batch(
+        await UserFactory(**{field: value}).create_batch(
             instances_count=instances_count
         )
         repository = BaseORMRepository(model_class=User)
@@ -62,11 +62,11 @@ class TestBaseORMRepository:
     )
     async def test_filter(self, filter_param):
         instances_count = random.randint(5, 10)
-        await UserFactory(kwargs=filter_param).create_batch(instances_count)
+        await UserFactory(**filter_param).create_batch(instances_count)
         await UserFactory().create_batch(random.randint(1, 5))
         repository = BaseORMRepository(model_class=User)
 
-        users = await repository.filter_by(filter_params=filter_param)
+        users = await repository.filter(filter_params=filter_param)
         assert len(users) == instances_count
 
     @pytest.mark.parametrize(

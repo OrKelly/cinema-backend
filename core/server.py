@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from api.v1.urls import router as v1_router
 from core.exceptions.base import ServerException
 from core.middlewares import SQLAlchemyMiddleware
+from core.middlewares.auth import AuthBackend, AuthenticationMiddleware
 from core.storages.s3 import MinioS3Storage
 
 
@@ -26,6 +27,7 @@ def make_middleware() -> list[Middleware]:
             allow_headers=["*"],
         ),
         Middleware(SQLAlchemyMiddleware),
+        Middleware(AuthenticationMiddleware, backend=AuthBackend()),
     ]
 
 
@@ -47,7 +49,9 @@ def init_storages():
 
 def create_app():
     app_ = FastAPI(
-        title="Cinema Backend", version="1.0.0", middleware=make_middleware()
+        title="Cinema Backend",
+        version="1.0.0",
+        middleware=make_middleware(),
     )
     init_routers(app_=app_)
     init_listeners(app_=app_)

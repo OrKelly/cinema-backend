@@ -5,8 +5,13 @@ from core.exceptions import NotFoundException
 
 @dataclass
 class UserNotFoundException(NotFoundException):
-    user_id: int = None
-
     @property
     def message(self):
-        return f"Пользователь с айди {self.user_id} не найден"
+        return "Пользователь не найден"
+
+
+@dataclass
+class UserEmailNotFoundException(NotFoundException):
+    @property
+    def message(self):
+        return "Пользователь с указанным email не найден!"
