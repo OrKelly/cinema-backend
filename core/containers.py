@@ -13,7 +13,12 @@ from apps.users.services.register import (
 from apps.users.services.users import BaseUserService, ORMUserService
 from apps.users.use_cases.register import RegisterUserUseCase
 from apps.cinema.models.halls import Hall
-from apps.cinema.repositories.halls import BaseHallsRepository, ORMHallRepository
+from apps.cinema.repositories.halls import (
+    BaseHallsRepository, ORMHallRepository
+)
+from apps.cinema.use_cases.hall_create import HallCreateUseCase
+from apps.cinema.services.halls import BaseHallService, ORMHallService
+
 
 @lru_cache(1)
 def get_container() -> punq.Container:
@@ -22,7 +27,9 @@ def get_container() -> punq.Container:
 
 def _initialize_repositories(container: punq.Container) -> None:
     container.register(BaseUserRepository, ORMUserRepository, model_class=User)
-    container.register(BaseHallsRepository, ORMHallRepository, model_class=Hall)
+    container.register(
+        BaseHallsRepository, ORMHallRepository, model_class=Hall
+    )
 
 
 def _initialize_services(container: punq.Container) -> None:
@@ -38,10 +45,12 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(PasswordIncorrectValidatorService)
     container.register(BaseUserService, ORMUserService)
     container.register(BaseRegisterValidatorService, factory=build_validators)
+    container.register(BaseHallService, ORMHallService)
 
 
 def _initialize_use_cases(container: punq.Container) -> None:
     container.register(RegisterUserUseCase)
+    container.register(HallCreateUseCase)
 
 
 def _initialize_container() -> punq.Container:
