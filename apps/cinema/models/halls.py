@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class Hall(Base, IntegerIdMixin):
     __tablename__ = "halls"
 
-    title: Mapped[str] = mapped_column(String(45))
+    title: Mapped[str] = mapped_column(String(45), unique=True)
     description: Mapped[str] = mapped_column(Text)
 
     film: Mapped["Film"] = relationship("Film", back_populates="halls")
