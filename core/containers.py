@@ -18,6 +18,14 @@ from apps.cinema.repositories.halls import (
 )
 from apps.cinema.use_cases.hall_create import CreateHallUseCase
 from apps.cinema.services.halls import BaseHallService, ORMHallService
+from apps.users.use_cases.auth import (
+    BaseAuthUserUseCase,
+    JwtBasedAuthUserUseCase,
+)
+from apps.users.use_cases.register import (
+    BaseRegisterUserUseCase,
+    RegisterUserUseCase,
+)
 
 
 @lru_cache(1)
@@ -51,6 +59,8 @@ def _initialize_services(container: punq.Container) -> None:
 def _initialize_use_cases(container: punq.Container) -> None:
     container.register(RegisterUserUseCase)
     container.register(CreateHallUseCase)
+    container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
+    container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
 
 
 def _initialize_container() -> punq.Container:

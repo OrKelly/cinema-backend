@@ -10,6 +10,11 @@ class TestUserApi:
     def get_register_url(**kwargs):
         return "api/v1/users/register"
 
+    @staticmethod
+    def get_login_url(**kwargs):
+        return "api/v1/users/login"
+
+    @pytest.mark.asyncio
     async def test_user_register(self, client: AsyncClient, faker, container):
         payload = {
             "first_name": faker.first_name(),
@@ -40,12 +45,9 @@ class TestUserApi:
         response = await client.post(self.get_register_url(), json=payload)
         assert response.status_code == 409
         user_service = container.resolve(BaseUserService)
-        user = await user_service.get_by_filter(
-            field="first_name", value=payload["last_name"]
-        )
-        assert not user
+        user = await user_service.get_by_email(payload["email"], unique=False)
+        assert len(user) == 1
 
-    @pytest.mark.asyncio
     async def test_user_register_with_bad_password(
         self, client: AsyncClient, faker, container
     ):
@@ -58,7 +60,20 @@ class TestUserApi:
         response = await client.post(self.get_register_url(), json=payload)
         assert response.status_code == 400
         user_service = container.resolve(BaseUserService)
-        user = await user_service.get_by_filter(
-            field="email", value=payload["email"]
-        )
+        user = await user_service.get_by_email(payload["email"])
         assert not user
+
+    async def test_user_login(self, client: AsyncClient, faker):
+        password = faker.password(length=8, digits=True, upper_case=True)
+        user = await UserFactory(password=password).create()
+        payload = {"email": user.email, "password": password}
+        response = await client.post(self.get_login_url(), json=payload)
+        assert response.status_code == 200
+
+    async def test_user_login_with_wrong_password(
+        self, client: AsyncClient, faker
+    ):
+        user = await UserFactory().create()
+        payload = {"email": user.email, "password": faker.password()}
+        response = await client.post(self.get_login_url(), json=payload)
+        assert response.status_code == 401
