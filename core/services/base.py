@@ -28,7 +28,18 @@ class BaseService(ABC):
     async def delete(self, instance: Any) -> None: ...
 
     @abstractmethod
+    async def filter_by(
+        self,
+        filter_params: dict,
+        join_: set[str] | None = None,
+        unique: bool = False,
+    ): ...
+
+    @abstractmethod
     async def get_by_id(self, id_: int): ...
+
+    @abstractmethod
+    async def update(self, id_: int, attributes: dict[str, Any] = None): ...
 
 
 # ToDo добавить другие базовые crud методы
@@ -70,3 +81,33 @@ class BaseOrmService(BaseService):
         return await self.repository.get_by(
             field="id", value=id_, join_=join_, unique=True
         )
+
+    async def filter_by(
+        self,
+        filter_params: dict,
+        join_: set[str] | None = None,
+        unique: bool = False,
+    ) -> Iterable[ModelType] | ModelType:
+        """
+        Метод возвращает инстансы модели, отфильтрованные
+        по значению одного или нескольких полей
+
+        :param filter_params: поля и значения для фильтрации.
+        Передаются в виде словаря поле:значение
+        :param join_: список джоинов для связи.
+        :param unique: нужно ли вернуть одно значение (первое) или их список
+        :return: список инстансов или инстанс
+        """
+        return self.repository.filter_by(filter_params, join_, unique)
+
+    async def update(
+        self, id_: int, attributes: dict[str, Any] = None
+    ) -> ModelType:
+        """
+        Метод для обновления инстанса модели.
+
+        :param id_: id обновляемого инстанса
+        :param attributes: аттрибуты обновляемого инстанса
+        :return: возвращает обновлённый инстанс
+        """
+        return await self.repository.update(id_, attributes)
