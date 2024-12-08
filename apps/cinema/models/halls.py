@@ -1,7 +1,6 @@
-from typing import TYPE_CHECKING
 
 from sqlalchemy import String, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from core.database.base import Base
 from core.database.mixins.id import IntegerIdMixin

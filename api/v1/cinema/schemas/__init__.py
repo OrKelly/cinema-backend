@@ -1,1 +1,1 @@
-from .halls import CreateHallSchema, CreateHallCompleteSchema
+from .halls import CreateHallCompleteSchema, CreateHallSchema  # noqa: F401

@@ -2,10 +2,13 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from apps.cinema.repositories.halls import BaseHallRepository
+from apps.cinema.exceptions.halls import (
+    HallAlreadyExists,
+    HallNotFoundException,
+)
 from apps.cinema.models.halls import Hall
+from apps.cinema.repositories.halls import BaseHallRepository
 from core.services.base import BaseOrmService
-from apps.cinema.exceptions.halls import HallNotFoundException
 
 
 @dataclass
@@ -32,13 +35,16 @@ class BaseHallService:
     ) -> Hall | None: ...
 
     @abstractmethod
-    async def get_filter(
+    async def get_by_filter(
         self,
-        field: str,
-        value: Any,
+        filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        unique: bool | None = False,
     ): ...
+
+    @abstractmethod
+    async def get_by_title(self, title: str) -> Hall | None: ...
 
 
 @dataclass
@@ -47,33 +53,51 @@ class ORMHallService(BaseHallService, BaseOrmService):
         return await super(BaseHallService, self).create(attributes)
 
     async def get_all(
-            self,
-            skip: int = 0,
-            limit: int = 100,
-            join_: set[str] = None,
-            order_: dict | None = None,
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        join_: set[str] = None,
+        order_: dict | None = None,
     ): ...
 
-    async def get_filter(
-            self,
-            field: str,
-            value: Any,
-            join_: set[str] = None,
-            order_: dict | None = None
+    async def get_by_filter(
+        self,
+        filter_params: dict,
+        join_: set[str] = None,
+        order_: dict | None = None,
+        unique: bool | None = False,
     ):
-        return await super(BaseHallService, self).get_filter(
-            field=field, value=value, join_=join_, order_=order_
+        return await super(BaseHallService, self).get_by_filter(
+            filter_params=filter_params, join_=join_, order_=order_
         )
 
     async def get_by_id(
-            self, id_: int, join_: set[str] | None = None
+        self, id_: int, join_: set[str] | None = None
     ) -> Hall | None:
         hall = await super(BaseHallService, self).get_by_id(
             id_=id_, join_=join_
         )
         if not hall:
-            raise HallNotFoundException(hall_id=id_)
+            raise HallNotFoundException()
         return hall
 
-    async def get_by_title(self, title: str):
-        hall = await self.get_filter(field="title", value=title)
+    async def get_by_title(self, title: str) -> Hall | None:
+        return await self.get_by_filter(
+            filter_params={"title": title}, unique=True
+        )
+
+
+@dataclass
+class BaseHallValidatorService:
+    @abstractmethod
+    async def validate(self, attributes: dict[str, Any]) -> None: ...
+
+
+@dataclass
+class UniqueTitleHallValidatorService(BaseHallValidatorService):
+    hall_service: BaseHallService
+
+    async def validate(self, attributes: dict[str, Any]) -> None:
+        hall = await self.hall_service.get_by_title(title=attributes["title"])
+        if hall:
+            raise HallAlreadyExists()

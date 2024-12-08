@@ -1,4 +1,3 @@
-import pytest
 from httpx import AsyncClient
 
 from apps.cinema.services.halls import BaseHallService
@@ -9,7 +8,7 @@ class TestHallApi:
     @staticmethod
     def get_list_url(**kwargs):
         return "api/v1/cinema/halls"
-    
+
     async def test_create_hall(self, client: AsyncClient, faker, container):
         payload = {
             "title": faker.company(),
@@ -23,9 +22,9 @@ class TestHallApi:
         for attr, value in payload.items():
             if hasattr(hall, attr):
                 assert getattr(hall, attr) == value
-    
+
     async def test_create_hall_with_exist_title(
-            self, client: AsyncClient, faker, container
+        self, client: AsyncClient, faker, container
     ):
         hall = await HallFactory().create()
         payload = {
@@ -36,9 +35,6 @@ class TestHallApi:
         assert response.status_code == 409
         hall_service = container.resolve(BaseHallService)
         hall = await hall_service.get_by_filter(
-            field="description", value=payload["description"]
+            filter_params={"description": payload["description"]}
         )
         assert not hall
-
-
-

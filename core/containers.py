@@ -2,6 +2,18 @@ from functools import lru_cache
 
 import punq
 
+from apps.cinema.models.halls import Hall
+from apps.cinema.repositories.halls import (
+    BaseHallRepository,
+    ORMHallRepository,
+)
+from apps.cinema.services.halls import (
+    BaseHallService,
+    BaseHallValidatorService,
+    ORMHallService,
+    UniqueTitleHallValidatorService,
+)
+from apps.cinema.use_cases.hall_create import CreateHallUseCase
 from apps.users.models.users import User
 from apps.users.repositories.users import BaseUserRepository, ORMUserRepository
 from apps.users.services.register import (
@@ -11,13 +23,6 @@ from apps.users.services.register import (
     UniqueEmailValidatorService,
 )
 from apps.users.services.users import BaseUserService, ORMUserService
-from apps.users.use_cases.register import RegisterUserUseCase
-from apps.cinema.models.halls import Hall
-from apps.cinema.repositories.halls import (
-    BaseHallRepository, ORMHallRepository
-)
-from apps.cinema.use_cases.hall_create import CreateHallUseCase
-from apps.cinema.services.halls import BaseHallService, ORMHallService
 from apps.users.use_cases.auth import (
     BaseAuthUserUseCase,
     JwtBasedAuthUserUseCase,
@@ -35,9 +40,7 @@ def get_container() -> punq.Container:
 
 def _initialize_repositories(container: punq.Container) -> None:
     container.register(BaseUserRepository, ORMUserRepository, model_class=User)
-    container.register(
-        BaseHallRepository, ORMHallRepository, model_class=Hall
-    )
+    container.register(BaseHallRepository, ORMHallRepository, model_class=Hall)
 
 
 def _initialize_services(container: punq.Container) -> None:
@@ -53,6 +56,9 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(PasswordIncorrectValidatorService)
     container.register(BaseUserService, ORMUserService)
     container.register(BaseRegisterValidatorService, factory=build_validators)
+    container.register(
+        BaseHallValidatorService, UniqueTitleHallValidatorService
+    )
     container.register(BaseHallService, ORMHallService)
 
 

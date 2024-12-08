@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from apps.cinema.models.halls import Hall
 from tests.factories.base import BaseFactory
 
-fake = Faker(locale='ru_RU')
+fake = Faker(locale="ru_RU")
 
 
 class HallCreate(BaseModel):
@@ -15,4 +15,3 @@ class HallCreate(BaseModel):
 class HallFactory(BaseFactory[Hall, HallCreate]):
     model_class = Hall
     schema = HallCreate
-
