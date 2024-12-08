@@ -16,22 +16,14 @@ class BaseService(ABC):
     async def get_all(self, skip: int = 0, limit: int = 100): ...
 
     @abstractmethod
-    async def get_filter(
-        self,
-        field: str,
-        value: Any,
-        join_: set[str, Any] = None,
-        order_: dict | None = None,
-    ): ...
-
-    @abstractmethod
     async def delete(self, instance: Any) -> None: ...
 
     @abstractmethod
-    async def filter_by(
+    async def get_by_filter(
         self,
         filter_params: dict,
         join_: set[str] | None = None,
+        order_: dict | None = None,
         unique: bool = False,
     ): ...
 
@@ -54,17 +46,6 @@ class BaseOrmService(BaseService):
 
     async def get_all(self, skip: int = 0, limit: int = 100): ...
 
-    async def get_filter(
-        self,
-        field: str,
-        value: Any,
-        join_: set[str, Any] = None,
-        order_: dict | None = None,
-    ) -> Iterable[ModelType] | list[None]:
-        return await self.repository.get_by(
-            field=field, value=value, join_=join_, order_=order_
-        )
-
     async def delete(self, instance: Any) -> None: ...
 
     async def get_by_id(
@@ -82,10 +63,11 @@ class BaseOrmService(BaseService):
             field="id", value=id_, join_=join_, unique=True
         )
 
-    async def filter_by(
+    async def get_by_filter(
         self,
         filter_params: dict,
         join_: set[str] | None = None,
+        order_: dict | None = None,
         unique: bool = False,
     ) -> Iterable[ModelType] | ModelType:
         """
@@ -98,7 +80,9 @@ class BaseOrmService(BaseService):
         :param unique: нужно ли вернуть одно значение (первое) или их список
         :return: список инстансов или инстанс
         """
-        return self.repository.filter_by(filter_params, join_, unique)
+        return await self.repository.filter(
+            filter_params=filter_params, join_=join_, unique=unique
+        )
 
     async def update(
         self, id_: int, attributes: dict[str, Any] = None

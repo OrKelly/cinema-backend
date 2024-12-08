@@ -1,6 +1,4 @@
-from dataclasses import field
-
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserRegisterSchema(BaseModel):
@@ -13,4 +11,9 @@ class UserRegisterSchema(BaseModel):
 
 class UserRegisterCompleteSchema(BaseModel):
     id: int
-    status: str = field(default="Вы успешно зарегистрировались")
+    status: str = Field(default="Вы успешно зарегистрировались")
+
+
+class UserLoginSchema(BaseModel):
+    email: EmailStr
+    password: str
