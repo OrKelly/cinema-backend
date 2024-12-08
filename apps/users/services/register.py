@@ -1,26 +1,26 @@
 import re
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from apps.users.exceptions.auth import (
     EmailAlreadyTakenException,
     PasswordIncorrectException,
 )
-from apps.users.repositories.users import BaseUserRepository
+from apps.users.services.users import BaseUserService
 
 
 @dataclass
-class BaseRegisterValidatorService:
+class BaseRegisterValidatorService(ABC):
     @abstractmethod
     async def validate(self, user_data: dict[str, any]) -> None: ...
 
 
 @dataclass
 class UniqueEmailValidatorService(BaseRegisterValidatorService):
-    repository: BaseUserRepository
+    user_service: BaseUserService
 
     async def validate(self, user_data: dict[str, any]) -> None:
-        user = await self.repository.get_by_email(user_data["email"])
+        user = await self.user_service.get_by_email(email=user_data["email"])
         if user:
             raise EmailAlreadyTakenException
 
