@@ -7,7 +7,7 @@ from tests.factories.halls import HallFactory
 
 class TestHallApi:
     @staticmethod
-    def get_register_url(**kwargs):
+    def get_list_url(**kwargs):
         return "api/v1/cinema/halls"
     
     async def test_create_hall(self, client: AsyncClient, faker, container):
@@ -15,7 +15,7 @@ class TestHallApi:
             "title": faker.company(),
             "description": faker.text(),
         }
-        response = await client.post(self.get_register_url(), json=payload)
+        response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 200
         hall_service = container.resolve(BaseHallService)
         hall = await hall_service.get_by_id(response.json()["data"]["id"])
@@ -32,7 +32,7 @@ class TestHallApi:
             "title": hall.title,
             "description": faker.text(),
         }
-        response = await client.post(self.get_register_url(), json=payload)
+        response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 409
         hall_service = container.resolve(BaseHallService)
         hall = await hall_service.get_by_filter(

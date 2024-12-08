@@ -9,7 +9,7 @@ from core.database import Transactional, Propagation
 
 
 @dataclass
-class BaseHallsRepository:
+class BaseHallRepository:
     @abstractmethod
     async def create(
         self, attributes: dict[str, Any] = None
@@ -34,10 +34,10 @@ class BaseHallsRepository:
 
 
 @dataclass
-class ORMHallRepository(BaseHallsRepository, BaseORMRepository[Hall]):
+class ORMHallRepository(BaseHallRepository, BaseORMRepository[Hall]):
     @Transactional(propagation=Propagation.REQUIRED)
     async def create(self, attributes: dict[str, Any] = None) -> Hall | None:
-        return await super(BaseHallsRepository, self).create(
+        return await super(BaseHallRepository, self).create(
             attributes=attributes
         )
 

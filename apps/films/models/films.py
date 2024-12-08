@@ -37,7 +37,6 @@ class Film(Base, IntegerIdMixin):
     genres: Mapped[list["Genre"]] = relationship(
         "Genre", secondary="film_genre_association", back_populates="films"
     )
-    halls: Mapped[list["Hall"]] = relationship("Hall", back_populates="film")
     filmsessions: Mapped[list["FilmSession"]] = relationship(
         "FilmSession", back_populates="film"
     )

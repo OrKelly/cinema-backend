@@ -2,7 +2,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from apps.cinema.repositories.halls import BaseHallsRepository
+from apps.cinema.repositories.halls import BaseHallRepository
 from apps.cinema.models.halls import Hall
 from core.services.base import BaseOrmService
 from apps.cinema.exceptions.halls import HallNotFoundException
@@ -10,7 +10,7 @@ from apps.cinema.exceptions.halls import HallNotFoundException
 
 @dataclass
 class BaseHallService:
-    repository: BaseHallsRepository
+    repository: BaseHallRepository
 
     @abstractmethod
     async def create(self, attributes: dict[str, Any]): ...
@@ -32,7 +32,7 @@ class BaseHallService:
     ) -> Hall | None: ...
 
     @abstractmethod
-    async def get_by_filter(
+    async def get_filter(
         self,
         field: str,
         value: Any,
@@ -54,14 +54,14 @@ class ORMHallService(BaseHallService, BaseOrmService):
             order_: dict | None = None,
     ): ...
 
-    async def get_by_filter(
+    async def get_filter(
             self,
             field: str,
             value: Any,
             join_: set[str] = None,
             order_: dict | None = None
     ):
-        return await super(BaseHallService, self).get_by_filter(
+        return await super(BaseHallService, self).get_filter(
             field=field, value=value, join_=join_, order_=order_
         )
 
@@ -74,3 +74,6 @@ class ORMHallService(BaseHallService, BaseOrmService):
         if not hall:
             raise HallNotFoundException(hall_id=id_)
         return hall
+
+    async def get_by_title(self, title: str):
+        hall = await self.get_filter(field="title", value=title)

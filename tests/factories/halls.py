@@ -16,6 +16,3 @@ class HallFactory(BaseFactory[Hall, HallCreate]):
     model_class = Hall
     schema = HallCreate
 
-    async def _get_instance_data(self) -> dict:
-        instance_data = await super()._get_instance_data()
-        return instance_data

@@ -10,13 +10,13 @@ from apps.cinema.use_cases.hall_create import CreateHallUseCase
 router = APIRouter()
 
 
-@router.post('api/v1/cinema/halls')
+@router.post('')
 async def create_hall_handler(
-    request: Request,
-    hall_data: CreateHallSchema,
-    container=Depends(get_container),   # noqa: B008
+        request: Request,
+        hall_data: CreateHallSchema,
+        container=Depends(get_container),  # noqa: B008
 ) -> ApiResponse[CreateHallCompleteSchema]:
     use_case: CreateHallUseCase = container.resolve(CreateHallUseCase)
     hall_data = hall_data.model_dump()
     hall = await use_case.execute(hall_data=hall_data)
-    return ApiResponse(data=CreateHallCompleteSchema(id=hall.id))
+    return ApiResponse(data=CreateHallCompleteSchema(id=hall.id, title=hall.title))

@@ -8,6 +8,4 @@ class CreateHallSchema(BaseModel):
 
 class CreateHallCompleteSchema(BaseModel):
     id: int
-    status: str = Field(
-        default="Новый кинозал успешно зарегистрирован в базе данных"
-    )
+    title: str
