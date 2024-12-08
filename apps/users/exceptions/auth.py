@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 
 from core.exceptions.base import (
