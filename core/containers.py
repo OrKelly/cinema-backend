@@ -12,6 +12,11 @@ from apps.users.services.register import (
 )
 from apps.users.services.users import BaseUserService, ORMUserService
 from apps.users.use_cases.register import RegisterUserUseCase
+# from apps.cinema.models.halls import Hall
+# from apps.cinema.repositories.halls import BaseHallsRepository, ORMHallRepository
+from apps.cinema.models.rows import Row
+from apps.cinema.repositories.rows import BaseRowRepository, ORMRowRepository
+from apps.cinema.services.rows import BaseRowService, ORMRowService
 
 
 @lru_cache(1)
@@ -21,7 +26,7 @@ def get_container() -> punq.Container:
 
 def _initialize_repositories(container: punq.Container) -> None:
     container.register(BaseUserRepository, ORMUserRepository, model_class=User)
-
+    container.register(BaseRowRepository, ORMRowRepository, model_class=Row)
 
 def _initialize_services(container: punq.Container) -> None:
     def build_validators() -> BaseRegisterValidatorService:
@@ -35,6 +40,7 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(UniqueEmailValidatorService)
     container.register(PasswordIncorrectValidatorService)
     container.register(BaseUserService, ORMUserService)
+    container.register(BaseRowService, ORMRowService)
     container.register(BaseRegisterValidatorService, factory=build_validators)
 
 

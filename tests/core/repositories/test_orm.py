@@ -6,6 +6,8 @@ from faker import Faker
 from apps.users.models.users import User
 from core.repositories.base import BaseORMRepository
 from tests.factories.user import UserFactory
+from core.generics import ModelType
+from typing import cast
 
 faker = Faker(locale="ru_RU")
 
@@ -13,7 +15,7 @@ faker = Faker(locale="ru_RU")
 class TestBaseORMRepository:
     async def test_create(self):
         attrs = await UserFactory()._get_instance_data()
-        repository = BaseORMRepository(model_class=User)
+        repository = BaseORMRepository(model_class=cast(ModelType, User))
         user = await repository.create(attributes=attrs)
         assert user
         assert await repository.get_by(field="id", value=user.id, unique=True)
@@ -24,7 +26,7 @@ class TestBaseORMRepository:
     async def test_get_all(self, prepare_database):
         instances_count = random.randint(5, 10)
         await UserFactory().create_batch(instances_count=instances_count)
-        repository = BaseORMRepository(model_class=User)
+        repository = BaseORMRepository(model_class=cast(ModelType, User))
         users = await repository.get_all()
         assert users
         assert len(users) == instances_count
@@ -42,7 +44,7 @@ class TestBaseORMRepository:
         await UserFactory(kwargs={field: value}).create_batch(
             instances_count=instances_count
         )
-        repository = BaseORMRepository(model_class=User)
+        repository = BaseORMRepository(model_class=cast(ModelType, User))
         users = await repository.get_by(field=field, value=value)
         assert users
         assert len(users) == instances_count
@@ -64,7 +66,7 @@ class TestBaseORMRepository:
         instances_count = random.randint(5, 10)
         await UserFactory(kwargs=filter_param).create_batch(instances_count)
         await UserFactory().create_batch(random.randint(1, 5))
-        repository = BaseORMRepository(model_class=User)
+        repository = BaseORMRepository(model_class=cast(ModelType, User))
 
         users = await repository.filter_by(filter_params=filter_param)
         assert len(users) == instances_count
@@ -77,7 +79,7 @@ class TestBaseORMRepository:
     )
     async def test_update(self, new_attrs):
         attrs = await UserFactory()._get_instance_data()
-        repository = BaseORMRepository(model_class=User)
+        repository = BaseORMRepository(model_class=cast(ModelType, User))
         user = await repository.create(attributes=attrs)
 
         current_user_id = user.id
