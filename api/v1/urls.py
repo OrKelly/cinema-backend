@@ -11,4 +11,3 @@ router = APIRouter(
 router.include_router(router=cinema_router, prefix="/cinema", tags=["cinema"])
 router.include_router(router=common_router, prefix="/common", tags=["common"])
 router.include_router(router=user_router, prefix="/users", tags=["users"])
-router.include_router(router=cinema_router, prefix="/cinema", tags=["cinema"])

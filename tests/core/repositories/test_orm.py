@@ -1,13 +1,13 @@
 import random
+from typing import cast
 
 import pytest
 from faker import Faker
 
 from apps.users.models.users import User
+from core.generics import ModelType
 from core.repositories.base import BaseORMRepository
 from tests.factories.user import UserFactory
-from core.generics import ModelType
-from typing import cast
 
 faker = Faker(locale="ru_RU")
 
@@ -62,7 +62,7 @@ class TestBaseORMRepository:
             },
         ],
     )
-    async def test_filter(self, filter_param):
+    async def test_filter(self, filter_param, prepare_database):
         instances_count = random.randint(5, 10)
         await UserFactory(**filter_param).create_batch(instances_count)
         await UserFactory().create_batch(random.randint(1, 5))

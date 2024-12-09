@@ -2,13 +2,11 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from apps.cinema.models.rows import Row
-from apps.cinema.models.halls import Hall
-from apps.cinema.exceptions.rows import RowNotFoundException
 from apps.cinema.exceptions.halls import HallNotFoundException
-from apps.cinema.repositories.rows import BaseRowRepository
+from apps.cinema.exceptions.rows import RowNotFoundException
+from apps.cinema.models.rows import Row
 from apps.cinema.repositories.halls import BaseHallRepository
-
+from apps.cinema.repositories.rows import BaseRowRepository
 from core.services.base import BaseOrmService
 
 
@@ -47,11 +45,12 @@ class BaseRowService:
 @dataclass
 class ORMRowService(BaseRowService, BaseOrmService):
     async def create(self, attributes: dict[str, Any]):
-        exists_hall = await self.hall_repository.get_by(field="id", value=attributes["hall_id"])
+        exists_hall = await self.hall_repository.get_by_id(
+            id_=attributes["hall_id"]
+        )
         if not exists_hall:
             raise HallNotFoundException
         return await super(BaseRowService, self).create(attributes)
-
 
     async def get_all(
         self,
@@ -75,9 +74,7 @@ class ORMRowService(BaseRowService, BaseOrmService):
     async def get_by_id(
         self, id_: int, join_: set[str] | None = None
     ) -> Row | None:
-        row = await super(BaseRowService, self).get_by_id(
-            id_=id_, join_=join_
-        )
+        row = await super(BaseRowService, self).get_by_id(id_=id_, join_=join_)
         if not row:
             raise RowNotFoundException(row_id=id_)
         return row
