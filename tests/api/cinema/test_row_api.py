@@ -5,6 +5,7 @@ from httpx import AsyncClient
 from apps.cinema.exceptions.halls import HallNotFoundException
 from apps.cinema.services.rows import BaseRowService
 from tests.factories.halls import HallFactory
+from tests.factories.row import RowFactory
 
 
 class TestRowAPI:
@@ -39,3 +40,9 @@ class TestRowAPI:
         response = await client.post(self.get_create_url(), json=payload)
         assert response.status_code == 404
         assert response.json()["message"] == HallNotFoundException().message
+
+    async def test_row_create_with_exist_row_number_in_hall(
+        self, client: AsyncClient, faker
+    ):
+        row = await RowFactory().create()
+        assert row

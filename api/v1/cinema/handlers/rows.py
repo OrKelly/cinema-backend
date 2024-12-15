@@ -10,7 +10,6 @@ from core.schemas.responses.api_response import ApiResponse
 router = APIRouter()
 
 
-# @router.post("api/v1/cinema/rows")
 @router.post("")
 async def create_row_handler(
     request: Request,
