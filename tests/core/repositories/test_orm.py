@@ -14,7 +14,7 @@ faker = Faker(locale="ru_RU")
 
 class TestBaseORMRepository:
     async def test_create(self):
-        attrs = await UserFactory()._get_instance_data()
+        attrs = await UserFactory().row()
         repository = BaseORMRepository(model_class=cast(ModelType, User))
         user = await repository.create(attributes=attrs)
         assert user
@@ -78,7 +78,7 @@ class TestBaseORMRepository:
         ],
     )
     async def test_update(self, new_attrs):
-        attrs = await UserFactory()._get_instance_data()
+        attrs = await UserFactory().row()
         repository = BaseORMRepository(model_class=cast(ModelType, User))
         user = await repository.create(attributes=attrs)
 

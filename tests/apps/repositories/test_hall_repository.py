@@ -10,7 +10,7 @@ from tests.factories.halls import HallFactory
 
 class TestHallRepository:
     async def test_create_hall(self):
-        attrs = await HallFactory()._get_instance_data()
+        attrs = await HallFactory().row()
         repository = ORMHallRepository(model_class=cast(ModelType, Hall))
         hall = await repository.create(attributes=attrs)
         assert hall

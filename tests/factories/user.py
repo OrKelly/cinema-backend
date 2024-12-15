@@ -24,8 +24,8 @@ class UserFactory(BaseFactory[User, UserCreate]):
     model_class = User
     schema = UserCreate
 
-    async def _get_instance_data(self) -> dict:
-        instance_data = await super()._get_instance_data()
+    async def row(self) -> dict:
+        instance_data = await super().row()
         instance_data["password"] = PasswordHandler.hash(
             instance_data["password"]
         )

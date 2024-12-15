@@ -3,7 +3,6 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
-
 from apps.cinema.models.rows import Row
 from core.database import Propagation, Transactional
 from core.repositories.base import BaseORMRepository
@@ -12,7 +11,9 @@ from core.repositories.base import BaseORMRepository
 @dataclass
 class BaseRowRepository:
     @abstractmethod
-    async def create(self, attributes: dict[str, Any] = None) -> Row | None: ...
+    async def create(
+        self, attributes: dict[str, Any] = None
+    ) -> Row | None: ...
 
     @abstractmethod
     async def get_by_id(self, id_: int) -> Row | None: ...
@@ -22,11 +23,11 @@ class BaseRowRepository:
 
     @abstractmethod
     async def get_by_filter(
-            self,
-            field: str,
-            value: Any,
-            join_: set[str, Any] = None,
-            order_: dict | None = None,
+        self,
+        field: str,
+        value: Any,
+        join_: set[str, Any] = None,
+        order_: dict | None = None,
     ) -> Iterable[Row] | list[None]: ...
 
 
@@ -39,10 +40,10 @@ class ORMRowRepository(BaseRowRepository, BaseORMRepository[Row]):
         )
 
     async def get_by_id(self, id_: int) -> Row | None:
-        return await self.get_by(field='id', value=id_)
+        return await self.get_by(field="id", value=id_)
 
     async def get_by_hall(self, hall_id: int) -> Iterable[Row] | list[None]:
-        return await self.get_by(field='hall', value=hall_id)
+        return await self.get_by(field="hall", value=hall_id)
 
     async def get_by_filter(
         self,
@@ -52,5 +53,3 @@ class ORMRowRepository(BaseRowRepository, BaseORMRepository[Row]):
         order_: dict | None = None,
     ) -> Iterable[Row] | list[None]:
         return await self.get_by(field=field, value=value, join_=join_)
-
-
