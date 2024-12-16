@@ -15,8 +15,14 @@ from apps.cinema.services.halls import (
     ORMHallService,
     UniqueTitleHallValidatorService,
 )
-from apps.cinema.services.rows import BaseRowService, ORMRowService
+from apps.cinema.services.rows import (
+    BaseRowService,
+    BaseRowValidatorService,
+    ORMRowService,
+    RowAlreadyExistsValidator,
+)
 from apps.cinema.use_cases.hall_create import CreateHallUseCase
+from apps.cinema.use_cases.row_create import CreateRowUseCase
 from apps.users.models.users import User
 from apps.users.repositories.users import BaseUserRepository, ORMUserRepository
 from apps.users.services.register import (
@@ -60,6 +66,7 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(PasswordIncorrectValidatorService)
     container.register(BaseUserService, ORMUserService)
     container.register(BaseRowService, ORMRowService)
+    container.register(BaseRowValidatorService, RowAlreadyExistsValidator)
     container.register(BaseRegisterValidatorService, factory=build_validators)
     container.register(
         BaseHallValidatorService, UniqueTitleHallValidatorService
@@ -70,6 +77,7 @@ def _initialize_services(container: punq.Container) -> None:
 def _initialize_use_cases(container: punq.Container) -> None:
     container.register(RegisterUserUseCase)
     container.register(CreateHallUseCase)
+    container.register(CreateRowUseCase)
     container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
     container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
 

@@ -2,8 +2,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from apps.cinema.exceptions.halls import HallNotFoundException
-from apps.cinema.exceptions.rows import RowNotFoundException
+from apps.cinema.exceptions.rows import RowAlreadyExists, RowNotFoundException
 from apps.cinema.models.rows import Row
 from apps.cinema.repositories.halls import BaseHallRepository
 from apps.cinema.repositories.rows import BaseRowRepository
@@ -35,21 +34,16 @@ class BaseRowService:
     @abstractmethod
     async def get_by_filter(
         self,
-        field: str,
-        value: Any,
-        join_: set[str, Any] = None,
+        filter_params: dict,
+        join_: set[str] = None,
         order_: dict | None = None,
+        unique: bool | None = False,
     ): ...
 
 
 @dataclass
 class ORMRowService(BaseRowService, BaseOrmService):
     async def create(self, attributes: dict[str, Any]):
-        exists_hall = await self.hall_repository.get_by_id(
-            id_=attributes["hall_id"]
-        )
-        if not exists_hall:
-            raise HallNotFoundException
         return await super(BaseRowService, self).create(attributes)
 
     async def get_all(
@@ -62,13 +56,13 @@ class ORMRowService(BaseRowService, BaseOrmService):
 
     async def get_by_filter(
         self,
-        field: str,
-        value: Any,
-        join_: set[str, Any] = None,
+        filter_params: dict,
+        join_: set[str] = None,
         order_: dict | None = None,
+        unique: bool | None = False,
     ):
-        return await super(BaseRowService, self).get_filter(
-            field=field, value=value, join_=join_, order_=order_
+        return await super(BaseRowService, self).get_by_filter(
+            filter_params=filter_params, join_=join_, order_=order_
         )
 
     async def get_by_id(
@@ -78,3 +72,24 @@ class ORMRowService(BaseRowService, BaseOrmService):
         if not row:
             raise RowNotFoundException(row_id=id_)
         return row
+
+
+@dataclass
+class BaseRowValidatorService:
+    @abstractmethod
+    async def validate(self, attributes: dict[str, Any]) -> None: ...
+
+
+@dataclass
+class RowAlreadyExistsValidator(BaseRowValidatorService):
+    row_service: BaseRowService
+
+    async def validate(self, attributes: dict[str, Any]) -> None:
+        row = await self.row_service.get_by_filter(
+            filter_params={
+                "hall_id": attributes["hall_id"],
+                "number": attributes["number"],
+            }
+        )
+        if row:
+            raise RowAlreadyExists(row_number=attributes["number"])

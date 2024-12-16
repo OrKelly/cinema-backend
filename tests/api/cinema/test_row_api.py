@@ -42,7 +42,11 @@ class TestRowAPI:
         assert response.json()["message"] == HallNotFoundException().message
 
     async def test_row_create_with_exist_row_number_in_hall(
-        self, client: AsyncClient, faker
+        self, client: AsyncClient
     ):
+        {
+            "hall_id": random.randint(1, 10),
+            "number": random.randint(1, 10),
+        }
         row = await RowFactory().create()
         assert row
