@@ -2,7 +2,10 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from apps.cinema.exceptions.rows import RowAlreadyExists, RowNotFoundException
+from apps.cinema.exceptions.rows import (
+    RowAlreadyExistsException,
+    RowNotFoundException,
+)
 from apps.cinema.models.rows import Row
 from apps.cinema.repositories.halls import BaseHallRepository
 from apps.cinema.repositories.rows import BaseRowRepository
@@ -70,7 +73,7 @@ class ORMRowService(BaseRowService, BaseOrmService):
     ) -> Row | None:
         row = await super(BaseRowService, self).get_by_id(id_=id_, join_=join_)
         if not row:
-            raise RowNotFoundException(row_id=id_)
+            raise RowNotFoundException()
         return row
 
 
@@ -92,4 +95,4 @@ class RowAlreadyExistsValidator(BaseRowValidatorService):
             }
         )
         if row:
-            raise RowAlreadyExists(row_number=attributes["number"])
+            raise RowAlreadyExistsException()

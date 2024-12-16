@@ -3,6 +3,7 @@ import random
 from httpx import AsyncClient
 
 from apps.cinema.exceptions.halls import HallNotFoundException
+from apps.cinema.exceptions.rows import RowAlreadyExistsException
 from apps.cinema.services.rows import BaseRowService
 from tests.factories.halls import HallFactory
 from tests.factories.row import RowFactory
@@ -42,11 +43,15 @@ class TestRowAPI:
         assert response.json()["message"] == HallNotFoundException().message
 
     async def test_row_create_with_exist_row_number_in_hall(
-        self, client: AsyncClient
+        self, client: AsyncClient, faker
     ):
-        {
-            "hall_id": random.randint(1, 10),
-            "number": random.randint(1, 10),
-        }
         row = await RowFactory().create()
-        assert row
+        payload = {
+            "hall_id": row.hall_id,
+            "number": row.number,
+        }
+        response = await client.post(self.get_create_url(), json=payload)
+        assert response.status_code == 409
+        assert (
+            response.json()["message"] == RowAlreadyExistsException().message
+        )
