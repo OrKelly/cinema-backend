@@ -16,7 +16,7 @@ class BaseHallRepository:
     ) -> Hall | None: ...
 
     @abstractmethod
-    async def get_by_title(self, title: str) -> Iterable[Hall] | None: ...
+    async def get_by_title(self, title: str) -> Hall | None: ...
 
     @abstractmethod
     async def get_by_id(self, id_: int) -> Hall | None: ...
@@ -39,11 +39,11 @@ class ORMHallRepository(BaseHallRepository, BaseORMRepository[Hall]):
             attributes=attributes
         )
 
-    async def get_by_title(self, title: str) -> Iterable[Hall] | None:
+    async def get_by_title(self, title: str) -> Hall | None:
         return await self.get_by(field="title", value=title)
 
     async def get_by_id(self, id_: int) -> Hall | None:
-        return await self.get_by(field="id", value=id)
+        return await self.get_by(field="id", value=id_)
 
     async def get_by_filter(
         self,
