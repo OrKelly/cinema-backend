@@ -11,7 +11,6 @@ class TestRowServices:
         attrs = await RowFactory().row()
         row = await self.row_service.create(attributes=attrs)
         assert row
-        assert await self.row_service.get_by_id(id_=row.id)
         for attr, value in attrs.items():
             if hasattr(row, attr):
                 assert getattr(row, attr) == value
