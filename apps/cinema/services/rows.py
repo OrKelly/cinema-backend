@@ -73,9 +73,7 @@ class ORMRowService(BaseRowService, BaseOrmService):
         return row
 
     async def get_by_hall(self, hall_id: int) -> Iterable[Row] | list[None]:
-        return await super(BaseRowService, self).get_by_filter(
-            filter_params={"hall_id": hall_id}
-        )
+        return await self.repository.get_by_hall(hall_id)
 
     async def get_by_filter(
         self,

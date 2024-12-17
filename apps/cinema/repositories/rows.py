@@ -46,7 +46,7 @@ class ORMRowRepository(BaseRowRepository, BaseORMRepository[Row]):
 
     async def get_by_hall(self, hall_id: int) -> Iterable[Row] | list[None]:
         return await super(BaseRowRepository, self).get_by(
-            field="hall", value=hall_id
+            field="hall_id", value=hall_id
         )
 
     async def get_by_filter(
