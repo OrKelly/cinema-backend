@@ -40,10 +40,14 @@ class ORMRowRepository(BaseRowRepository, BaseORMRepository[Row]):
         )
 
     async def get_by_id(self, id_: int) -> Row | None:
-        return await self.get_by(field="id", value=id_)
+        return await super(BaseRowRepository, self).get_by(
+            field="id", value=id_
+        )
 
     async def get_by_hall(self, hall_id: int) -> Iterable[Row] | list[None]:
-        return await self.get_by(field="hall", value=hall_id)
+        return await super(BaseRowRepository, self).get_by(
+            field="hall", value=hall_id
+        )
 
     async def get_by_filter(
         self,
@@ -52,4 +56,6 @@ class ORMRowRepository(BaseRowRepository, BaseORMRepository[Row]):
         join_: set[str, Any] = None,
         order_: dict | None = None,
     ) -> Iterable[Row] | list[None]:
-        return await self.get_by(field=field, value=value, join_=join_)
+        return await super(BaseRowRepository, self).get_by(
+            field=field, value=value, join_=join_
+        )
