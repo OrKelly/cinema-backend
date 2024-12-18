@@ -1,9 +1,8 @@
 from faker import Faker
-from pydantic import BaseModel, Field
 
 from apps.users.models.users import User
 from core.security.password import PasswordHandler
-from tests.factories.base import BaseFactory
+from tests.factories.base import BaseFactory, BaseFakeSchema
 
 fake = Faker(locale="ru_RU")
 
@@ -12,12 +11,15 @@ def generate_password():
     return fake.password(length=8, digits=True, upper_case=True)
 
 
-class UserCreate(BaseModel):
-    first_name: str = Field(default_factory=fake.first_name)
-    last_name: str = Field(default_factory=fake.last_name)
-    patronymic: str = Field(default_factory=fake.middle_name)
-    email: str = Field(default_factory=fake.email)
-    password: str = Field(default_factory=generate_password)
+class UserCreate(BaseFakeSchema):
+    first_name: str = fake.first_name
+    last_name: str = fake.last_name
+    patronymic: str = fake.middle_name
+    email: str = fake.email
+    password: str = generate_password
+
+    class Meta:
+        model = User
 
 
 class UserFactory(BaseFactory[User, UserCreate]):

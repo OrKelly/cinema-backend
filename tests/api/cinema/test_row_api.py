@@ -11,7 +11,7 @@ from tests.factories.row import RowFactory
 
 class TestRowAPI:
     @staticmethod
-    def get_create_url(**kwargs):
+    def get_list_url(**kwargs):
         return "api/v1/cinema/rows"
 
     async def test_row_create_with_exist_hall(
@@ -22,7 +22,7 @@ class TestRowAPI:
             "hall_id": hall.id,
             "number": random.randint(1, 10),
         }
-        response = await client.post(self.get_create_url(), json=payload)
+        response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 200
         row_service = container.resolve(BaseRowService)
         row = await row_service.get_by_id(response.json()["data"]["id"])
@@ -38,19 +38,19 @@ class TestRowAPI:
             "hall_id": random.randint(1, 10),
             "number": random.randint(1, 10),
         }
-        response = await client.post(self.get_create_url(), json=payload)
+        response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 404
         assert response.json()["message"] == HallNotFoundException().message
 
     async def test_row_create_with_exist_row_number_in_hall(
-        self, client: AsyncClient, faker
+        self, client: AsyncClient
     ):
         row = await RowFactory().create()
         payload = {
             "hall_id": row.hall_id,
             "number": row.number,
         }
-        response = await client.post(self.get_create_url(), json=payload)
+        response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 409
         assert (
             response.json()["message"] == RowAlreadyExistsException().message

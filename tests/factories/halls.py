@@ -1,15 +1,17 @@
 from faker import Faker
-from pydantic import BaseModel, Field
 
 from apps.cinema.models.halls import Hall
-from tests.factories.base import BaseFactory
+from tests.factories.base import BaseFactory, BaseFakeSchema
 
 fake = Faker(locale="ru_RU")
 
 
-class HallCreate(BaseModel):
-    title: str = Field(default_factory=fake.company)
-    description: str = Field(default_factory=fake.text)
+class HallCreate(BaseFakeSchema):
+    title: str = fake.company
+    description: str = fake.text
+
+    class Meta:
+        model = Hall
 
 
 class HallFactory(BaseFactory[Hall, HallCreate]):

@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -35,6 +36,11 @@ class BaseRowService:
     ) -> Row | None: ...
 
     @abstractmethod
+    async def get_by_hall(
+        self, hall_id: int
+    ) -> Iterable[Row] | list[None]: ...
+
+    @abstractmethod
     async def get_by_filter(
         self,
         filter_params: dict,
@@ -55,7 +61,19 @@ class ORMRowService(BaseRowService, BaseOrmService):
         limit: int = 100,
         join_: set[str, Any] = None,
         order_: dict | None = None,
-    ): ...
+    ):
+        return await super(BaseRowService, self).get_all()
+
+    async def get_by_id(
+        self, id_: int, join_: set[str] | None = None
+    ) -> Row | None:
+        row = await super(BaseRowService, self).get_by_id(id_=id_, join_=join_)
+        if not row:
+            raise RowNotFoundException()
+        return row
+
+    async def get_by_hall(self, hall_id: int) -> Iterable[Row] | list[None]:
+        return await self.repository.get_by_hall(hall_id)
 
     async def get_by_filter(
         self,
@@ -67,14 +85,6 @@ class ORMRowService(BaseRowService, BaseOrmService):
         return await super(BaseRowService, self).get_by_filter(
             filter_params=filter_params, join_=join_, order_=order_
         )
-
-    async def get_by_id(
-        self, id_: int, join_: set[str] | None = None
-    ) -> Row | None:
-        row = await super(BaseRowService, self).get_by_id(id_=id_, join_=join_)
-        if not row:
-            raise RowNotFoundException()
-        return row
 
 
 @dataclass
