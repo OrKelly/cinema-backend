@@ -7,7 +7,9 @@ from fastapi.responses import JSONResponse
 from api.v1.urls import router as v1_router
 from core.exceptions.base import ServerException
 from core.middlewares import SQLAlchemyMiddleware
+from core.middlewares import LoggingAPIMiddleware
 from core.storages.s3 import MinioS3Storage
+from core.loggings.logguc import MainLogger
 
 
 def init_routers(app_: FastAPI) -> None:
@@ -26,6 +28,7 @@ def make_middleware() -> list[Middleware]:
             allow_headers=["*"],
         ),
         Middleware(SQLAlchemyMiddleware),
+        Middleware(LoggingAPIMiddleware),
     ]
 
 
@@ -43,7 +46,6 @@ def init_listeners(app_: FastAPI) -> None:
 
 def init_storages():
     MinioS3Storage()
-
 
 def create_app():
     app_ = FastAPI(
