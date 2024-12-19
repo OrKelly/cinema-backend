@@ -24,6 +24,6 @@ async def create_place_handler(
     place = await use_case.execute(place_data)
     return ApiResponse(
         data=CreatePlaceCompleteSchema(
-            id=place.id, row=place.row.id, number=place.number
+            id=place.id, row=place.row_id, number=place.number
         )
     )

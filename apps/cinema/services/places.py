@@ -36,8 +36,8 @@ class BasePlaceService:
     ) -> Place | None: ...
 
     @abstractmethod
-    async def get_by_hall(
-        self, hall_id: int
+    async def get_by_row(
+        self, row_id: int
     ) -> Iterable[Place] | list[None]: ...
 
     @abstractmethod
@@ -74,8 +74,8 @@ class ORMPlaceService(BasePlaceService, BaseOrmService):
             raise PlaceNotFoundException()
         return place
 
-    async def get_by_hall(self, hall_id: int) -> Iterable[Place] | list[None]:
-        return await self.repository.get_by_hall(hall_id)
+    async def get_by_row(self, row_id: int) -> Iterable[Place] | list[None]:
+        return await self.repository.get_by_row(row_id=row_id)
 
     async def get_by_filter(
         self,
@@ -102,7 +102,7 @@ class PlaceAlreadyExistsValidator(BasePlaceValidatorService):
     async def validate(self, attributes: dict[str, Any]) -> None:
         place = await self.place_service.get_by_filter(
             filter_params={
-                "place_id": attributes["place_id"],
+                "row_id": attributes["row_id"],
                 "number": attributes["number"],
             }
         )

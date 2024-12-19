@@ -19,7 +19,7 @@ class BasePlaceRepository:
     async def get_by_id(self, id_: int) -> Place | None: ...
 
     @abstractmethod
-    async def get_by_hall(self, hall_id: int) -> list[Place] | None: ...
+    async def get_by_row(self, row_id: int) -> list[Place] | None: ...
 
     @abstractmethod
     async def get_by_filter(
@@ -42,8 +42,8 @@ class ORMPlaceRepository(BasePlaceRepository, BaseORMRepository[Place]):
     async def get_by_id(self, id_: int) -> Place | None:
         return await self.get_by(field="id", value=id_)
 
-    async def get_by_hall(self, hall_id: int) -> Iterable[Place] | list[None]:
-        return await self.get_by(field="hall", value=hall_id)
+    async def get_by_row(self, row_id: int) -> Iterable[Place] | list[None]:
+        return await self.get_by(field="row_id", value=row_id)
 
     async def get_by_filter(
         self,
