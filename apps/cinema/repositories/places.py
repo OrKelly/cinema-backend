@@ -52,4 +52,6 @@ class ORMPlaceRepository(BasePlaceRepository, BaseORMRepository[Place]):
         join_: set[str, Any] = None,
         order_: dict | None = None,
     ) -> Iterable[Place] | list[None]:
-        return await self.get_by(field=field, value=value, join_=join_)
+        return await super(BasePlaceRepository, self).get_by(
+            field=field, value=value, join_=join_
+        )
