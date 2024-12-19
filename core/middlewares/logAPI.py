@@ -1,21 +1,35 @@
 from loguru import logger
+from fastapi import Request
+from starlette.types import ASGIApp, Receive, Scope, Send
+from starlette.middleware.base import BaseHTTPMiddleware
 
 
-class LoggingAPIMiddleware:  
-    def __init__(self, get_response):  
-        self.get_response = get_response  
+class LoggingAPIMiddleware(BaseHTTPMiddleware):  
+    def __init__(self, app: ASGIApp) -> None:  
+        super().__init__(app)
+    
+    
+    async def __call__(
+        self, scope: Scope, receive: Receive, send: Send
+        ) -> None:
+        receive_ = await receive()
+        request = Request(scope, receive=receive_)
 
-    def __call__(self, request):
-        response = self.get_response(request) 
-        logger.bind(
-            path=request.path,
+        logger.info(
+            'Request: "{method} {path}"',
             method=request.method,
-            status_code=response.status_code,
-            response_size=len(response.content),
-        ).info(
-            'Request: "{method} {path}" | Response: {status_code}',
-            method=request.method,
-            path=request.path,
-            status_code=response.status_code
+            path=request.url,
         )
-        return response
+
+        logger.bind(
+            path=request.url,
+            method=request.method
+        ).info(
+            'Request headers: "{headers}" | Params: {path_param} {query_param}',
+            headers=request.headers,
+            path_param=request.path_params,
+            query_param=request.query_params
+        )
+        
+        await self.app(scope, receive_, send)
+        
