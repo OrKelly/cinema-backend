@@ -8,12 +8,12 @@ from core.config import config
 from core.exceptions import ServerException
 
 
-class JWTDecodeError(ServerException):
+class JWTDecodeError(JWTError, ServerException):
     code = status.HTTP_401_UNAUTHORIZED
     message = "Invalid token"
 
 
-class JWTExpiredError(ServerException):
+class JWTExpiredError(JWTError, ServerException):
     code = status.HTTP_401_UNAUTHORIZED
     message = "Token expired"
 
