@@ -31,6 +31,20 @@ from apps.users.use_cases.register import (
     BaseRegisterUserUseCase,
     RegisterUserUseCase,
 )
+from apps.films.models.films import Film
+from apps.films.repositories.films import (
+    BaseFilmRepository,
+    BaseORMRepository,
+)
+from apps.films.services.films import (
+    BaseFilmService, ORMFilmService
+)
+from apps.films.services.validation import (
+    BaseValidationFilmService, FilmRentDatesValidatorService
+)
+from apps.films.use_cases.validation import (
+    BaseValidationFilmUseCase, AddFilmUseCase
+)
 
 
 @lru_cache(1)
@@ -41,6 +55,7 @@ def get_container() -> punq.Container:
 def _initialize_repositories(container: punq.Container) -> None:
     container.register(BaseUserRepository, ORMUserRepository, model_class=User)
     container.register(BaseHallRepository, ORMHallRepository, model_class=Hall)
+    container.register(BaseFilmRepository, BaseORMRepository, model_class=Film)
 
 
 def _initialize_services(container: punq.Container) -> None:
@@ -60,6 +75,10 @@ def _initialize_services(container: punq.Container) -> None:
         BaseHallValidatorService, UniqueTitleHallValidatorService
     )
     container.register(BaseHallService, ORMHallService)
+    container.register(BaseFilmService, ORMFilmService)
+    container.register(
+        BaseValidationFilmService, FilmRentDatesValidatorService
+    )
 
 
 def _initialize_use_cases(container: punq.Container) -> None:
@@ -67,6 +86,7 @@ def _initialize_use_cases(container: punq.Container) -> None:
     container.register(CreateHallUseCase)
     container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
     container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
+    container.register(BaseValidationFilmUseCase, AddFilmUseCase)
 
 
 def _initialize_container() -> punq.Container:
