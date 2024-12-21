@@ -66,7 +66,7 @@ class TestBaseORMRepository:
         await UserFactory().create_batch(random.randint(1, 5))
         repository = BaseORMRepository(model_class=User)
 
-        users = await repository.filter(filter_params=filter_param)
+        users = await repository.get_by_filter(filter_params=filter_param)
         assert len(users) == instances_count
 
     @pytest.mark.parametrize(
