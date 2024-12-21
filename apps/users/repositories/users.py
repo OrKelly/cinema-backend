@@ -19,7 +19,7 @@ class BaseUserRepository:
     async def get_by_id(self, id_: int) -> User | None: ...
 
     @abstractmethod
-    async def filter(
+    async def get_by_filter(
         self,
         filter_params: dict,
         join_: set[str, Any] = None,
@@ -39,14 +39,14 @@ class ORMUserRepository(BaseUserRepository, BaseORMRepository[User]):
     async def get_by_id(self, id_: int) -> User | None:
         return await self.get_by(field="id", value=id_)
 
-    async def filter(
+    async def get_by_filter(
         self,
         filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
         unique: bool = False,
     ) -> Iterable[User] | list[None]:
-        return await super(BaseUserRepository, self).filter(
+        return await super(BaseUserRepository, self).get_by_filter(
             filter_params=filter_params,
             join_=join_,
             order_=order_,

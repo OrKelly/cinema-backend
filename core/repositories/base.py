@@ -40,11 +40,13 @@ class BaseRepository(ABC):
     async def delete(self, instance: Any) -> None: ...
 
     @abstractmethod
-    async def filter(
+    async def get_by_filter(
         self,
         filter_params: dict,
         join_: set[str] | None = None,
         unique: bool = False,
+        skip: int = 0,
+        limit: int = 100,
     ): ...
 
     @abstractmethod
@@ -94,7 +96,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         query = self._query(join_, order_)
         query = query.offset(skip).limit(limit)
 
-        if join_ is not None:
+        if join_:
             return await self._all_unique(query)
 
         return await self._all(query)
@@ -137,12 +139,14 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         async with get_session() as session:
             await session.delete(instance)
 
-    async def filter(
+    async def get_by_filter(
         self,
         filter_params: dict,
         join_: set[str] | None = None,
         order_: dict | None = None,
         unique: bool = False,
+        skip=0,
+        limit=100,
     ) -> Iterable[ModelType] | ModelType:
         """
         Метод возвращает инстансы модели, отфильтрованные
@@ -152,9 +156,12 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         Передаются в виде словаря поле:значение
         :param join_: список джоинов для связи.
         :param unique: нужно ли вернуть одно значение (первое) или их список
+        :param skip: кол-во записей для пропуска (для пагинации).
+        :param limit: кол-во возвращаемых записей
         :return: список инстансов или инстанс
         """
         query = self._query(join_, order_)
+        query = query.offset(skip).limit(limit)
         query = await self._filter_by(query, filter_params)
 
         if join_ is not None:
@@ -331,7 +338,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         Передаются в виде словаря поле:значение
         :return: отфильтрованный запрос.
         """
-        return query.filter(
+        return query.get_by_filter(
             *[
                 getattr(self.model_class, field) == value
                 for field, value in filter_params.items()
