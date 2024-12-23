@@ -29,12 +29,12 @@ class TestRowServices:
     async def test_get_by_hall(self, prepare_database):
         await HallFactory().create_batch(10)
         await RowFactory(hall_id=9).create_batch(5)
-        all_rows_need_hall = await self.row_service.get_by_hall(hall_id=9)
-        assert len(all_rows_need_hall) == 5
+        all_rows_desired_hall = await self.row_service.get_by_hall(hall_id=9)
+        assert len(all_rows_desired_hall) == 5
 
     async def test_get_by_filter(self, prepare_database):
         await RowFactory(number=9).create_batch(5)
-        all_rows_need_hall = await self.row_service.get_by_filter(
+        all_rows_with_number = await self.row_service.get_by_filter(
             filter_params={"number": 9}
         )
-        assert len(all_rows_need_hall) == 5
+        assert len(all_rows_with_number) == 5
