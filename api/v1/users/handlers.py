@@ -46,3 +46,17 @@ async def user_login_handler(
     credentials_data = credentials_data.model_dump()
     tokens = await use_case.execute(credentials_data=credentials_data)
     return ApiResponse(data=tokens)
+
+
+@router.post(
+    "/register/employee"
+)
+async def employee_register_handler(
+    request: Request,
+    user_data: UserRegisterSchema,
+    container=Depends(get_container),  # noqa: B008
+):
+    use_case: BaseRegisterUserUseCase = container.resolve(
+        BaseRegisterUserUseCase
+    )
+    user_data = user_data.model_dump()
