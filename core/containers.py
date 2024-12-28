@@ -40,10 +40,9 @@ from apps.films.services.films import (
     BaseFilmService, ORMFilmService
 )
 from apps.films.services.validation import (
-    BaseValidationFilmService, FilmRentDatesValidatorService
-)
-from apps.films.use_cases.validation import (
-    BaseValidationFilmUseCase, AddFilmUseCase
+    BaseFilmValidatorService,
+    FilmRentDatesValidatorService,
+    ComposedFilmValidatorService,
 )
 
 
@@ -59,7 +58,7 @@ def _initialize_repositories(container: punq.Container) -> None:
 
 
 def _initialize_services(container: punq.Container) -> None:
-    def build_validators() -> BaseRegisterValidatorService:
+    def build_user_validators() -> BaseRegisterValidatorService:
         return ComposedRegisterValidatorService(
             validators=[
                 container.resolve(UniqueEmailValidatorService),
@@ -67,17 +66,26 @@ def _initialize_services(container: punq.Container) -> None:
             ],
         )
 
+    def buid_film_validators() -> BaseFilmValidatorService:
+        return ComposedFilmValidatorService(
+            validators=[
+                container.resolve(FilmRentDatesValidatorService)
+            ]
+        )
+
     container.register(UniqueEmailValidatorService)
     container.register(PasswordIncorrectValidatorService)
     container.register(BaseUserService, ORMUserService)
-    container.register(BaseRegisterValidatorService, factory=build_validators)
+    container.register(
+        BaseRegisterValidatorService, factory=build_user_validators
+    )
     container.register(
         BaseHallValidatorService, UniqueTitleHallValidatorService
     )
     container.register(BaseHallService, ORMHallService)
     container.register(BaseFilmService, ORMFilmService)
     container.register(
-        BaseValidationFilmService, FilmRentDatesValidatorService
+        BaseFilmValidatorService, factory=buid_film_validators
     )
 
 
@@ -86,7 +94,6 @@ def _initialize_use_cases(container: punq.Container) -> None:
     container.register(CreateHallUseCase)
     container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
     container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
-    container.register(BaseValidationFilmUseCase, AddFilmUseCase)
 
 
 def _initialize_container() -> punq.Container:

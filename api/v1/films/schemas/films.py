@@ -12,7 +12,6 @@ class AddFilmCompleteSchema(BaseModel):
 class FilmAddSchema(BaseModel):
     cinemahall_id: int
     description: str
-    poster: str
     age_rating: AgeRatingEnum
     duration:  float
     status: FilmStatusEnum

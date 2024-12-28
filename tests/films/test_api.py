@@ -10,7 +10,7 @@ from apps.films.services.films import BaseFilmService
 class TestFilmAPI:
     @staticmethod
     def get_list_url(**kwargs):
-        return "api/v1/films/add"
+        return "api/v1/films"
 
     @pytest.mark.ayncio
     async def test_create_film(
@@ -42,7 +42,7 @@ class TestFilmAPI:
             self, client: AsyncClient, faker, container
     ):
         hall = await HallFactory().create()
-        date_rent_start = datetime.now(UTC) + timedelta(1)
+        date_rent_start = datetime.now(UTC) - timedelta(1)
         payload = {
             "cinemahall_id": hall.id,
             "description": faker.text(),
