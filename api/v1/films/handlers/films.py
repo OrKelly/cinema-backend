@@ -5,12 +5,9 @@ from fastapi.routing import APIRouter
 from api.v1.films.schemas.films import AddFilmCompleteSchema, FilmAddSchema
 from core.containers import get_container
 from core.schemas.responses.api_response import ApiResponse
-from apps.films.use_cases.film_create import CreateFilmUseCase
-from core.storages.s3.minio import MinioS3Storage
+from apps.films.use_cases.film_create import BaseCreateFilmUseCase
 
 router = APIRouter()
-
-storage_client = MinioS3Storage()
 
 
 @router.post("")
@@ -20,8 +17,8 @@ async def create_film_handler(
     film_data: FilmAddSchema,
     container=Depends(get_container),   # noqa: B008
 ) -> ApiResponse[AddFilmCompleteSchema]:
-    use_case: CreateFilmUseCase = container.resolve(
-        CreateFilmUseCase
+    use_case: BaseCreateFilmUseCase = container.resolve(
+        BaseCreateFilmUseCase
     )
     film_data = film_data.model_dump()
     film = await use_case.execute(film_data=film_data, poster=poster)

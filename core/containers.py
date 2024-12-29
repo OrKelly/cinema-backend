@@ -44,6 +44,10 @@ from apps.films.services.validation import (
     FilmRentDatesValidatorService,
     ComposedFilmValidatorService,
 )
+from apps.films.use_cases.film_create import (
+    BaseCreateFilmUseCase,
+    CreateFilmUseCase
+)
 
 
 @lru_cache(1)
@@ -94,6 +98,7 @@ def _initialize_use_cases(container: punq.Container) -> None:
     container.register(CreateHallUseCase)
     container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
     container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
+    container.register(BaseCreateFilmUseCase, CreateFilmUseCase)
 
 
 def _initialize_container() -> punq.Container:
