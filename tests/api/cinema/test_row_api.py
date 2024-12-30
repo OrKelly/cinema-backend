@@ -21,6 +21,7 @@ class TestRowAPI:
         payload = {
             "hall_id": hall.id,
             "number": random.randint(1, 10),
+            "capacity": random.randint(10, 30),
         }
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 200
@@ -37,6 +38,7 @@ class TestRowAPI:
         payload = {
             "hall_id": random.randint(1, 10),
             "number": random.randint(1, 10),
+            "capacity": random.randint(10, 30),
         }
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 404
@@ -49,6 +51,7 @@ class TestRowAPI:
         payload = {
             "hall_id": row.hall_id,
             "number": row.number,
+            "capacity": random.randint(10, 30),
         }
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 409
