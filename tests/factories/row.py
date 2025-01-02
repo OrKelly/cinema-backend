@@ -14,7 +14,7 @@ fake = Faker(locale="ru_RU")
 class RowCreate(BaseFakeSchema):
     number = fake.pyint
     hall_id = SubFactory(factory=HallFactory)
-    capacity = fake.pyint
+    capacity = fake.pyint(min_value=10, max_value=30)
 
     class Meta:
         model = Row

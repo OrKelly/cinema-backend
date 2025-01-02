@@ -4,6 +4,7 @@ from httpx import AsyncClient
 
 from apps.cinema.exceptions.halls import HallNotFoundException
 from apps.cinema.exceptions.rows import RowAlreadyExistsException
+from apps.cinema.services.places import BasePlaceService
 from apps.cinema.services.rows import BaseRowService
 from tests.factories.halls import HallFactory
 from tests.factories.row import RowFactory
@@ -26,8 +27,11 @@ class TestRowAPI:
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 200
         row_service = container.resolve(BaseRowService)
+        place_service = container.resolve(BasePlaceService)
         row = await row_service.get_by_id(response.json()["data"]["id"])
+        current_row_places = await place_service.get_by_row(row_id=row.id)
         assert row.id == response.json()["data"]["id"]
+        assert len(current_row_places) == payload["capacity"]
         for attr, value in payload.items():
             if hasattr(row, attr):
                 assert getattr(row, attr) == value
