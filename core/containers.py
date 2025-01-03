@@ -3,10 +3,15 @@ from functools import lru_cache
 import punq
 
 from apps.cinema.models.halls import Hall
+from apps.cinema.models.places import Place
 from apps.cinema.models.rows import Row
 from apps.cinema.repositories.halls import (
     BaseHallRepository,
     ORMHallRepository,
+)
+from apps.cinema.repositories.places import (
+    BasePlaceRepository,
+    ORMPlaceRepository,
 )
 from apps.cinema.repositories.rows import BaseRowRepository, ORMRowRepository
 from apps.cinema.services.halls import (
@@ -15,6 +20,12 @@ from apps.cinema.services.halls import (
     ORMHallService,
     UniqueTitleHallValidatorService,
 )
+from apps.cinema.services.places import (
+    BasePlaceService,
+    BasePlaceValidatorService,
+    ORMPlaceService,
+    PlaceAlreadyExistsValidator,
+)
 from apps.cinema.services.rows import (
     BaseRowService,
     BaseRowValidatorService,
@@ -22,6 +33,7 @@ from apps.cinema.services.rows import (
     RowAlreadyExistsValidator,
 )
 from apps.cinema.use_cases.hall_create import CreateHallUseCase
+from apps.cinema.use_cases.place_create import CreatePlaceUseCase
 from apps.cinema.use_cases.row_create import CreateRowUseCase
 from apps.users.models.users import User
 from apps.users.repositories.users import BaseUserRepository, ORMUserRepository
@@ -51,6 +63,9 @@ def _initialize_repositories(container: punq.Container) -> None:
     container.register(BaseUserRepository, ORMUserRepository, model_class=User)
     container.register(BaseHallRepository, ORMHallRepository, model_class=Hall)
     container.register(BaseRowRepository, ORMRowRepository, model_class=Row)
+    container.register(
+        BasePlaceRepository, ORMPlaceRepository, model_class=Place
+    )
 
 
 def _initialize_services(container: punq.Container) -> None:
@@ -65,21 +80,24 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(UniqueEmailValidatorService)
     container.register(PasswordIncorrectValidatorService)
     container.register(BaseUserService, ORMUserService)
+    container.register(BaseRegisterValidatorService, factory=build_validators)
     container.register(BaseRowService, ORMRowService)
     container.register(BaseRowValidatorService, RowAlreadyExistsValidator)
-    container.register(BaseRegisterValidatorService, factory=build_validators)
+    container.register(BaseHallService, ORMHallService)
     container.register(
         BaseHallValidatorService, UniqueTitleHallValidatorService
     )
-    container.register(BaseHallService, ORMHallService)
+    container.register(BasePlaceService, ORMPlaceService)
+    container.register(BasePlaceValidatorService, PlaceAlreadyExistsValidator)
 
 
 def _initialize_use_cases(container: punq.Container) -> None:
     container.register(RegisterUserUseCase)
-    container.register(CreateHallUseCase)
-    container.register(CreateRowUseCase)
     container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
     container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
+    container.register(CreateHallUseCase)
+    container.register(CreateRowUseCase)
+    container.register(CreatePlaceUseCase)
 
 
 def _initialize_container() -> punq.Container:

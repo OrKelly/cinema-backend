@@ -20,5 +20,7 @@ async def create_row_handler(
     row_data = row_schema.model_dump()
     row = await use_case.execute(row_data)
     return ApiResponse(
-        data=CreateRowCompleteSchema(id=row.id, number=row.number)
+        data=CreateRowCompleteSchema(
+            id=row.id, number=row.number, capacity=row.capacity
+        )
     )
