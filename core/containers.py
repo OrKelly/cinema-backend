@@ -52,6 +52,8 @@ from apps.users.use_cases.register import (
     BaseRegisterUserUseCase,
     RegisterUserUseCase,
 )
+from core.loggers import FileLogger
+from core.loggers.base import BaseLogger
 
 
 @lru_cache(1)
@@ -100,11 +102,16 @@ def _initialize_use_cases(container: punq.Container) -> None:
     container.register(CreatePlaceUseCase)
 
 
+def _initialize_external_staff(container: punq.Container) -> None:
+    container.register(BaseLogger, FileLogger)
+
+
 def _initialize_container() -> punq.Container:
     container = punq.Container()
 
     _initialize_repositories(container)
     _initialize_services(container)
     _initialize_use_cases(container)
+    _initialize_external_staff(container)
 
     return container
