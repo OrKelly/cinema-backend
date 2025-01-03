@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
 
 
 @dataclass
-class BaseLogging(ABC):
+class BaseLogger(ABC):
     """
     Базовый класс для логирования
     """
@@ -13,8 +12,7 @@ class BaseLogging(ABC):
 
     @abstractmethod
     def setup_config_loggers(self, config: dict):
-        """Метод для настройки логера через конфиг
-        """
+        """Метод для настройки логера через конфиг"""
         ...
 
     @abstractmethod
@@ -22,8 +20,7 @@ class BaseLogging(ABC):
 
     @abstractmethod
     def debug(self, message: str):
-        """Конфиг debug метод
-        """
+        """Конфиг debug метод"""
         ...
 
     @abstractmethod

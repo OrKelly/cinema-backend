@@ -6,10 +6,9 @@ from fastapi.responses import JSONResponse
 
 from api.v1.urls import router as v1_router
 from core.exceptions.base import ServerException
-from core.middlewares import SQLAlchemyMiddleware
+from core.middlewares import LoggingMiddleware, SQLAlchemyMiddleware
 from core.middlewares.auth import AuthBackend, AuthenticationMiddleware
 from core.storages.s3 import MinioS3Storage
-from core.loggings.logguc import MainLogger
 
 
 def init_routers(app_: FastAPI) -> None:
@@ -28,7 +27,7 @@ def make_middleware() -> list[Middleware]:
             allow_headers=["*"],
         ),
         Middleware(SQLAlchemyMiddleware),
-        Middleware(LoggingAPIMiddleware),
+        Middleware(LoggingMiddleware),
         Middleware(AuthenticationMiddleware, backend=AuthBackend()),
     ]
 
