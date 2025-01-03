@@ -21,5 +21,6 @@ class Row(Base, IntegerIdMixin):
         nullable=False,
     )
     number: Mapped[int] = mapped_column(Integer, nullable=False)
+    capacity: Mapped[int] = mapped_column(Integer, nullable=False)
 
     places: Mapped[list["Place"]] = relationship("Place", back_populates="row")
