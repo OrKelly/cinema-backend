@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from sys import stdout
 from typing import Any
@@ -9,10 +10,28 @@ from core.loggers.base import BaseLogger
 
 @dataclass
 class FileLogger(BaseLogger):
+    def __post_init__(self):
+        self.log = logger
+        self.log_path = self.__get_or_create_log_path()
+        self.handlers: list = self.__set_handlers()
+        self.configs: dict[str, Any] = self.__set_configs()
+        self.log = self.log.patch(
+            lambda record: record.update(name=self.module_name)
+        )
+        self.setup_lib_configs()
+
+    def __get_or_create_log_path(self):
+        logs_directory = os.path.join(
+            os.path.dirname(__file__), "..", "..", "logs"
+        )
+        if not os.path.exists(logs_directory):
+            os.makedirs(logs_directory)
+        return logs_directory
+
     def __set_handlers(self):
         return [
             {
-                "sink": f"logs/{self.module_name}.log",
+                "sink": f"{self.log_path}/{self.module_name}.log",
                 "rotation": "10 mb",
                 "level": "INFO",
                 "compression": "zip",
@@ -26,7 +45,7 @@ class FileLogger(BaseLogger):
                 "level": "DEBUG",
             },
             {
-                "sink": f"logs/{self.module_name}_error.log",
+                "sink": f"{self.log_path}/{self.module_name}_error.log",
                 "rotation": "5 mb",
                 "level": "ERROR",
                 "compression": "zip",
@@ -40,14 +59,6 @@ class FileLogger(BaseLogger):
             "handlers": self.__set_handlers(),
             "extra": {"ip": "localhost"},
         }
-
-    def __post_init__(self):
-        self.log = logger
-        self.handlers: list = self.__set_handlers()
-        self.configs: dict[str, Any] = self.__set_configs()
-        self.log = self.log.patch(
-            lambda record: record.update(name=self.module_name)
-        )
 
     def add_handler(self, handler: list):
         if self.handlers is None:
