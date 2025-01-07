@@ -13,17 +13,17 @@ from apps.films.services.films import BaseFilmService
 @dataclass
 class BaseFilmValidatorService(ABC):
     @abstractmethod
-    def validate(self, film_data: dict[str, any]) -> None: ...
+    async def validate(self, film_data: dict[str, any]) -> None: ...
 
 
 @dataclass
 class FilmRentDatesValidatorService(BaseFilmValidatorService):
     film_service: BaseFilmService
 
-    def validate(self, film_data: dict[str, any]):
-        if film_data["date_rent_start"] >= datetime.now(UTC):
+    async def validate(self, film_data: dict[str, any]):
+        if film_data["date_rent_start"] < datetime.now(UTC):
             raise StartDateIncorrectException
-        if film_data["date_rent_end"] > film_data["date_rent_start"]:
+        if film_data["date_rent_end"] <= film_data["date_rent_start"]:
             raise EndDateIncorrectException
 
 

@@ -43,11 +43,9 @@ from apps.films.repositories.films import (
 from apps.films.services.films import BaseFilmService, ORMFilmService
 from apps.films.services.validation import (
     BaseFilmValidatorService,
-    ComposedFilmValidatorService,
     FilmRentDatesValidatorService,
 )
 from apps.films.use_cases.film_create import (
-    BaseCreateFilmUseCase,
     CreateFilmUseCase,
 )
 from apps.users.models.users import User
@@ -69,6 +67,7 @@ from apps.users.use_cases.register import (
 )
 from core.loggers import FileLogger
 from core.loggers.base import BaseLogger
+from core.storages.s3.base import BaseS3Storage
 from core.storages.s3.minio import MinioS3Storage
 
 
@@ -78,7 +77,7 @@ def get_container() -> punq.Container:
 
 
 def _initialize_storage(container: punq.Container) -> None:
-    container.register(MinioS3Storage)
+    container.register(BaseS3Storage, MinioS3Storage)
 
 
 def _initialize_repositories(container: punq.Container) -> None:
@@ -100,11 +99,6 @@ def _initialize_services(container: punq.Container) -> None:
             ],
         )
 
-    def buid_film_validators() -> BaseFilmValidatorService:
-        return ComposedFilmValidatorService(
-            validators=[container.resolve(FilmRentDatesValidatorService)]
-        )
-
     container.register(UniqueEmailValidatorService)
     container.register(PasswordIncorrectValidatorService)
     container.register(FilmRentDatesValidatorService)
@@ -123,7 +117,7 @@ def _initialize_services(container: punq.Container) -> None:
     )
     container.register(BaseHallService, ORMHallService)
     container.register(BaseFilmService, ORMFilmService)
-    container.register(BaseFilmValidatorService, factory=buid_film_validators)
+    container.register(BaseFilmValidatorService, FilmRentDatesValidatorService)
     container.register(BasePlaceService, ORMPlaceService)
     container.register(BasePlaceValidatorService, PlaceAlreadyExistsValidator)
 
@@ -132,7 +126,7 @@ def _initialize_use_cases(container: punq.Container) -> None:
     container.register(RegisterUserUseCase)
     container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
     container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
-    container.register(BaseCreateFilmUseCase, CreateFilmUseCase)
+    container.register(CreateFilmUseCase)
     container.register(CreateHallUseCase)
     container.register(CreateRowUseCase)
     container.register(CreatePlaceUseCase)

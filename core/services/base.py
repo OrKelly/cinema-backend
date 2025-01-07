@@ -46,8 +46,10 @@ class BaseOrmService(BaseService):
     async def create(self, attributes: dict[str, Any] = None) -> ModelType:
         return await self.repository.create(attributes)
 
-    async def get_all(self, skip: int = 0, limit: int = 100):
-        return await self.repository.get_all()
+    async def get_all(
+        self, skip: int = 0, limit: int = 100, join_=None, order_=None
+    ):
+        return await self.repository.get_all(skip, limit, join_, order_)
 
     async def delete(self, instance: Any) -> None: ...
 

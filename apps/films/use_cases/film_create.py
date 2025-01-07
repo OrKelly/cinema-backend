@@ -1,6 +1,3 @@
-import os
-import shutil
-import tempfile
 from dataclasses import dataclass
 from typing import Any
 
@@ -9,37 +6,30 @@ from fastapi import UploadFile
 from apps.films.models.films import Film
 from apps.films.services.films import BaseFilmService
 from apps.films.services.validation import BaseFilmValidatorService
-from core.storages.s3.minio import MinioS3Storage
+from core.storages.s3.base import BaseS3Storage
+from core.storages.s3.utils import remove_file_on_exception
 
 
 @dataclass
-class BaseCreateFilmUseCase:
+class CreateFilmUseCase:
     film_service: BaseFilmService
     validator: BaseFilmValidatorService
-    poster_creator: MinioS3Storage
+    poster_creator: BaseS3Storage
 
-    async def execute(
-        self, film_data: dict[str, Any], poster: UploadFile
-    ) -> Film: ...
+    async def execute(self, film_data: dict[str, Any]) -> Film:
+        poster = film_data["poster"]
+        async with remove_file_on_exception(
+            storage_service=self.poster_creator,
+            file_path=f"posters/{poster.filename}",
+        ):
+            poster_url = self.upload_poster(poster)
+            film_data["poster"] = poster_url
+            await self.validator.validate(film_data)
+            return await self.film_service.create(attributes=film_data)
 
-
-@dataclass
-class CreateFilmUseCase(BaseCreateFilmUseCase):
     def upload_poster(self, poster: UploadFile) -> str:
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            shutil.copyfileobj(poster.file, temp_file)
-            temp_file_path = temp_file.name
-        try:
-            self.poster_creator.upload_file(temp_file_path, poster.filename)
-            # return self.poster_creator.get_object(poster.filename).url()
-        finally:
-            os.remove(temp_file_path)
-
-    async def execute(
-        self, film_data: dict[str, Any], poster: UploadFile
-    ) -> Film:
-        poster_url = self.upload_poster(poster)
-        result_data = film_data.copy()
-        result_data["poster"] = poster_url
-        self.validator.validate(result_data)
-        return await self.film_service.create(attributes=film_data)
+        poster_filepath = f"posters/{poster.filename}"
+        self.poster_creator.upload_file_from_stream(
+            poster_filepath, poster.file, poster.size
+        )
+        return self.poster_creator.get_object(poster_filepath).url
