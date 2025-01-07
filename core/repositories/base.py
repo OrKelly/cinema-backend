@@ -338,7 +338,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         Передаются в виде словаря поле:значение
         :return: отфильтрованный запрос.
         """
-        return query.get_by_filter(
+        return query.filter(
             *[
                 getattr(self.model_class, field) == value
                 for field, value in filter_params.items()

@@ -48,11 +48,15 @@ from apps.films.use_cases.film_create import (
     BaseCreateFilmUseCase,
     CreateFilmUseCase
 )
+from core.storages.s3.minio import MinioS3Storage
 
 
 @lru_cache(1)
 def get_container() -> punq.Container:
     return _initialize_container()
+
+def _initialize_storage(container: punq.Container) -> None:
+    container.register(MinioS3Storage)
 
 
 def _initialize_repositories(container: punq.Container) -> None:
@@ -79,6 +83,7 @@ def _initialize_services(container: punq.Container) -> None:
 
     container.register(UniqueEmailValidatorService)
     container.register(PasswordIncorrectValidatorService)
+    container.register(FilmRentDatesValidatorService)
     container.register(BaseUserService, ORMUserService)
     container.register(
         BaseRegisterValidatorService, factory=build_user_validators
@@ -104,6 +109,7 @@ def _initialize_use_cases(container: punq.Container) -> None:
 def _initialize_container() -> punq.Container:
     container = punq.Container()
 
+    _initialize_storage(container)
     _initialize_repositories(container)
     _initialize_services(container)
     _initialize_use_cases(container)

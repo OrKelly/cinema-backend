@@ -13,7 +13,7 @@ class FilmAddSchema(BaseModel):
     cinemahall_id: int
     description: str
     age_rating: AgeRatingEnum
-    duration:  float
+    duration: float
     status: FilmStatusEnum
     date_rent_start: datetime
     date_rent_end: datetime
