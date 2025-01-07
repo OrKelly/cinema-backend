@@ -14,8 +14,11 @@ from core.database import (
     set_session_context,
 )
 from core.database.session import engines
+from core.enums import RoleKindEnum
+from core.security.jwt import JWTHandler
 from core.server import create_app
 
+from .factories.user import UserFactory
 from .fixtures import *  # noqa: F403, I001
 
 
@@ -52,4 +55,40 @@ def app() -> Generator[FastAPI, Any, None]:
 @pytest.fixture(scope="function")  # noqa: PT003
 async def client(app: FastAPI):
     async with AsyncClient(app=app, base_url="http://test") as ac:
+        yield ac
+
+
+@pytest.fixture
+async def logged_client(app: FastAPI):
+    headers = {}
+    user = await UserFactory().create()
+    access_token = JWTHandler.encode({"user_id": user.id})
+    headers["Authorization"] = f"Bearer {access_token}"
+    async with AsyncClient(
+        app=app, base_url="http://test", headers=headers
+    ) as ac:
+        yield ac
+
+
+@pytest.fixture
+async def admin_client(app: FastAPI):
+    headers = {}
+    user = await UserFactory(role=RoleKindEnum.ADMIN).create()
+    access_token = JWTHandler.encode({"user_id": user.id})
+    headers["Authorization"] = f"Bearer {access_token}"
+    async with AsyncClient(
+        app=app, base_url="http://test", headers=headers
+    ) as ac:
+        yield ac
+
+
+@pytest.fixture
+async def employee_client(app: FastAPI):
+    headers = {}
+    user = await UserFactory(role=RoleKindEnum.EMPLOYEE).create()
+    access_token = JWTHandler.encode({"user_id": user.id})
+    headers["Authorization"] = f"Bearer {access_token}"
+    async with AsyncClient(
+        app=app, base_url="http://test", headers=headers
+    ) as ac:
         yield ac

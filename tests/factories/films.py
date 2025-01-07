@@ -1,10 +1,12 @@
-from faker import Faker
 from dataclasses import dataclass
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+
+from faker import Faker
 
 from apps.films.models.films import Film
 from tests.factories.base import BaseFactory, BaseFakeSchema, SubFactory
+
 from .halls import HallFactory
 
 fake = Faker(locale="ru_RU")

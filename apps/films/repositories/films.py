@@ -1,11 +1,11 @@
 from abc import abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
-from collections.abc import Iterable
 
 from apps.films.models.films import Film
-from core.repositories.base import BaseORMRepository
 from core.database import Propagation, Transactional
+from core.repositories.base import BaseORMRepository
 
 
 @dataclass
