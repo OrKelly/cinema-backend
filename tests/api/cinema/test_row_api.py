@@ -6,7 +6,6 @@ from apps.cinema.exceptions.halls import HallNotFoundException
 from apps.cinema.exceptions.rows import RowAlreadyExistsException
 from apps.cinema.services.places import BasePlaceService
 from apps.cinema.services.rows import BaseRowService
-from tests.factories.halls import HallFactory
 from tests.factories.row import RowFactory
 
 
@@ -18,12 +17,7 @@ class TestRowAPI:
     async def test_row_create_with_exist_hall(
         self, client: AsyncClient, container
     ):
-        hall = await HallFactory().create()
-        payload = {
-            "hall_id": hall.id,
-            "number": random.randint(1, 10),
-            "capacity": random.randint(10, 30),
-        }
+        payload = await RowFactory().row()
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 200
         row_service = container.resolve(BaseRowService)
@@ -39,11 +33,8 @@ class TestRowAPI:
     async def test_row_create_without_existing_hall(
         self, client: AsyncClient, prepare_database
     ):
-        payload = {
-            "hall_id": random.randint(1, 10),
-            "number": random.randint(1, 10),
-            "capacity": random.randint(10, 30),
-        }
+        payload = await RowFactory().row()
+        payload.update({"hall_id": random.randint(2, 10)})
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 404
         assert response.json()["message"] == HallNotFoundException().message
@@ -55,7 +46,7 @@ class TestRowAPI:
         payload = {
             "hall_id": row.hall_id,
             "number": row.number,
-            "capacity": random.randint(10, 30),
+            "capacity": row.capacity,
         }
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 409
@@ -64,12 +55,7 @@ class TestRowAPI:
         )
 
     async def test_row_get_with_places(self, client: AsyncClient, container):
-        hall = await HallFactory().create()
-        payload = {
-            "hall_id": hall.id,
-            "number": random.randint(1, 10),
-            "capacity": random.randint(10, 30),
-        }
+        payload = await RowFactory().row()
         row_service = container.resolve(BaseRowService)
         row = await row_service.create(payload)
         response = await client.get(
