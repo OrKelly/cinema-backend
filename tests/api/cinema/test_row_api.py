@@ -62,3 +62,25 @@ class TestRowAPI:
         assert (
             response.json()["message"] == RowAlreadyExistsException().message
         )
+
+    async def test_row_get_with_places(self, client: AsyncClient, container):
+        hall = await HallFactory().create()
+        payload = {
+            "hall_id": hall.id,
+            "number": random.randint(1, 10),
+            "capacity": random.randint(10, 30),
+        }
+        row_service = container.resolve(BaseRowService)
+        row = await row_service.create(payload)
+        response = await client.get(
+            "/".join((self.get_list_url(), str(row.id)))
+        )
+        assert response.status_code == 200
+        response_json = response.json()
+        assert row.id == response_json["id"]
+        assert row.number == response_json["number"]
+        assert row.capacity == response_json["capacity"]
+        assert row.capacity == len(response_json["places"])
+        for number, place in enumerate(response_json["places"], start=1):
+            assert place["id"]
+            assert place["number"] == number
