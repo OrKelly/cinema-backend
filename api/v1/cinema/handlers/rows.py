@@ -1,8 +1,16 @@
-from fastapi import Depends
+from typing import Annotated
+
+from fastapi import Depends, Path
 from fastapi.requests import Request
 from fastapi.routing import APIRouter
 
-from api.v1.cinema.schemas.rows import CreateRowCompleteSchema, CreateRowSchema
+from api.v1.cinema.schemas.places import GetPlaceSchema
+from api.v1.cinema.schemas.rows import (
+    CreateRowCompleteSchema,
+    CreateRowSchema,
+    GetRowSchema,
+)
+from apps.cinema.services.rows import BaseRowService
 from apps.cinema.use_cases.row_create import CreateRowUseCase
 from core.containers import get_container
 from core.schemas.responses.api_response import ApiResponse
@@ -23,4 +31,24 @@ async def create_row_handler(
         data=CreateRowCompleteSchema(
             id=row.id, number=row.number, capacity=row.capacity
         )
+    )
+
+
+@router.get("/{id}")
+async def get_row_handler(
+    request: Request,
+    id: Annotated[int, Path(gt=0, description="Enter row id")],
+    container=Depends(get_container),  # noqa: B008
+) -> GetRowSchema:
+    row_service: BaseRowService = container.resolve(BaseRowService)
+    row, row_places = await row_service.get_by_id_with_places(id_=id)
+    proceed_places_list = [
+        dict(GetPlaceSchema(id=place.id, number=place.number))
+        for place in row_places
+    ]
+    return GetRowSchema(
+        id=row.id,
+        number=row.number,
+        capacity=row.capacity,
+        places=proceed_places_list,
     )

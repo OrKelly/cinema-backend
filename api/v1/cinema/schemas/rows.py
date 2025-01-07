@@ -14,3 +14,10 @@ class CreateRowCompleteSchema(BaseModel):
     status: str = Field(
         default="Новый ряд успешно зарегистрирован в базе данных"
     )
+
+
+class GetRowSchema(BaseModel):
+    id: int
+    number: int
+    capacity: int
+    places: list[dict]

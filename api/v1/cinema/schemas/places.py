@@ -13,3 +13,8 @@ class CreatePlaceCompleteSchema(BaseModel):
     status: str = Field(
         default="Новое место успешно зарегистрировано в базе данных"
     )
+
+
+class GetPlaceSchema(BaseModel):
+    id: int
+    number: int
