@@ -10,6 +10,7 @@ from api.v1.cinema.schemas.rows import (
     CreateRowSchema,
     GetRowSchema,
 )
+from apps.cinema.services.places import BasePlaceService
 from apps.cinema.services.rows import BaseRowService
 from apps.cinema.use_cases.row_create import CreateRowUseCase
 from core.containers import get_container
@@ -41,14 +42,19 @@ async def get_row_handler(
     container=Depends(get_container),  # noqa: B008
 ) -> GetRowSchema:
     row_service: BaseRowService = container.resolve(BaseRowService)
-    row, row_places = await row_service.get_by_id_with_places(id_=id)
-    proceed_places_list = [
-        dict(GetPlaceSchema(id=place.id, number=place.number))
-        for place in row_places
-    ]
+    container.resolve(BasePlaceService)
+
+    reviews = await row_service.get_by_filter(
+        filter_params={"id": id}, join_={"places"}
+    )
+    response = [v for v in reviews]
+
     return GetRowSchema(
-        id=row.id,
-        number=row.number,
-        capacity=row.capacity,
-        places=proceed_places_list,
+        id=response[0][0],
+        number=response[1][1],
+        capacity=response[2][2],
+        places=[
+            GetPlaceSchema(id=item[3], number=item[4]).model_dump()
+            for item in response
+        ],
     )

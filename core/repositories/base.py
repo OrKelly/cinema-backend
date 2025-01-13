@@ -8,6 +8,7 @@ from sqlalchemy import Select, func
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.sql.expression import select
 
+from apps.cinema.models import Place
 from core.database import get_session
 from core.generics import ModelType
 
@@ -201,7 +202,13 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :return: объект query (Select) который используется
         в других методах для доп.фильтрации или запроса
         """
-        query = select(self.model_class)
+        query = select(
+            self.model_class.id,
+            self.model_class.number,
+            self.model_class.capacity,
+            Place.id,
+            Place.number,
+        )
         query = self._maybe_join(query, join_)
         return self._maybe_ordered(query, order_)
 
@@ -224,8 +231,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :return: список инстансов.
         """
         async with get_session() as session:
-            result = await session.execute(query)
-            return result.unique().scalars().all()
+            return await session.execute(query)
 
     async def _first(self, query: Select) -> ModelType | None:
         """
@@ -390,4 +396,5 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :param join_: имя соединения, которое нужно добавить.
         :return: запрос с добавленным соединением.
         """
-        return getattr(self, "_join_" + join_)(query)
+        return query.join(getattr(self.model_class, join_))
+        # return getattr(self, "_join_" + join_)(query)
