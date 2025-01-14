@@ -24,6 +24,8 @@ class BaseUserRepository:
         filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        skip: int = 0,
+        limit: int = 100,
         unique: bool = False,
     ) -> Iterable[User] | list[None]: ...
 
@@ -44,11 +46,15 @@ class ORMUserRepository(BaseUserRepository, BaseORMRepository[User]):
         filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        skip: int = 0,
+        limit: int = 100,
         unique: bool = False,
     ) -> Iterable[User] | list[None]:
         return await super(BaseUserRepository, self).get_by_filter(
             filter_params=filter_params,
             join_=join_,
+            skip=skip,
+            limit=limit,
             order_=order_,
             unique=unique,
         )
