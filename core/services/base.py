@@ -24,6 +24,8 @@ class BaseService(ABC):
         filter_params: dict,
         join_: set[str] | None = None,
         order_: dict | None = None,
+        skip: int = 0,
+        limit: int = 100,
         unique: bool = False,
     ): ...
 
@@ -44,8 +46,10 @@ class BaseOrmService(BaseService):
     async def create(self, attributes: dict[str, Any] = None) -> ModelType:
         return await self.repository.create(attributes)
 
-    async def get_all(self, skip: int = 0, limit: int = 100):
-        return await self.repository.get_all()
+    async def get_all(
+        self, skip: int = 0, limit: int = 100, join_=None, order_=None
+    ):
+        return await self.repository.get_all(skip, limit, join_, order_)
 
     async def delete(self, instance: Any) -> None: ...
 
@@ -70,6 +74,8 @@ class BaseOrmService(BaseService):
         join_: set[str] | None = None,
         order_: dict | None = None,
         unique: bool = False,
+        skip: int = 0,
+        limit: int = 100,
     ) -> Iterable[ModelType] | ModelType:
         """
         Метод возвращает инстансы модели, отфильтрованные
@@ -81,7 +87,7 @@ class BaseOrmService(BaseService):
         :param unique: нужно ли вернуть одно значение (первое) или их список
         :return: список инстансов или инстанс
         """
-        return await self.repository.filter(
+        return await self.repository.get_by_filter(
             filter_params=filter_params, join_=join_, unique=unique
         )
 

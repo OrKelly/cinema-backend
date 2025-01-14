@@ -3,20 +3,20 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
-from apps.users.models.users import User
+from apps.films.models.films import Film
 from core.database import Propagation, Transactional
 from core.repositories.base import BaseORMRepository
 
 
 @dataclass
-class BaseUserRepository:
+class BaseFilmRepository:
     @abstractmethod
     async def create(
         self, attributes: dict[str, Any] = None
-    ) -> User | None: ...
+    ) -> Film | None: ...
 
     @abstractmethod
-    async def get_by_id(self, id_: int) -> User | None: ...
+    async def get_by_id(self, id: int) -> Film | None: ...
 
     @abstractmethod
     async def get_by_filter(
@@ -25,18 +25,18 @@ class BaseUserRepository:
         join_: set[str, Any] = None,
         order_: dict | None = None,
         unique: bool = False,
-    ) -> Iterable[User] | list[None]: ...
+    ) -> Iterable[Film] | list[None]: ...
 
 
 @dataclass
-class ORMUserRepository(BaseUserRepository, BaseORMRepository[User]):
+class ORMFilmRepository(BaseFilmRepository, BaseORMRepository[Film]):
     @Transactional(propagation=Propagation.REQUIRED)
-    async def create(self, attributes: dict[str, Any] = None) -> User | None:
-        return await super(BaseUserRepository, self).create(
+    async def create(self, attributes: dict[str, Any] = None) -> Film | None:
+        return await super(BaseFilmRepository, self).create(
             attributes=attributes
         )
 
-    async def get_by_id(self, id_: int) -> User | None:
+    async def get_by_id(self, id_: int) -> Film | None:
         return await self.get_by(field="id", value=id_)
 
     async def get_by_filter(
@@ -45,8 +45,8 @@ class ORMUserRepository(BaseUserRepository, BaseORMRepository[User]):
         join_: set[str, Any] = None,
         order_: dict | None = None,
         unique: bool = False,
-    ) -> Iterable[User] | list[None]:
-        return await super(BaseUserRepository, self).get_by_filter(
+    ) -> Iterable[Film] | list[None]:
+        return await super(BaseFilmRepository, self).get_by_filter(
             filter_params=filter_params,
             join_=join_,
             order_=order_,

@@ -24,10 +24,10 @@ class BasePlaceRepository:
     @abstractmethod
     async def get_by_filter(
         self,
-        field: str,
-        value: Any,
+        filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        unique: bool = False,
     ) -> Iterable[Place] | list[None]: ...
 
 
@@ -47,11 +47,14 @@ class ORMPlaceRepository(BasePlaceRepository, BaseORMRepository[Place]):
 
     async def get_by_filter(
         self,
-        field: str,
-        value: Any,
+        filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        unique: bool = False,
     ) -> Iterable[Place] | list[None]:
-        return await super(BasePlaceRepository, self).get_by(
-            field=field, value=value, join_=join_
+        return await super(BasePlaceRepository, self).get_by_filter(
+            filter_params=filter_params,
+            join_=join_,
+            order_=order_,
+            unique=unique,
         )
