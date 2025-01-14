@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import BinaryIO
 
 from fastapi import status
 from minio import Minio, S3Error
@@ -18,9 +19,30 @@ class MinioS3Storage(BaseS3Storage):
         if not self._client.bucket_exists(self.bucket_name):
             self._client.make_bucket(self.bucket_name)
 
-    def upload_file(self, file_path: str, object_name: str) -> HTTPResponse:
+    def upload_file_by_file_path(
+        self, file_path: str, object_name: str
+    ) -> HTTPResponse:
         try:
             self._client.fput_object(self.bucket_name, object_name, file_path)
+            return HTTPResponse(
+                status=status.HTTP_201_CREATED, body="Файл успешно загружен"
+            )
+        except S3Error as e:
+            return HTTPResponse(
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                body=f"Ошибка при загрузке файла: {e}",
+            )
+
+    def upload_file_from_stream(
+        self, file_name: str, file: BinaryIO, length: int
+    ) -> HTTPResponse:
+        try:
+            self._client.put_object(
+                bucket_name=self.bucket_name,
+                object_name=file_name,
+                data=file,
+                length=length,
+            )
             return HTTPResponse(
                 status=status.HTTP_201_CREATED, body="Файл успешно загружен"
             )

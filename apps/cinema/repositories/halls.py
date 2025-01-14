@@ -24,10 +24,10 @@ class BaseHallRepository:
     @abstractmethod
     async def get_by_filter(
         self,
-        field: str,
-        value: Any,
+        filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        unique: bool = False,
     ) -> Iterable[Hall] | list[None]: ...
 
 
@@ -47,9 +47,14 @@ class ORMHallRepository(BaseHallRepository, BaseORMRepository[Hall]):
 
     async def get_by_filter(
         self,
-        field: str,
-        value: Any,
-        join_: set[str] = None,
+        filter_params: dict,
+        join_: set[str, Any] = None,
         order_: dict | None = None,
+        unique: bool = False,
     ) -> Iterable[Hall] | list[None]:
-        return await self.get_by(field=field, value=value, join_=join_)
+        return await super(BaseHallRepository, self).get_by_filter(
+            filter_params=filter_params,
+            join_=join_,
+            order_=order_,
+            unique=unique,
+        )
