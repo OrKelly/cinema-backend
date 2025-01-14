@@ -62,7 +62,7 @@ class TestRowAPI:
             "/".join((self.get_list_url(), str(row.id)))
         )
         assert response.status_code == 200
-        response_json = response.json()
+        response_json = response.json()["data"]
         assert row.id == response_json["id"]
         assert row.number == response_json["number"]
         assert row.capacity == response_json["capacity"]

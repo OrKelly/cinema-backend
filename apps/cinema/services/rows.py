@@ -55,6 +55,9 @@ class BaseRowService:
         unique: bool | None = False,
     ): ...
 
+    @abstractmethod
+    async def get_with_places_by_id(self, id_: int) -> Row: ...
+
 
 @dataclass
 class ORMRowService(BaseRowService, BaseOrmService):
@@ -83,12 +86,13 @@ class ORMRowService(BaseRowService, BaseOrmService):
             raise RowNotFoundException()
         return row
 
-    async def get_by_id_with_places(
-        self, id_: int, join_: set[str] | None = None
-    ) -> tuple[Row, Iterable[Place]] | None:
-        row = await self.get_by_id(id_=id_, join_=join_)
-        row_places = await self.place_service.get_by_row(row_id=id_)
-        return row, row_places
+    async def get_with_places_by_id(self, id_: int) -> Row:
+        row = await self.get_by_filter(
+            filter_params={"id": id_}, join_={"places"}, unique=True
+        )
+        if not row:
+            raise RowNotFoundException
+        return row[0]
 
     async def get_by_hall(self, hall_id: int) -> Iterable[Row] | list[None]:
         return await self.repository.get_by_hall(hall_id)
@@ -101,7 +105,10 @@ class ORMRowService(BaseRowService, BaseOrmService):
         unique: bool | None = False,
     ):
         return await super(BaseRowService, self).get_by_filter(
-            filter_params=filter_params, join_=join_, order_=order_
+            filter_params=filter_params,
+            join_=join_,
+            order_=order_,
+            unique=unique,
         )
 
 

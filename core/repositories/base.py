@@ -8,7 +8,6 @@ from sqlalchemy import Select, func
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.sql.expression import select
 
-from apps.cinema.models import Place
 from core.database import get_session
 from core.generics import ModelType
 
@@ -45,6 +44,7 @@ class BaseRepository(ABC):
         self,
         filter_params: dict,
         join_: set[str] | None = None,
+        order_: dict | None = None,
         unique: bool = False,
     ): ...
 
@@ -54,7 +54,6 @@ class BaseRepository(ABC):
     ): ...
 
 
-# ToDO: добавить filter_by и update методы
 @dataclass
 class BaseORMRepository(BaseRepository, Generic[ModelType]):
     """Базовый класс для репозиториев данных"""
@@ -202,13 +201,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :return: объект query (Select) который используется
         в других методах для доп.фильтрации или запроса
         """
-        query = select(
-            self.model_class.id,
-            self.model_class.number,
-            self.model_class.capacity,
-            Place.id,
-            Place.number,
-        )
+        query = select(self.model_class)
         query = self._maybe_join(query, join_)
         return self._maybe_ordered(query, order_)
 
@@ -231,7 +224,8 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :return: список инстансов.
         """
         async with get_session() as session:
-            return await session.execute(query)
+            result = await session.execute(query)
+            return result.unique().scalars().all()
 
     async def _first(self, query: Select) -> ModelType | None:
         """
@@ -396,5 +390,4 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :param join_: имя соединения, которое нужно добавить.
         :return: запрос с добавленным соединением.
         """
-        return query.join(getattr(self.model_class, join_))
-        # return getattr(self, "_join_" + join_)(query)
+        return getattr(self, "_join_" + join_)(query)

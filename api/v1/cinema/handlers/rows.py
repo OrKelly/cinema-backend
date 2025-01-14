@@ -4,7 +4,6 @@ from fastapi import Depends, Path
 from fastapi.requests import Request
 from fastapi.routing import APIRouter
 
-from api.v1.cinema.schemas.places import GetPlaceSchema
 from api.v1.cinema.schemas.rows import (
     CreateRowCompleteSchema,
     CreateRowSchema,
@@ -40,21 +39,9 @@ async def get_row_handler(
     request: Request,
     id: Annotated[int, Path(gt=0, description="Enter row id")],
     container=Depends(get_container),  # noqa: B008
-) -> GetRowSchema:
+) -> ApiResponse[GetRowSchema]:
     row_service: BaseRowService = container.resolve(BaseRowService)
     container.resolve(BasePlaceService)
 
-    reviews = await row_service.get_by_filter(
-        filter_params={"id": id}, join_={"places"}
-    )
-    response = [v for v in reviews]
-
-    return GetRowSchema(
-        id=response[0][0],
-        number=response[1][1],
-        capacity=response[2][2],
-        places=[
-            GetPlaceSchema(id=item[3], number=item[4]).model_dump()
-            for item in response
-        ],
-    )
+    row = await row_service.get_with_places_by_id(id)
+    return ApiResponse(data=GetRowSchema.to_schema(row))

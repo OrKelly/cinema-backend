@@ -3,6 +3,9 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
+from sqlalchemy import Select
+from sqlalchemy.orm import joinedload
+
 from apps.cinema.models.rows import Row
 from core.database import Propagation, Transactional
 from core.repositories.base import BaseORMRepository
@@ -59,3 +62,6 @@ class ORMRowRepository(BaseRowRepository, BaseORMRepository[Row]):
         return await super(BaseRowRepository, self).get_by(
             field=field, value=value, join_=join_
         )
+
+    def _join_places(self, query: Select):
+        return query.options(joinedload(Row.places))
