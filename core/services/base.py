@@ -88,7 +88,12 @@ class BaseOrmService(BaseService):
         :return: список инстансов или инстанс
         """
         return await self.repository.get_by_filter(
-            filter_params=filter_params, join_=join_, unique=unique
+            filter_params=filter_params,
+            join_=join_,
+            order_=order_,
+            skip=skip,
+            limit=limit,
+            unique=unique,
         )
 
     async def update(

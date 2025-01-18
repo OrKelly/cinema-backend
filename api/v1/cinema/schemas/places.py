@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 
+from apps.cinema.models import Place
+
 
 class CreatePlaceSchema(BaseModel):
     row_id: int
@@ -13,3 +15,12 @@ class CreatePlaceCompleteSchema(BaseModel):
     status: str = Field(
         default="Новое место успешно зарегистрировано в базе данных"
     )
+
+
+class GetPlaceSchema(BaseModel):
+    id: int
+    number: int
+
+    @classmethod
+    def to_schema(cls, place: Place) -> "GetPlaceSchema":
+        return cls(id=place.id, number=place.number)

@@ -44,6 +44,7 @@ class BaseRepository(ABC):
         self,
         filter_params: dict,
         join_: set[str] | None = None,
+        order_: dict | None = None,
         unique: bool = False,
         skip: int = 0,
         limit: int = 100,
@@ -55,7 +56,6 @@ class BaseRepository(ABC):
     ): ...
 
 
-# ToDO: добавить filter_by и update методы
 @dataclass
 class BaseORMRepository(BaseRepository, Generic[ModelType]):
     """Базовый класс для репозиториев данных"""
@@ -392,6 +392,10 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
     def _add_join_to_query(self, query: Select, join_: str) -> Select:
         """
         Метод возвращает запрос с указанным соединением (JOIN).
+        Нужно обязательно создать метод в классе наследнике,
+        где будет логика этого джоина.
+        Наименование - _join_имя_джоина (желательно той модели,
+        к которой джоинимся)
 
         :param query: запрос, к которому нужно добавить соединение.
         :param join_: имя соединения, которое нужно добавить.
