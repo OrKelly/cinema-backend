@@ -34,7 +34,7 @@ class BaseFilmService:
         self,
         rating: AgeRatingEnum,
         join_: set[str, Any] = None,
-        unique: bool = True,
+        unique: bool = False,
         skip=0,
         limit=100,
     ) -> list[Film]: ...
@@ -44,7 +44,7 @@ class BaseFilmService:
         self,
         status: FilmStatusEnum,
         join_: set[str, Any] = None,
-        unique: bool = True,
+        unique: bool = False,
         skip=0,
         limit=100,
     ) -> list[Film]: ...
@@ -78,15 +78,17 @@ class ORMFilmService(BaseFilmService, BaseOrmService):
 
     async def get_by_rating(
         self,
-        age_rating,
-        join_=None,
-        skip: int = 0,
-        limit: int = 100,
+        rating: AgeRatingEnum,
+        join_: set[str, Any] = None,
+        unique: bool = False,
+        skip=0,
+        limit=100,
     ):
         return await super(BaseFilmService, self).get_by_filter(
-            filter_params={"age_rating": age_rating},
+            filter_params={"age_rating": rating},
             join_=join_,
             skip=skip,
+            unique=unique,
             limit=limit,
         )
 
@@ -94,6 +96,7 @@ class ORMFilmService(BaseFilmService, BaseOrmService):
         self,
         status,
         join_=None,
+        unique: bool = False,
         skip=0,
         limit=100,
     ):
@@ -101,5 +104,6 @@ class ORMFilmService(BaseFilmService, BaseOrmService):
             filter_params={"status": status},
             join_=join_,
             skip=skip,
+            unique=unique,
             limit=limit,
         )

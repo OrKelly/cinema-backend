@@ -1,3 +1,4 @@
+import datetime
 import os
 import tempfile
 
@@ -38,3 +39,8 @@ def faker():
 @pytest.fixture(scope="session")
 def container():
     return get_container()
+
+
+@pytest.fixture
+def current_date_time():
+    return datetime.datetime.now(datetime.UTC)

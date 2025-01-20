@@ -10,7 +10,7 @@ from core.schemas.responses.api_response import ApiResponse
 router = APIRouter()
 
 
-@router.post("")
+@router.post("/")
 async def create_film_handler(
     request: Request,
     form_data: FilmAddSchema = Depends(FilmAddSchema.as_form),  # noqa: B008
