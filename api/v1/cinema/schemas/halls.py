@@ -16,11 +16,15 @@ class CreateHallCompleteSchema(BaseModel):
 
 class GetHallSchema(BaseModel):
     id: int
+    title: str
+    description: str
     rows: list[GetRowSchema]
 
     @classmethod
     def to_schema(cls, hall: Hall) -> "GetHallSchema":
         return cls(
             id=hall.id,
+            title=hall.title,
+            description=hall.description,
             rows=[GetRowSchema.to_schema(row) for row in hall.rows],
         )
