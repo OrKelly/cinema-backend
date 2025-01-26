@@ -82,13 +82,23 @@ class BaseOrmService(BaseService):
         по значению одного или нескольких полей
 
         :param filter_params: поля и значения для фильтрации.
-        Передаются в виде словаря поле:значение
+         Передаются в виде словаря поле:значение
         :param join_: список джоинов для связи.
+        :param order_: словарь, указывающий порядок сортировки.
+         Должен содержать ключи "asc" (по возрастанию) или "desc" (по убыванию)
+         со списками имён полей для сортировки.
         :param unique: нужно ли вернуть одно значение (первое) или их список
+        :param skip: кол-во записей для пропуска (для пагинации).
+        :param limit: кол-во возвращаемых записей
         :return: список инстансов или инстанс
         """
         return await self.repository.get_by_filter(
-            filter_params=filter_params, join_=join_, unique=unique
+            filter_params=filter_params,
+            join_=join_,
+            order_=order_,
+            skip=skip,
+            limit=limit,
+            unique=unique,
         )
 
     async def update(

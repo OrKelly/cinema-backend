@@ -27,6 +27,8 @@ class BasePlaceRepository:
         filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        skip: int = 0,
+        limit: int = 100,
         unique: bool = False,
     ) -> Iterable[Place] | list[None]: ...
 
@@ -50,11 +52,15 @@ class ORMPlaceRepository(BasePlaceRepository, BaseORMRepository[Place]):
         filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        skip: int = 0,
+        limit: int = 100,
         unique: bool = False,
     ) -> Iterable[Place] | list[None]:
         return await super(BasePlaceRepository, self).get_by_filter(
             filter_params=filter_params,
             join_=join_,
             order_=order_,
+            skip=skip,
+            limit=limit,
             unique=unique,
         )
