@@ -7,7 +7,6 @@ from apps.cinema.exceptions.rows import (
     RowAlreadyExistsException,
     RowNotFoundException,
 )
-from apps.cinema.models.places import Place
 from apps.cinema.models.rows import Row
 from apps.cinema.repositories.rows import BaseRowRepository
 from apps.cinema.services.places import BasePlaceService
@@ -35,11 +34,6 @@ class BaseRowService:
     async def get_by_id(
         self, id_: int, join_: set[str] | None = None
     ) -> Row | None: ...
-
-    @abstractmethod
-    async def get_by_id_with_places(
-        self, id_: int, join_: set[str] | None = None
-    ) -> tuple[Row, Iterable[Place]] | None: ...
 
     @abstractmethod
     async def get_by_hall(

@@ -3,6 +3,10 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
+from sqlalchemy import Select
+from sqlalchemy.orm import joinedload
+
+from apps.cinema.models import Row
 from apps.cinema.models.halls import Hall
 from core.database import Propagation, Transactional
 from core.repositories.base import BaseORMRepository
@@ -64,3 +68,6 @@ class ORMHallRepository(BaseHallRepository, BaseORMRepository[Hall]):
             limit=limit,
             unique=unique,
         )
+
+    def _join_rows(self, query: Select):
+        return query.options(joinedload(Hall.rows).joinedload(Row.places))

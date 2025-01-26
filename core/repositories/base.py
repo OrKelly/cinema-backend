@@ -91,6 +91,9 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :param skip: кол-во записей для пропуска (для пагинации).
         :param limit: кол-во возвращаемых записей
         :param join_: список моделей, к которым необходимо заджоиниться
+        :param order_: словарь, указывающий порядок сортировки.
+         Должен содержать ключи "asc" (по возрастанию) или "desc" (по убыванию)
+         со списками имён полей для сортировки.
         :return: список инстансов
         """
         query = self._query(join_, order_)
@@ -106,8 +109,8 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         field: str,
         value: Any,
         join_: set[str] | None = None,
-        unique: bool = False,
         order_: dict | None = None,
+        unique: bool = False,
     ) -> Iterable[ModelType] | ModelType:
         """
         Метод возвращает инстансы модели, отфильтрованные
@@ -116,6 +119,9 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         :param field: поле для фильтрации.
         :param value: значение для фильтрации.
         :param join_: список джоинов для связи.
+        :param order_: словарь, указывающий порядок сортировки.
+         Должен содержать ключи "asc" (по возрастанию) или "desc" (по убыванию)
+         со списками имён полей для сортировки.
         :param unique: нужно ли вернуть одно значение (первое) или их список
         :return: список инстансов или инстанс
         """
@@ -154,6 +160,9 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
 
         :param filter_params: поля и значения для фильтрации.
         Передаются в виде словаря поле:значение
+        :param order_: словарь, указывающий порядок сортировки.
+         Должен содержать ключи "asc" (по возрастанию) или "desc" (по убыванию)
+         со списками имён полей для сортировки.
         :param join_: список джоинов для связи.
         :param unique: нужно ли вернуть одно значение (первое) или их список
         :param skip: кол-во записей для пропуска (для пагинации).
@@ -256,7 +265,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
             query = await session.scalars(query)
             return query.one_or_none()
 
-    async def _one(self, query: Select) -> ModelType:
+    async def _one(self, query: Select) -> ModelType | None:
         """
         Метод для получения первого инстанса из запроса.
         Если он не найдет - рейзится NotFound

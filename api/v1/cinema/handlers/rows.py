@@ -9,7 +9,6 @@ from api.v1.cinema.schemas.rows import (
     CreateRowSchema,
     GetRowSchema,
 )
-from apps.cinema.services.places import BasePlaceService
 from apps.cinema.services.rows import BaseRowService
 from apps.cinema.use_cases.row_create import CreateRowUseCase
 from core.containers import get_container
@@ -41,7 +40,5 @@ async def get_row_handler(
     container=Depends(get_container),  # noqa: B008
 ) -> ApiResponse[GetRowSchema]:
     row_service: BaseRowService = container.resolve(BaseRowService)
-    container.resolve(BasePlaceService)
-
     row = await row_service.get_with_places_by_id(id)
     return ApiResponse(data=GetRowSchema.to_schema(row))
