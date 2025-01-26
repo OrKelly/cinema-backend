@@ -22,8 +22,8 @@ class FilmCreate(BaseFakeSchema):
     age_rating: Enum = fake.enum(AgeRatingEnum)
     duration: float = fake.pyfloat
     status: Enum = fake.enum(FilmStatusEnum)
-    date_rent_start: datetime = fake.date
-    date_rent_end: datetime = fake.date
+    date_rent_start: datetime = fake.date_time
+    date_rent_end: datetime = fake.date_time
 
     class Meta:
         model = Film

@@ -13,7 +13,7 @@ from tests.factories.halls import HallFactory
 class TestFilmAPI:
     @staticmethod
     def get_list_url(**kwargs):
-        return "api/v1/films/film"
+        return "api/v1/films/"
 
     def generate_fake_file(self, faker):
         # Generate fake file content

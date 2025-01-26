@@ -39,7 +39,9 @@ class ORMUserRepository(BaseUserRepository, BaseORMRepository[User]):
         )
 
     async def get_by_id(self, id_: int) -> User | None:
-        return await self.get_by(field="id", value=id_)
+        return await super(BaseUserRepository, self).get_by(
+            field="id", value=id_
+        )
 
     async def get_by_filter(
         self,

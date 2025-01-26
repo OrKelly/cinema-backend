@@ -35,10 +35,23 @@ from apps.cinema.services.rows import (
 from apps.cinema.use_cases.hall_create import CreateHallUseCase
 from apps.cinema.use_cases.place_create import CreatePlaceUseCase
 from apps.cinema.use_cases.row_create import CreateRowUseCase
+from apps.films.models import FilmSession
 from apps.films.models.films import Film
+from apps.films.repositories.film_sessions import (
+    BaseFilmSessionRepository,
+    ORMFilmSessionRepository,
+)
 from apps.films.repositories.films import (
     BaseFilmRepository,
-    BaseORMRepository,
+    ORMFilmRepository,
+)
+from apps.films.services.film_sessions import (
+    BaseFilmSessionService,
+    BaseFilmSessionValidatorService,
+    ComposedFilmSessionValidator,
+    FilmSessionIsDateTimeFreeValidatorService,
+    FilmSessionValidatorService,
+    ORMFilmSessionService,
 )
 from apps.films.services.films import BaseFilmService, ORMFilmService
 from apps.films.services.validation import (
@@ -48,6 +61,7 @@ from apps.films.services.validation import (
 from apps.films.use_cases.film_create import (
     CreateFilmUseCase,
 )
+from apps.films.use_cases.film_session_create import CreateFilmSessionUseCase
 from apps.users.models.users import User
 from apps.users.repositories.users import BaseUserRepository, ORMUserRepository
 from apps.users.services.register import (
@@ -87,7 +101,12 @@ def _initialize_repositories(container: punq.Container) -> None:
     container.register(
         BasePlaceRepository, ORMPlaceRepository, model_class=Place
     )
-    container.register(BaseFilmRepository, BaseORMRepository, model_class=Film)
+    container.register(
+        BaseFilmSessionRepository,
+        ORMFilmSessionRepository,
+        model_class=FilmSession,
+    )
+    container.register(BaseFilmRepository, ORMFilmRepository, model_class=Film)
 
 
 def _initialize_services(container: punq.Container) -> None:
@@ -97,6 +116,14 @@ def _initialize_services(container: punq.Container) -> None:
                 container.resolve(UniqueEmailValidatorService),
                 container.resolve(PasswordIncorrectValidatorService),
             ],
+        )
+
+    def build_film_session_validators() -> BaseFilmSessionValidatorService:
+        return ComposedFilmSessionValidator(
+            validators=[
+                container.resolve(FilmSessionValidatorService),
+                container.resolve(FilmSessionIsDateTimeFreeValidatorService),
+            ]
         )
 
     container.register(UniqueEmailValidatorService)
@@ -110,16 +137,19 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(BaseRowValidatorService, RowAlreadyExistsValidator)
     container.register(BaseHallService, ORMHallService)
     container.register(
-        BaseRegisterValidatorService, factory=build_user_validators
-    )
-    container.register(
         BaseHallValidatorService, UniqueTitleHallValidatorService
     )
+    container.register(BaseFilmSessionService, ORMFilmSessionService)
     container.register(BaseHallService, ORMHallService)
     container.register(BaseFilmService, ORMFilmService)
     container.register(BaseFilmValidatorService, FilmRentDatesValidatorService)
     container.register(BasePlaceService, ORMPlaceService)
     container.register(BasePlaceValidatorService, PlaceAlreadyExistsValidator)
+    container.register(FilmSessionIsDateTimeFreeValidatorService)
+    container.register(FilmSessionValidatorService)
+    container.register(
+        BaseFilmSessionValidatorService, factory=build_film_session_validators
+    )
 
 
 def _initialize_use_cases(container: punq.Container) -> None:
@@ -130,6 +160,7 @@ def _initialize_use_cases(container: punq.Container) -> None:
     container.register(CreateHallUseCase)
     container.register(CreateRowUseCase)
     container.register(CreatePlaceUseCase)
+    container.register(CreateFilmSessionUseCase)
 
 
 def _initialize_external_staff(container: punq.Container) -> None:
