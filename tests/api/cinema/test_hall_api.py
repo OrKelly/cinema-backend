@@ -16,7 +16,9 @@ class TestHallApi:
     def get_list_url(**kwargs):
         return "api/v1/cinema/halls"
 
-    async def test_create_hall(self, client: AsyncClient, faker):
+    async def test_create_hall(
+        self, client: AsyncClient, faker, prepare_database
+    ):
         payload = {
             "title": faker.company(),
             "description": faker.text(),
@@ -68,3 +70,27 @@ class TestHallApi:
         assert len(response_json["rows"]) == rows_amount
         assert response_json["rows"][0]["capacity"] == rows_capacity
         assert len(response_json["rows"][0]["places"]) == rows_capacity
+
+    async def test_update_hall(self, client: AsyncClient):
+        hall = await HallFactory().create()
+        payload = await HallFactory().row()
+        initial_hall_title = hall.title
+        initial_hall_description = hall.description
+        response = await client.put(
+            "/".join((self.get_list_url(), str(hall.id))), json=payload
+        )
+        response_json = response.json()["data"]
+        assert response.status_code == 200
+        assert initial_hall_title != response_json["title"]
+        assert initial_hall_description != response_json["description"]
+
+    async def test_update_hall_with_invalid_length_title(
+        self, client: AsyncClient
+    ):
+        hall = await HallFactory().create()
+        payload = await HallFactory().row()
+        payload["title"] = payload.get("title")[0] * 50
+        response = await client.put(
+            "/".join((self.get_list_url(), str(hall.id))), json=payload
+        )
+        assert response.status_code == 422
