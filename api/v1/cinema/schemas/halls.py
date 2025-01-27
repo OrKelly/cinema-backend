@@ -1,12 +1,27 @@
-from pydantic import BaseModel
+from typing import Annotated
+
+from pydantic import AfterValidator, BaseModel
 
 from api.v1.cinema.schemas.rows import GetRowSchema
 from apps.cinema.models.halls import Hall
 
 
+def val_len(value: str) -> str:
+    if len(value) > 45:
+        raise ValueError(f"{value} the allowed length is 45 characters")
+    return value
+
+
 class CreateHallSchema(BaseModel):
-    title: str
+    title: Annotated[str, AfterValidator(val_len)]
     description: str
+
+    @classmethod
+    def to_schema(cls, hall: Hall) -> "CreateHallSchema":
+        return cls(
+            title=hall.title,
+            description=hall.description,
+        )
 
 
 class CreateHallCompleteSchema(BaseModel):

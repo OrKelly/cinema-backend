@@ -37,3 +37,17 @@ async def get_hall_handler(
     hall_service: BaseHallService = container.resolve(BaseHallService)
     hall = await hall_service.get_with_rows_and_places_by_id(id)
     return ApiResponse(data=GetHallSchema.to_schema(hall))
+
+
+@router.put("/{id}")
+async def update_hall_handler(
+    request: Request,
+    id: Annotated[int, Path(gt=0, description="Enter hall id")],
+    new_hall_data: CreateHallSchema,
+    container=Depends(get_container),  # noqa: B008
+) -> ApiResponse[CreateHallSchema]:
+    hall_service: BaseHallService = container.resolve(BaseHallService)
+    hall = await hall_service.update(
+        id_=id, attributes=new_hall_data.model_dump()
+    )
+    return ApiResponse(data=CreateHallSchema.to_schema(hall))
