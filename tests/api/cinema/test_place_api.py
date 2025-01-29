@@ -15,7 +15,7 @@ class TestPlaceAPI:
         return "api/v1/cinema/places"
 
     async def test_place_create_with_exist_row(
-        self, client: AsyncClient, container
+        self, client: AsyncClient, container, prepare_database
     ):
         row = await RowFactory().create()
         payload = {

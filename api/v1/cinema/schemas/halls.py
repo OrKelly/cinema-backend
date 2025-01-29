@@ -8,7 +8,7 @@ from apps.cinema.models.halls import Hall
 
 def val_len(value: str) -> str:
     if len(value) > 45:
-        raise ValueError(f"{value} the allowed length is 45 characters")
+        raise ValueError("Допустимая длина title не более 45 символов")
     return value
 
 
