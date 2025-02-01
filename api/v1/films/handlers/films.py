@@ -1,8 +1,12 @@
-from fastapi import Depends
+from typing import Annotated
+
+from fastapi import Depends, Path
 from fastapi.requests import Request
 from fastapi.routing import APIRouter
 
 from api.v1.films.schemas.films import AddFilmCompleteSchema, FilmAddSchema
+from api.v1.films.schemas.sessions import GetSessionsByFilmID
+from apps.films.services.film_sessions import BaseFilmSessionService
 from apps.films.use_cases.film_create import CreateFilmUseCase
 from core.containers import get_container
 from core.schemas.responses.api_response import ApiResponse
@@ -22,3 +26,21 @@ async def create_film_handler(
     return ApiResponse(
         data=AddFilmCompleteSchema(id=film.id, status="Фильм в базе данных")
     )
+
+
+@router.get("/{id}/sessions")
+async def get_film_sessions(
+    request: Request,
+    id: Annotated[
+        int,
+        Path(gt=0, description="Введите id фильма, для получения его сеансов"),
+    ],
+    container=Depends(get_container),  # noqa: B008
+) -> ApiResponse[GetSessionsByFilmID]:
+    film_session_service: BaseFilmSessionService = container.resolve(
+        BaseFilmSessionService
+    )
+    film_sessions = await film_session_service.get_by_filter(
+        filter_params={"film_id": id}, order_={"asc": ["date_time"]}
+    )
+    return ApiResponse(data=GetSessionsByFilmID.to_schema(film_sessions))
