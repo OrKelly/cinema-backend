@@ -4,7 +4,10 @@ from core.exceptions.base import (
     InstanceAlreadyExistException,
     ServerException,
     UnauthorizedException,
+    NotFoundException,
+    FieldValidationException,
 )
+
 
 
 @dataclass
@@ -29,3 +32,24 @@ class CredentialsDataIsNotCorrect(UnauthorizedException):
     @property
     def message(self):
         return "Пользователь с указанными email и паролем не найден в системе"
+
+
+@dataclass
+class UserNotExistException(NotFoundException):
+    @property
+    def message(self):
+        return "Пользователя с указанным id не существует"
+
+
+@dataclass
+class InvalidFieldException(FieldValidationException):
+    @property
+    def message(self):
+        return "Данные введены некорректно"
+
+
+@dataclass
+class NoDataInFieldException(FieldValidationException):
+    @property
+    def message(self):
+        return "Вы не указали никаких данных"

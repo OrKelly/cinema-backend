@@ -44,4 +44,10 @@ class UnauthorizedException(ServerException):
 @dataclass
 class InstanceAlreadyExistException(ServerException):
     code: status.HTTP_409_CONFLICT = status.HTTP_409_CONFLICT
-    error_code = status.HTTP_409_CONFLICT = status.HTTP_409_CONFLICT
+    error_code: status.HTTP_409_CONFLICT = status.HTTP_409_CONFLICT
+
+
+@dataclass
+class FieldValidationException(ServerException):
+    code: status.HTTP_422_UNPROCESSABLE_ENTITY = status.HTTP_422_UNPROCESSABLE_ENTITY
+    error_code: status.HTTP_422_UNPROCESSABLE_ENTITY = status.HTTP_422_UNPROCESSABLE_ENTITY
