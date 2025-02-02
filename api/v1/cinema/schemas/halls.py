@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from pydantic import AfterValidator, BaseModel
 
@@ -27,6 +27,11 @@ class CreateHallSchema(BaseModel):
 class CreateHallCompleteSchema(BaseModel):
     id: int
     title: str
+
+
+class UpdateHallSchema(BaseModel):
+    title: Optional[Annotated[str, AfterValidator(val_len)]] = None
+    description: Optional[str] = None
 
 
 class GetHallSchema(BaseModel):

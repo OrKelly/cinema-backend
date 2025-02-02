@@ -108,12 +108,10 @@ class ORMHallService(BaseHallService, BaseOrmService):
     async def update(
         self, id_: int, attributes: dict[str, Any]
     ) -> Hall | None:
-        hall = await super(BaseHallService, self).update(
+        await self.get_by_id(id_=id_)
+        return await super(BaseHallService, self).update(
             id_=id_, attributes=attributes
         )
-        if not hall:
-            raise HallNotFoundException
-        return hall
 
 
 @dataclass
