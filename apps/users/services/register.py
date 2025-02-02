@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from apps.users.exceptions.auth import (
     EmailAlreadyTakenException,
     PasswordIncorrectException,
+    UserNotExistException,
 )
 from apps.users.services.users import BaseUserService
 
@@ -13,6 +14,11 @@ from apps.users.services.users import BaseUserService
 class BaseRegisterValidatorService(ABC):
     @abstractmethod
     async def validate(self, user_data: dict[str, any]) -> None: ...
+
+
+class BaseExistingUserValidatorService(ABC):
+    @abstractmethod
+    async def validate(self, _id: int) -> None: ...
 
 
 @dataclass
@@ -41,3 +47,12 @@ class ComposedRegisterValidatorService(BaseRegisterValidatorService):
     async def validate(self, user_data: dict[str, any]) -> None:
         for validator in self.validators:
             await validator.validate(user_data)
+
+
+class ExistingUserValidatorService(BaseExistingUserValidatorService):
+    user_service: BaseUserService
+
+    async def validate(self, _id):
+        user = self.user_service.get_by_id(_id)
+        if not user:
+            raise UserNotExistException
