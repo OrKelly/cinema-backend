@@ -6,9 +6,11 @@ from api.v1.users.schemas import (
     UserLoginSchema,
     UserRegisterCompleteSchema,
     UserRegisterSchema,
+    EmployeeRegisterSchema,
+    EmployeeRegisterCompleteSchema,
 )
 from apps.users.use_cases.auth import BaseAuthUserUseCase
-from apps.users.use_cases.register import BaseRegisterUserUseCase
+from apps.users.use_cases.register import BaseRegisterUserUseCase, RegisterEmployeeUseCase
 from core.containers import get_container
 from core.schemas.extras.auth import Token
 from core.schemas.responses.api_response import ApiResponse
@@ -48,15 +50,17 @@ async def user_login_handler(
     return ApiResponse(data=tokens)
 
 
-@router.post(
-    "/register/employee"
-)
+@router.post("/employee")
 async def employee_register_handler(
     request: Request,
-    user_data: UserRegisterSchema,
+    user_data: EmployeeRegisterSchema,
     container=Depends(get_container),  # noqa: B008
-):
-    use_case: BaseRegisterUserUseCase = container.resolve(
-        BaseRegisterUserUseCase
-    )
+) -> ApiResponse[EmployeeRegisterCompleteSchema]:
     user_data = user_data.model_dump()
+    use_case: RegisterEmployeeUseCase = container.resolve(RegisterEmployeeUseCase)
+    employee = await use_case.execute(user_data=user_data)
+    return ApiResponse(
+        data=EmployeeRegisterCompleteSchema(id=employee.id)
+    )
+    
+
