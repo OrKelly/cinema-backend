@@ -40,7 +40,7 @@ class BaseRepository(ABC):
     async def delete(self, instance: Any) -> None: ...
 
     @abstractmethod
-    async def filter(
+    async def get_by_filter(
         self,
         filter_params: dict,
         join_: set[str] | None = None,
@@ -137,7 +137,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         async with get_session() as session:
             await session.delete(instance)
 
-    async def filter(
+    async def get_by_filter(
         self,
         filter_params: dict,
         join_: set[str] | None = None,
