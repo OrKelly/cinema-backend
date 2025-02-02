@@ -30,6 +30,8 @@ from apps.users.services.register import (
     ComposedRegisterValidatorService,
     PasswordIncorrectValidatorService,
     UniqueEmailValidatorService,
+    BaseExistingUserValidatorService,
+    ExistingUserValidatorService,
 )
 from apps.users.services.users import BaseUserService, ORMUserService
 from apps.users.use_cases.auth import (
@@ -39,6 +41,7 @@ from apps.users.use_cases.auth import (
 from apps.users.use_cases.register import (
     BaseRegisterUserUseCase,
     RegisterUserUseCase,
+    RegisterEmployeeUseCase,
 )
 
 
@@ -71,11 +74,15 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(
         BaseHallValidatorService, UniqueTitleHallValidatorService
     )
+    container.register(
+        BaseExistingUserValidatorService, ExistingUserValidatorService
+    )
     container.register(BaseHallService, ORMHallService)
 
 
 def _initialize_use_cases(container: punq.Container) -> None:
     container.register(RegisterUserUseCase)
+    container.register(RegisterEmployeeUseCase)
     container.register(CreateHallUseCase)
     container.register(CreateRowUseCase)
     container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
