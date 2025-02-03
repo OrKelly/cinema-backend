@@ -11,8 +11,8 @@ from tests.factories.row import RowFactory
 
 class TestRowAPI:
     @staticmethod
-    def get_list_url(**kwargs):
-        return "api/v1/cinema/rows"
+    def get_list_url(*args, **kwargs):
+        return "/".join(("api/v1/cinema/rows", *map(str, args)))
 
     async def test_row_create_with_exist_hall(
         self, client: AsyncClient, container
@@ -58,9 +58,7 @@ class TestRowAPI:
         payload = await RowFactory().row()
         row_service = container.resolve(BaseRowService)
         row = await row_service.create(payload)
-        response = await client.get(
-            "/".join((self.get_list_url(), str(row.id)))
-        )
+        response = await client.get(self.get_list_url(row.id))
         response_json = response.json()["data"]
         assert response.status_code == 200
         assert row.id == response_json["id"]

@@ -16,8 +16,8 @@ hall_service: BaseHallService = get_container().resolve(BaseHallService)
 
 class TestHallApi:
     @staticmethod
-    def get_list_url(**kwargs):
-        return "api/v1/cinema/halls"
+    def get_list_url(*args, **kwargs):
+        return "/".join(("api/v1/cinema/halls", *map(str, args)))
 
     async def test_create_hall(
         self, client: AsyncClient, faker, prepare_database
@@ -61,9 +61,7 @@ class TestHallApi:
         for _i in range(rows_amount):
             await row_service.create(payload)
 
-        response = await client.get(
-            "/".join((self.get_list_url(), str(hall.id)))
-        )
+        response = await client.get(self.get_list_url(hall.id))
 
         response_json = response.json()["data"]
         assert response.status_code == 200
@@ -95,9 +93,7 @@ class TestHallApi:
         hall = await HallFactory().create()
         initial_hall_title = hall.title
         initial_hall_description = hall.description
-        response = await client.patch(
-            "/".join((self.get_list_url(), str(hall.id))), json=payload
-        )
+        response = await client.patch(self.get_list_url(hall.id), json=payload)
         response_json = response.json()["data"]
         assert response.status_code == 200
         if flag == "change_all":
@@ -116,7 +112,5 @@ class TestHallApi:
         hall = await HallFactory().create()
         payload = await HallFactory().row()
         payload["title"] = fake.pystr(min_chars=50, max_chars=50)
-        response = await client.patch(
-            "/".join((self.get_list_url(), str(hall.id))), json=payload
-        )
+        response = await client.patch(self.get_list_url(hall.id), json=payload)
         assert response.status_code == 422

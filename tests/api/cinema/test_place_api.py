@@ -11,8 +11,8 @@ from tests.factories.row import RowFactory
 
 class TestPlaceAPI:
     @staticmethod
-    def get_list_url(**kwargs):
-        return "api/v1/cinema/places"
+    def get_list_url(*args, **kwargs):
+        return "/".join(("api/v1/cinema/places", *map(str, args)))
 
     async def test_place_create_with_exist_row(
         self, client: AsyncClient, container, prepare_database
