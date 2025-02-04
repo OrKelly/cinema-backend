@@ -200,6 +200,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
                 setattr(instance, attr, value)
 
         async with get_session() as session:
+            session.add(instance)
             await session.commit()
 
         return instance
