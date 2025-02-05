@@ -1,5 +1,7 @@
 import random
 
+import pytest
+from faker import Faker
 from httpx import AsyncClient
 
 from apps.cinema.services.halls import BaseHallService
@@ -8,15 +10,18 @@ from core.containers import get_container
 from tests.factories.halls import HallFactory
 from tests.factories.row import RowFactory
 
+fake = Faker(locale="ru_RU")
 hall_service: BaseHallService = get_container().resolve(BaseHallService)
 
 
 class TestHallApi:
     @staticmethod
-    def get_list_url(**kwargs):
-        return "api/v1/cinema/halls"
+    def get_list_url(*args, **kwargs):
+        return "/".join(("api/v1/cinema/halls", *map(str, args)))
 
-    async def test_create_hall(self, client: AsyncClient, faker):
+    async def test_create_hall(
+        self, client: AsyncClient, faker, prepare_database
+    ):
         payload = {
             "title": faker.company(),
             "description": faker.text(),
@@ -56,9 +61,7 @@ class TestHallApi:
         for _i in range(rows_amount):
             await row_service.create(payload)
 
-        response = await client.get(
-            "/".join((self.get_list_url(), str(hall.id)))
-        )
+        response = await client.get(self.get_list_url(hall.id))
 
         response_json = response.json()["data"]
         assert response.status_code == 200
@@ -68,3 +71,46 @@ class TestHallApi:
         assert len(response_json["rows"]) == rows_amount
         assert response_json["rows"][0]["capacity"] == rows_capacity
         assert len(response_json["rows"][0]["places"]) == rows_capacity
+
+    @pytest.mark.parametrize(
+        ("payload", "flag"),
+        [
+            (
+                {
+                    "title": fake.pystr(min_chars=1, max_chars=45),
+                    "description": fake.pystr(),
+                },
+                "change_all",
+            ),
+            ({"description": fake.pystr()}, "change_only_description"),
+            (
+                {"title": fake.pystr(min_chars=1, max_chars=45)},
+                "change_only_title",
+            ),
+        ],
+    )
+    async def test_update_hall(self, payload, flag, client: AsyncClient):
+        hall = await HallFactory().create()
+        initial_hall_title = hall.title
+        initial_hall_description = hall.description
+        response = await client.patch(self.get_list_url(hall.id), json=payload)
+        response_json = response.json()["data"]
+        assert response.status_code == 200
+        if flag == "change_all":
+            assert initial_hall_title != response_json["title"]
+            assert initial_hall_description != response_json["description"]
+        if flag == "change_only_description":
+            assert initial_hall_title == response_json["title"]
+            assert initial_hall_description != response_json["description"]
+        if flag == "change_only_title":
+            assert initial_hall_title != response_json["title"]
+            assert initial_hall_description == response_json["description"]
+
+    async def test_update_hall_with_invalid_length_title(
+        self, client: AsyncClient
+    ):
+        hall = await HallFactory().create()
+        payload = await HallFactory().row()
+        payload["title"] = fake.pystr(min_chars=50, max_chars=50)
+        response = await client.patch(self.get_list_url(hall.id), json=payload)
+        assert response.status_code == 422

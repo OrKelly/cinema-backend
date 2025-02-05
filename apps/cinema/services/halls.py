@@ -49,6 +49,11 @@ class BaseHallService:
     @abstractmethod
     async def get_with_rows_and_places_by_id(self, id: int) -> Hall | None: ...
 
+    @abstractmethod
+    async def update(
+        self, id_: int, attributes: dict[str, Any]
+    ) -> Hall | None: ...
+
 
 @dataclass
 class ORMHallService(BaseHallService, BaseOrmService):
@@ -99,6 +104,14 @@ class ORMHallService(BaseHallService, BaseOrmService):
         if not hall:
             raise HallNotFoundException
         return hall[0]
+
+    async def update(
+        self, id_: int, attributes: dict[str, Any]
+    ) -> Hall | None:
+        await self.get_by_id(id_=id_)
+        return await super(BaseHallService, self).update(
+            id_=id_, attributes=attributes
+        )
 
 
 @dataclass
