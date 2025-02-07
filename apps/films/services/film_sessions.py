@@ -21,6 +21,7 @@ from core.services.base import BaseOrmService
 @dataclass
 class BaseFilmSessionService(ABC):
     repository: BaseFilmSessionRepository
+    film_services: BaseFilmService
 
     @abstractmethod
     async def create(self, attributes: dict[str, Any]): ...
@@ -51,6 +52,11 @@ class BaseFilmSessionService(ABC):
     @abstractmethod
     async def get_sessions_by_hall_id_and_date(
         self, hall_id: int, date_time: datetime, join_: set | None = None
+    ) -> Iterable[FilmSession] | Iterable[None]: ...
+
+    @abstractmethod
+    async def get_sessions_by_film_id(
+        self, film_id: int
     ) -> Iterable[FilmSession] | Iterable[None]: ...
 
 
@@ -101,6 +107,16 @@ class ORMFilmSessionService(BaseFilmSessionService, BaseOrmService):
             hall_id, date_time, join_
         )
 
+    async def get_sessions_by_film_id(
+        self, film_id: int
+    ) -> Iterable[FilmSession] | Iterable[None]:
+        await FilmSessionValidatorService(self.film_services).validate(
+            attributes={"film_id": film_id}
+        )
+        return await self.get_by_filter(
+            filter_params={"film_id": film_id}, order_={"asc": ["date_time"]}
+        )
+
 
 @dataclass
 class BaseFilmSessionValidatorService(ABC):
@@ -121,11 +137,15 @@ class FilmSessionValidatorService(BaseFilmSessionValidatorService):
         if not film:
             raise FilmNotFoundException
         timezone = pytz.UTC
-        date_time = attributes["date_time"]
-        if date_time.tzinfo is None:
-            date_time = timezone.localize(date_time)
-        if film.date_rent_start > date_time or film.date_rent_end < date_time:
-            raise FilmSessionIncorrectDateException
+        date_time = attributes.get("date_time")
+        if date_time:
+            if date_time.tzinfo is None:
+                date_time = timezone.localize(date_time)
+            if (
+                film.date_rent_start > date_time
+                or film.date_rent_end < date_time
+            ):
+                raise FilmSessionIncorrectDateException
 
     async def get_film(self, attributes: dict[str, Any]) -> Film:
         return await self.film_service.get_by_id(attributes["film_id"])

@@ -12,10 +12,11 @@ from tests.factories.halls import HallFactory
 
 class TestFilmAPI:
     @staticmethod
-    def get_list_url(**kwargs):
-        return "api/v1/films/"
+    def get_list_url(*args, **kwargs):
+        return "/".join(("api/v1/films/", *map(str, args)))
 
-    def generate_fake_file(self, faker):
+    @staticmethod
+    def generate_fake_file(faker):
         # Generate fake file content
         file_content = faker.binary(length=1024)  # 1KB of random bytes
         # Create a file-like object

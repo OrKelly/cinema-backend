@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from datetime import datetime
 
 from pydantic import BaseModel, Field
@@ -31,11 +32,11 @@ class FilmSessionSchema(BaseModel):
 
 
 class GetSessionsByFilmID(BaseModel):
-    film_sessions: list[FilmSessionSchema]
+    film_sessions: Iterable[FilmSessionSchema]
 
     @classmethod
     def to_schema(
-        cls, film_session_list: list[FilmSession]
+        cls, film_session_list: Iterable[FilmSession]
     ) -> "GetSessionsByFilmID":
         return cls(
             film_sessions=[

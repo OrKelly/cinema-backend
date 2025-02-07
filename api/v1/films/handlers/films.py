@@ -4,8 +4,8 @@ from fastapi import Depends, Path
 from fastapi.requests import Request
 from fastapi.routing import APIRouter
 
+from api.v1.films.schemas.film_sessions import GetSessionsByFilmID
 from api.v1.films.schemas.films import AddFilmCompleteSchema, FilmAddSchema
-from api.v1.films.schemas.sessions import GetSessionsByFilmID
 from apps.films.services.film_sessions import BaseFilmSessionService
 from apps.films.use_cases.film_create import CreateFilmUseCase
 from core.containers import get_container
@@ -40,7 +40,7 @@ async def get_film_sessions(
     film_session_service: BaseFilmSessionService = container.resolve(
         BaseFilmSessionService
     )
-    film_sessions = await film_session_service.get_by_filter(
-        filter_params={"film_id": id}, order_={"asc": ["date_time"]}
+    film_sessions = await film_session_service.get_sessions_by_film_id(
+        film_id=id
     )
     return ApiResponse(data=GetSessionsByFilmID.to_schema(film_sessions))
