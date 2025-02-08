@@ -2,7 +2,7 @@ from fastapi import Depends
 from fastapi.requests import Request
 from fastapi.routing import APIRouter
 
-from api.v1.films.schemas.film_sessions import (
+from api.v1.films.schemas.sessions import (
     AddFilmSessionCompleteSchema,
     FilmSessionAddSchema,
 )

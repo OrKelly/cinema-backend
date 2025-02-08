@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from .film_sessions import router as session_router
 from .films import router as films_router
+from .sessions import router as session_router
 
 router = APIRouter()
 

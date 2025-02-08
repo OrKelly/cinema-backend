@@ -24,8 +24,6 @@ class BaseFilmRepository:
         filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
-        skip: int = 0,
-        limit: int = 100,
         unique: bool = False,
     ) -> Iterable[Film] | Film | list[None]: ...
 
@@ -46,8 +44,6 @@ class ORMFilmRepository(BaseFilmRepository, BaseORMRepository[Film]):
         filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
-        skip: int = 0,
-        limit: int = 100,
         unique: bool = False,
     ) -> Iterable[Film] | Film | list[None]:
         return await super(BaseFilmRepository, self).get_by_filter(
