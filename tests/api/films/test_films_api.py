@@ -5,15 +5,19 @@ from enum import Enum
 import pytest
 from httpx import AsyncClient
 
+from apps.films.exceptions.films import FilmNotFoundException
+from apps.films.services.film_sessions import BaseFilmSessionService
 from apps.films.services.films import BaseFilmService
 from core.enums.films import AgeRatingEnum, FilmStatusEnum
+from tests.factories.film_sessions import FilmSessionFactory
+from tests.factories.films import FilmFactory
 from tests.factories.halls import HallFactory
 
 
 class TestFilmAPI:
     @staticmethod
     def get_list_url(*args, **kwargs):
-        return "/".join(("api/v1/films/", *map(str, args)))
+        return "api/v1/films/" + "/".join(map(str, args))
 
     @staticmethod
     def generate_fake_file(faker):
@@ -123,3 +127,34 @@ class TestFilmAPI:
         film_service = container.resolve(BaseFilmService)
         films = await film_service.get_all()
         assert not films
+
+    async def test_get_film_sessions_by_id_film(
+        self, client: AsyncClient, container, faker, prepare_database
+    ):
+        film = await FilmFactory().create()
+        film_sessions_services = container.resolve(BaseFilmSessionService)
+        amount_film_sessions = faker.pyint(min_value=1, max_value=6)
+        film_sessions = await FilmSessionFactory().create_batch(
+            amount_film_sessions
+        )
+        for session in film_sessions:
+            await film_sessions_services.update(
+                session.id, {"film_id": film.id}
+            )
+        response = await client.get(self.get_list_url(film.id, "sessions"))
+        response_json = response.json()["data"]
+        assert response.status_code == 200
+        assert amount_film_sessions == len(response_json["film_sessions"])
+        assert response_json["film_sessions"] == sorted(
+            response_json["film_sessions"], key=lambda d: d["date_time"]
+        )
+
+    async def test_get_film_sessions_by_id_not_exist_film(
+        self, client: AsyncClient, faker, prepare_database
+    ):
+        response = await client.get(
+            self.get_list_url(faker.pyint(), "sessions")
+        )
+        response_json = response.json()
+        assert response.status_code == 404
+        assert response_json["message"] == FilmNotFoundException().message

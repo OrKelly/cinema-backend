@@ -19,14 +19,14 @@ class FilmSessionAddSchema(BaseModel):
 
 class FilmSessionSchema(BaseModel):
     id: int
-    datetime: datetime
+    date_time: datetime
     price: float
 
     @classmethod
     def to_schema(cls, film_session: FilmSession) -> "FilmSessionSchema":
         return cls(
             id=film_session.id,
-            datetime=film_session.date_time,
+            date_time=film_session.date_time,
             price=film_session.price,
         )
 
