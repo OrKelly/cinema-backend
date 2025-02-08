@@ -29,6 +29,20 @@ class TestFilmAPI:
         file_bytes.name = "fake_image.jpg"
         return file_bytes
 
+    @staticmethod
+    async def generate_payload(faker, date_rent_start, date_rent_end):
+        hall = await HallFactory().create()
+        return {
+            "cinemahall_id": hall.id,
+            "title": faker.word(),
+            "description": faker.text(),
+            "age_rating": faker.enum(AgeRatingEnum).value,
+            "duration": faker.pyfloat(),
+            "status": faker.enum(FilmStatusEnum).value,
+            "date_rent_start": date_rent_start.isoformat(),
+            "date_rent_end": date_rent_end.isoformat(),
+        }
+
     @pytest.mark.asyncio
     async def test_create_film(
         self,
@@ -39,19 +53,12 @@ class TestFilmAPI:
         minio_cleanup,
         fake_file,
     ):
-        hall = await HallFactory().create()
         date_rent_start = datetime.now(UTC) + timedelta(4)
-        payload = {
-            "cinemahall_id": hall.id,
-            "title": faker.word(),
-            "description": faker.text(),
-            "age_rating": faker.enum(AgeRatingEnum).value,
-            "duration": faker.pyfloat(),
-            "status": faker.enum(FilmStatusEnum).value,
-            "date_rent_start": date_rent_start.isoformat(),
-            "date_rent_end": (date_rent_start + timedelta(1)).isoformat(),
-        }
-
+        payload = await self.generate_payload(
+            faker=faker,
+            date_rent_start=date_rent_start,
+            date_rent_end=date_rent_start + timedelta(1),
+        )
         files = {"poster": ("fake_image.jpg", fake_file, "image/jpeg")}
         response = await client.post(
             self.get_list_url(), data=payload, files=files
@@ -78,18 +85,12 @@ class TestFilmAPI:
         prepare_database,
         fake_file,
     ):
-        hall = await HallFactory().create()
         date_rent_start = datetime.now(UTC) - timedelta(1)
-        payload = {
-            "cinemahall_id": hall.id,
-            "title": faker.word(),
-            "description": faker.text(),
-            "age_rating": faker.enum(AgeRatingEnum).value,
-            "duration": faker.pyfloat(),
-            "status": faker.enum(FilmStatusEnum).value,
-            "date_rent_start": date_rent_start.isoformat(),
-            "date_rent_end": (date_rent_start + timedelta(1)).isoformat(),
-        }
+        payload = await self.generate_payload(
+            faker=faker,
+            date_rent_start=date_rent_start,
+            date_rent_end=date_rent_start + timedelta(1),
+        )
         files = {"poster": ("fake_image.jpg", fake_file, "image/jpeg")}
         response = await client.post(
             self.get_list_url(), data=payload, files=files
@@ -107,18 +108,12 @@ class TestFilmAPI:
         prepare_database,
         fake_file,
     ):
-        hall = await HallFactory().create()
         date_rent_start = datetime.now(UTC) - timedelta(1)
-        payload = {
-            "cinemahall_id": hall.id,
-            "title": faker.word(),
-            "description": faker.text(),
-            "age_rating": faker.enum(AgeRatingEnum).value,
-            "duration": faker.pyfloat(),
-            "status": faker.enum(FilmStatusEnum).value,
-            "date_rent_start": date_rent_start.isoformat(),
-            "date_rent_end": (date_rent_start - timedelta(1)).isoformat(),
-        }
+        payload = await self.generate_payload(
+            faker=faker,
+            date_rent_start=date_rent_start,
+            date_rent_end=date_rent_start - timedelta(1),
+        )
         files = {"poster": ("fake_image.jpg", fake_file, "image/jpeg")}
         response = await client.post(
             self.get_list_url(), data=payload, files=files
