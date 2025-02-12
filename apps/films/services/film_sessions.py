@@ -110,9 +110,7 @@ class ORMFilmSessionService(BaseFilmSessionService, BaseOrmService):
     async def get_sessions_by_film_id(
         self, film_id: int
     ) -> Iterable[FilmSession] | Iterable[None]:
-        await FilmSessionValidatorService(self.film_services).validate(
-            attributes={"film_id": film_id}
-        )
+        await self.film_services.get_by_id(id_=film_id)
         return await self.get_by_filter(
             filter_params={"film_id": film_id}, order_={"asc": ["date_time"]}
         )
