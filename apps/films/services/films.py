@@ -2,6 +2,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
+from apps.films.exceptions.films import FilmNotFoundException
 from apps.films.models.films import Film
 from apps.films.repositories.films import BaseFilmRepository
 from core.enums.films import AgeRatingEnum, FilmStatusEnum
@@ -72,9 +73,12 @@ class ORMFilmService(BaseFilmService, BaseOrmService):
     async def get_by_id(
         self, id_, join_: set[str] | None = None
     ) -> Film | None:
-        return await super(BaseFilmService, self).get_by_id(
+        film = await super(BaseFilmService, self).get_by_id(
             id_=id_, join_=join_
         )
+        if not film:
+            raise FilmNotFoundException()
+        return film
 
     async def get_by_rating(
         self,
