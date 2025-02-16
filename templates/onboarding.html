@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Email</title>
+    <style>
+        body {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 560px;
+            margin: 32px auto;
+            box-shadow: 0px 0px 10px #e7e7e7;
+        }
+
+        /* Email Head */
+        .heading {
+            background-color: #ff6f61;
+            color: #ffffff;
+            font-weight: bold;
+            text-align: center;
+            padding-bottom: 18px;
+        }
+
+        .titleLine {
+            font-size: 32px;
+            padding-top: 5px;
+        }
+
+        /* Email Body */
+        .greet {
+            font-size: 28px;
+            padding: 10px;
+            padding: 24px 24px 0 24px;
+            margin: 12px auto;
+        }
+
+        .textCenter {
+            text-align: center
+        }
+
+        .param1 {
+            font-size: 18px;
+            padding: 0 24px 0 24px;
+        }
+
+        .param2 {
+            font-size: 18px;
+            padding: 0 24px 24px 24px;
+        }
+
+        /* Email Footer */
+        .emailFooter {
+            height: 60px;
+            background: #f6f6f6;
+        }
+
+        .icons {
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        .icon {
+            padding: 12px;
+            width: 40px;
+            height: 40px;
+        }
+
+        .marginTop32 {
+            margin-top: 32px;
+        }
+
+        .detail {
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            color: #3d71b6;
+            padding-bottom: 24px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="email-container">
+        <table width="100%" style="border-collapse: separate; border-spacing: 0;">
+            <thead>
+                <tr>
+                    <td class="heading">
+                        <div class="textCenter marginTop32">
+                            <img src="/static_files/images/logo.png" alt="Brand Logo" height="48">
+                        </div>
+                        <div class="titleLine">Добро пожаловать в нашу команду!</div>
+                    </td>
+                </tr>
+            </thead>
+            <tbody class="greetDetails">
+                <tr>
+                    <td>
+                        <div class="greet">John Doe</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="param1"> Ваши данные:</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="param1"> Логин: johndoe@mail.ru</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="param2"> Пароль: !JD!@14tweDW</div>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot class="emailFooter">
+                <tr>
+                    <td>
+                        <div class="textCenter marginTop32">
+                            <img src="https://htmljstemplates.com/static_files/images/logo.png" alt="Brand Logo"
+                                height="48">
+                        </div>
+                        <div class="icons">
+                            <img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg"
+                                alt="facebook icon">
+                            <img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Rutube_icon.svg"
+                                alt="google icon">
+                            <img class="icon" src="https://htmljstemplates.com/static_files/svgs/linkedin.svg"
+                                alt="linkedin icon">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <a href="#" class="detail">support@cinema-backend.com</a>
+                    </td>
+                </tr>
+
+            </tfoot>
+        </table>
+    </div>
+</body>
+
+</html>
