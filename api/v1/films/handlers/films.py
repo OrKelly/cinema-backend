@@ -6,7 +6,9 @@ from fastapi.routing import APIRouter
 
 from api.v1.films.schemas.film_sessions import GetSessionsByFilmID
 from api.v1.films.schemas.films import AddFilmCompleteSchema, FilmAddSchema
+from api.v1.films.schemas.genres import GetAllGenresSchema
 from apps.films.services.film_sessions import BaseFilmSessionService
+from apps.films.services.genres import BaseGenreService
 from apps.films.use_cases.film_create import CreateFilmUseCase
 from core.containers import get_container
 from core.schemas.responses.api_response import ApiResponse
@@ -44,3 +46,14 @@ async def get_film_sessions(
         film_id=id
     )
     return ApiResponse(data=GetSessionsByFilmID.to_schema(film_sessions))
+
+
+@router.get("/genres")
+async def get_film_genres(
+    request: Request,
+    container=Depends(get_container),  # noqa: B008
+) -> ApiResponse[GetAllGenresSchema]:
+    genre_service: BaseGenreService = container.resolve(BaseGenreService)
+    genres = await genre_service.get_all()
+
+    return ApiResponse(data=GetAllGenresSchema.to_schema(genres))
