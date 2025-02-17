@@ -8,6 +8,7 @@ from apps.films.exceptions.films import FilmNotFoundException
 from apps.films.services.films import BaseFilmService
 from tests.factories.film_sessions import FilmSessionFactory
 from tests.factories.films import FilmFactory
+from tests.factories.genres import GenreFactory
 from tests.factories.halls import HallFactory
 
 
@@ -128,3 +129,13 @@ class TestFilmAPI:
         response_json = response.json()
         assert response.status_code == 404
         assert response_json["message"] == FilmNotFoundException().message
+
+    async def test_get_all_genres(
+        self, client: AsyncClient, faker, prepare_database
+    ):
+        amount_genres = faker.pyint(max_value=20)
+        await GenreFactory().create_batch(amount_genres)
+        response = await client.get(self.get_list_url("genres"))
+        response_json = response.json()["data"]
+        assert response.status_code == 200
+        assert len(response_json["genres"]) == amount_genres

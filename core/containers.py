@@ -37,6 +37,7 @@ from apps.cinema.use_cases.place_create import CreatePlaceUseCase
 from apps.cinema.use_cases.row_create import CreateRowUseCase
 from apps.films.models import FilmSession
 from apps.films.models.films import Film
+from apps.films.models.genres import Genre
 from apps.films.repositories.film_sessions import (
     BaseFilmSessionRepository,
     ORMFilmSessionRepository,
@@ -44,6 +45,10 @@ from apps.films.repositories.film_sessions import (
 from apps.films.repositories.films import (
     BaseFilmRepository,
     ORMFilmRepository,
+)
+from apps.films.repositories.genres import (
+    BaseGenreRepository,
+    ORMGenreRepository,
 )
 from apps.films.services.film_sessions import (
     BaseFilmSessionService,
@@ -54,6 +59,7 @@ from apps.films.services.film_sessions import (
     ORMFilmSessionService,
 )
 from apps.films.services.films import BaseFilmService, ORMFilmService
+from apps.films.services.genres import BaseGenreService, ORMGenreService
 from apps.films.services.validation import (
     BaseFilmValidatorService,
     FilmRentDatesValidatorService,
@@ -107,6 +113,9 @@ def _initialize_repositories(container: punq.Container) -> None:
         model_class=FilmSession,
     )
     container.register(BaseFilmRepository, ORMFilmRepository, model_class=Film)
+    container.register(
+        BaseGenreRepository, ORMGenreRepository, model_class=Genre
+    )
 
 
 def _initialize_services(container: punq.Container) -> None:
@@ -150,6 +159,7 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(
         BaseFilmSessionValidatorService, factory=build_film_session_validators
     )
+    container.register(BaseGenreService, ORMGenreService)
 
 
 def _initialize_use_cases(container: punq.Container) -> None:
