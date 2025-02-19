@@ -3,13 +3,18 @@ from fastapi.requests import Request
 from fastapi.routing import APIRouter
 
 from api.v1.users.schemas import (
+    GenreSelectionCompleteSchema,
+    GenreSelectionSchema,
     UserLoginSchema,
     UserRegisterCompleteSchema,
     UserRegisterSchema,
 )
+from apps.users.services.users import BaseUserService
 from apps.users.use_cases.auth import BaseAuthUserUseCase
 from apps.users.use_cases.register import BaseRegisterUserUseCase
 from core.containers import get_container
+from core.permissions.base import AuthenticatedPermission
+from core.permissions.depends import permissions
 from core.schemas.extras.auth import Token
 from core.schemas.responses.api_response import ApiResponse
 
@@ -46,3 +51,19 @@ async def user_login_handler(
     credentials_data = credentials_data.model_dump()
     tokens = await use_case.execute(credentials_data=credentials_data)
     return ApiResponse(data=tokens)
+
+
+@router.post("/genres")
+async def user_add_favourite_genres(
+    request: Request,
+    selected_genres: GenreSelectionSchema,
+    container=Depends(get_container),  # noqa: B008
+    auth_result=permissions([AuthenticatedPermission]),  # noqa: B008
+) -> ApiResponse[GenreSelectionCompleteSchema]:
+    user_service = container.resolve(BaseUserService)
+    await user_service.add_favourite_genres(
+        request.user.id, selected_genres.genres_id
+    )
+    return ApiResponse(
+        data=GenreSelectionCompleteSchema(genres_id=selected_genres.genres_id)
+    )

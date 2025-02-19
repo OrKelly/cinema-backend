@@ -2,9 +2,13 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
+from sqlalchemy import insert
+
 from apps.users.exceptions.users import UserNotFoundException
+from apps.users.models.association_tables import user_genre_association
 from apps.users.models.users import User
 from apps.users.repositories.users import BaseUserRepository
+from core.database import get_session
 from core.security.password import PasswordHandler
 from core.services.base import BaseOrmService
 
@@ -66,3 +70,13 @@ class ORMUserService(BaseUserService, BaseOrmService):
         return await super(BaseUserService, self).get_by_filter(
             filter_params={"email": email}, join_=join_, unique=unique
         )
+
+    async def add_favourite_genres(self, user_id: int, genre_id: tuple):
+        async with get_session() as session:
+            for item in genre_id:
+                query = insert(user_genre_association).values(
+                    user_id=user_id, genre_id=item
+                )
+                result = await session.execute(query)
+            await session.commit()
+        return result

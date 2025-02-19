@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -17,3 +19,14 @@ class UserRegisterCompleteSchema(BaseModel):
 class UserLoginSchema(BaseModel):
     email: EmailStr
     password: str
+
+
+class GenreSelectionSchema(BaseModel):
+    genres_id: list[Annotated[int, Field(gt=0, default=1)]]
+
+
+class GenreSelectionCompleteSchema(BaseModel):
+    genres_id: list[int]
+    status: str = Field(
+        default="Выбранные жанры успешно добавлены в избранные"
+    )
