@@ -4,7 +4,9 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum
 
-from apps.users.models.association_tables import user_genre_association
+from apps.association_tables.models.user_genre_association import (
+    user_genre_association,
+)
 from core.database import Base
 from core.database.mixins import IntegerIdMixin, TimeStampMixin
 from core.enums.users import RoleKindEnum

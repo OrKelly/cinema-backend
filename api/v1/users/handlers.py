@@ -9,7 +9,9 @@ from api.v1.users.schemas import (
     UserRegisterCompleteSchema,
     UserRegisterSchema,
 )
-from apps.users.services.users import BaseUserService
+from apps.association_tables.repositories.user_genre_associations import (
+    BaseUserGenreAssociationRepository,
+)
 from apps.users.use_cases.auth import BaseAuthUserUseCase
 from apps.users.use_cases.register import BaseRegisterUserUseCase
 from core.containers import get_container
@@ -60,8 +62,10 @@ async def user_add_favourite_genres(
     container=Depends(get_container),  # noqa: B008
     auth_result=permissions([AuthenticatedPermission]),  # noqa: B008
 ) -> ApiResponse[GenreSelectionCompleteSchema]:
-    user_service = container.resolve(BaseUserService)
-    await user_service.add_favourite_genres(
+    user_genre_repository = container.resolve(
+        BaseUserGenreAssociationRepository
+    )
+    await user_genre_repository.insert_association_table(
         request.user.id, selected_genres.genres_id
     )
     return ApiResponse(

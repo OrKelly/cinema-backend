@@ -2,6 +2,11 @@ from functools import lru_cache
 
 import punq
 
+from apps.association_tables.models import user_genre_association
+from apps.association_tables.repositories.user_genre_associations import (
+    BaseUserGenreAssociationRepository,
+    ORMUserGenreAssociationRepository,
+)
 from apps.cinema.models.halls import Hall
 from apps.cinema.models.places import Place
 from apps.cinema.models.rows import Row
@@ -115,6 +120,11 @@ def _initialize_repositories(container: punq.Container) -> None:
     container.register(BaseFilmRepository, ORMFilmRepository, model_class=Film)
     container.register(
         BaseGenreRepository, ORMGenreRepository, model_class=Genre
+    )
+    container.register(
+        BaseUserGenreAssociationRepository,
+        ORMUserGenreAssociationRepository,
+        model_class=user_genre_association,
     )
 
 
