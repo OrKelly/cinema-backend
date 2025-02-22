@@ -65,7 +65,7 @@ async def user_add_favourite_genres(
     user_genre_repository = container.resolve(
         BaseUserGenreAssociationRepository
     )
-    await user_genre_repository.insert_association_table(
+    await user_genre_repository.insert_user_genre_association(
         request.user.id, selected_genres.genres_id
     )
     return ApiResponse(
