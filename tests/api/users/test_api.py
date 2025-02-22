@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 from apps.users.services.users import BaseUserService
+from tests.factories.genres import GenreFactory
 from tests.factories.user import UserFactory
 
 
@@ -13,6 +14,10 @@ class TestUserApi:
     @staticmethod
     def get_login_url(**kwargs):
         return "api/v1/users/login"
+
+    @staticmethod
+    def get_genres_url(**kwargs):
+        return "api/v1/users/genres"
 
     @pytest.mark.asyncio
     async def test_user_register(self, client: AsyncClient, faker, container):
@@ -77,3 +82,20 @@ class TestUserApi:
         payload = {"email": user.email, "password": faker.password()}
         response = await client.post(self.get_login_url(), json=payload)
         assert response.status_code == 401
+
+    @pytest.mark.parametrize(
+        "selected_genre_ids", [[1, 2, 3], [1, 3, 5, 8], [4, 8, 1]]
+    )
+    async def test_add_user_favourite_genres(
+        self,
+        selected_genre_ids,
+        logged_client,
+    ):
+        await GenreFactory().create_batch(instances_count=10)
+        payload = {"genres_id": selected_genre_ids}
+        response = await logged_client.post(
+            self.get_genres_url(), json=payload
+        )  # E501
+        response_json = response.json()["data"]
+        assert response.status_code == 200
+        assert response_json["genres_id"] == selected_genre_ids
