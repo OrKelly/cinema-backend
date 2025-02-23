@@ -64,8 +64,8 @@ async def user_add_favourite_genres(
 ) -> ApiResponse[GenreSelectionCompleteSchema]:
     user_genre_service = container.resolve(BaseUserGenreAssociationService)
     await user_genre_service.insert_user_genre_association(
-        request.user.id, selected_genres.genres_id
+        request.user.id, selected_genres.genre_ids
     )
     return ApiResponse(
-        data=GenreSelectionCompleteSchema(genres_id=selected_genres.genres_id)
+        data=GenreSelectionCompleteSchema(genre_ids=selected_genres.genre_ids)
     )

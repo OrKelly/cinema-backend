@@ -4,14 +4,14 @@ from dataclasses import dataclass
 from apps.association_tables.repositories.user_genre_associations import (
     BaseUserGenreAssociationRepository,
 )
-from apps.users.repositories.users import BaseUserRepository
+from apps.users.services.users import BaseUserService
 from core.services.base import BaseOrmService
 
 
 @dataclass
 class BaseUserGenreAssociationService:
     repository: BaseUserGenreAssociationRepository
-    user_repository: BaseUserRepository
+    user_service: BaseUserService
 
     @abstractmethod
     async def insert_user_genre_association(
@@ -26,10 +26,7 @@ class ORMUserGenreAssociationService(
     async def insert_user_genre_association(
         self, user_id: int, genre_ids: list[int]
     ):
-        user = await self.user_repository.get_by_filter(
-            filter_params={"id": user_id},
-            join_={"genres"},
-        )
+        user = await self.user_service.get_by_id(id_=user_id, join_={"genres"})
         new_genre_ids = list(
             set(genre_ids) - set(map(lambda item: item.id, user[0].genres))
         )

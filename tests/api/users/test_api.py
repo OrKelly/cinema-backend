@@ -92,10 +92,29 @@ class TestUserApi:
         logged_client,
     ):
         await GenreFactory().create_batch(instances_count=10)
-        payload = {"genres_id": selected_genre_ids}
+        payload = {"genre_ids": selected_genre_ids}
         response = await logged_client.post(
             self.get_genres_url(), json=payload
         )  # E501
         response_json = response.json()["data"]
         assert response.status_code == 200
-        assert response_json["genres_id"] == selected_genre_ids
+        assert response_json["genre_ids"] == selected_genre_ids
+
+    async def test_add_already_exist_user_favourite_genres(
+        self,
+        prepare_database,
+        logged_client,
+        faker,
+    ):
+        await GenreFactory().create_batch(instances_count=10)
+        selected_genre_ids = list(
+            {faker.random_int(min=1, max=10) for _ in range(7)}
+        )
+        payload = {"genre_ids": selected_genre_ids}
+        await logged_client.post(self.get_genres_url(), json=payload)  # E501
+        response = await logged_client.post(
+            self.get_genres_url(), json=payload
+        )  # E501
+        response_json = response.json()["data"]
+        assert response.status_code == 200
+        assert response_json["genre_ids"] == selected_genre_ids
