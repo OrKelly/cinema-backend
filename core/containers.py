@@ -59,7 +59,6 @@ from apps.films.services.film_sessions import (
     ORMFilmSessionService,
 )
 from apps.films.services.films import BaseFilmService, ORMFilmService
-from apps.films.services.genres import BaseGenreService, ORMGenreService
 from apps.films.services.validation import (
     BaseFilmValidatorService,
     FilmRentDatesValidatorService,
@@ -128,6 +127,9 @@ def _initialize_repositories(container: punq.Container) -> None:
         BaseGenreRepository, ORMGenreRepository, model_class=Genre
     )
     container.register(
+        BaseGenreRepository, ORMGenreRepository, model_class=Genre
+    )
+    container.register(
         BaseNotificationRepository,
         ORMNotificationRepository,
         model_class=Notification,
@@ -175,7 +177,6 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(
         BaseFilmSessionValidatorService, factory=build_film_session_validators
     )
-    container.register(BaseGenreService, ORMGenreService)
 
 
 def _initialize_use_cases(container: punq.Container) -> None:
