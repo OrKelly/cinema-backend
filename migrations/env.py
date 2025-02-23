@@ -27,6 +27,7 @@ from core.database import Base
 from apps.users.models.users import User
 from apps.films.models import Film, FilmSession, Genre, film_genre_association
 from apps.cinema.models import Hall, Row, Place
+from apps.notifications.models.notification import Notification
 # For auto generate schemas
 from core.config import config as app_config
 
