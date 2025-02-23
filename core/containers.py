@@ -68,6 +68,17 @@ from apps.films.use_cases.film_create import (
     CreateFilmUseCase,
 )
 from apps.films.use_cases.film_session_create import CreateFilmSessionUseCase
+from apps.notifications.models.notification import Notification
+from apps.notifications.repositories.notification import (
+    BaseNotificationRepository,
+    ORMNotificationRepository,
+)
+from apps.notifications.services.send_services.base import (
+    BaseNotificationService,
+)
+from apps.notifications.services.send_services.email import (
+    EmailNotificationService,
+)
 from apps.users.models.users import User
 from apps.users.repositories.users import BaseUserRepository, ORMUserRepository
 from apps.users.services.register import (
@@ -115,6 +126,11 @@ def _initialize_repositories(container: punq.Container) -> None:
     container.register(BaseFilmRepository, ORMFilmRepository, model_class=Film)
     container.register(
         BaseGenreRepository, ORMGenreRepository, model_class=Genre
+    )
+    container.register(
+        BaseNotificationRepository,
+        ORMNotificationRepository,
+        model_class=Notification,
     )
 
 
@@ -174,7 +190,15 @@ def _initialize_use_cases(container: punq.Container) -> None:
 
 
 def _initialize_external_staff(container: punq.Container) -> None:
+    def _initialize_notification_service():
+        return EmailNotificationService(
+            logger=container.resolve(BaseLogger, module_name="notification")
+        )
+
     container.register(BaseLogger, FileLogger)
+    container.register(
+        BaseNotificationService, factory=_initialize_notification_service
+    )
 
 
 def _initialize_container() -> punq.Container:
