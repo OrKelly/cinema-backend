@@ -7,6 +7,10 @@ from apps.association_tables.repositories.user_genre_associations import (
     BaseUserGenreAssociationRepository,
     ORMUserGenreAssociationRepository,
 )
+from apps.association_tables.services.user_genre_associations import (
+    BaseUserGenreAssociationService,
+    ORMUserGenreAssociationService,
+)
 from apps.cinema.models.halls import Hall
 from apps.cinema.models.places import Place
 from apps.cinema.models.rows import Row
@@ -151,6 +155,11 @@ def _initialize_services(container: punq.Container) -> None:
                 container.resolve(FilmSessionIsDateTimeFreeValidatorService),
             ]
         )
+
+    # apps/association_tables
+    container.register(
+        BaseUserGenreAssociationService, ORMUserGenreAssociationService
+    )
 
     # apps/cinema
     container.register(BaseHallService, ORMHallService)
