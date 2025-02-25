@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import File, Form, UploadFile
 from pydantic import BaseModel, Field
 
+from apps.films.models import Film
 from core.enums.films import AgeRatingEnum, FilmStatusEnum
 
 
@@ -45,4 +46,30 @@ class FilmAddSchema(BaseModel):
             status=status,
             date_rent_start=date_rent_start,
             date_rent_end=date_rent_end,
+        )
+
+
+class FilmInfoSchema(BaseModel):
+    cinemahall_id: int
+    title: str
+    description: str
+    poster: str
+    age_rating: AgeRatingEnum
+    duration: float
+    status: FilmStatusEnum
+    date_rent_start: datetime
+    date_rent_end: datetime
+
+    @classmethod
+    def as_form(cls, film: Film) -> "FilmInfoSchema":
+        return cls(
+            poster=film.poster,
+            title=film.title,
+            cinemahall_id=film.cinemahall_id,
+            description=film.description,
+            age_rating=film.age_rating,
+            duration=film.duration,
+            status=film.status,
+            date_rent_start=film.date_rent_start,
+            date_rent_end=film.date_rent_end,
         )

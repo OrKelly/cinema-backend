@@ -5,9 +5,14 @@ from fastapi.requests import Request
 from fastapi.routing import APIRouter
 
 from api.v1.films.schemas.film_sessions import GetSessionsByFilmID
-from api.v1.films.schemas.films import AddFilmCompleteSchema, FilmAddSchema
+from api.v1.films.schemas.films import (
+    AddFilmCompleteSchema,
+    FilmAddSchema,
+    FilmInfoSchema,
+)
 from api.v1.films.schemas.genres import GetAllGenresSchema
 from apps.films.services.film_sessions import BaseFilmSessionService
+from apps.films.services.films import BaseFilmService
 from apps.films.services.genres import BaseGenreService
 from apps.films.use_cases.film_create import CreateFilmUseCase
 from core.containers import get_container
@@ -57,3 +62,22 @@ async def get_film_genres(
     genres = await genre_service.get_all()
 
     return ApiResponse(data=GetAllGenresSchema.to_schema(genres))
+
+
+@router.get("/{id}")
+async def get_film_by_id(
+    request: Request,
+    id: Annotated[
+        int,
+        Path(
+            gt=0,
+            description="Введите id фильма, для получения информации "
+            "о фильме",
+        ),
+    ],
+    container=Depends(get_container),  # noqa: B008
+) -> ApiResponse[FilmInfoSchema]:
+    film_id_service: BaseFilmService = container.resolve(BaseFilmService)
+    film = await film_id_service.get_by_id(id_=id)
+
+    return ApiResponse(data=FilmInfoSchema.as_form(film))
