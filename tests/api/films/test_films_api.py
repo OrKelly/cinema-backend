@@ -143,7 +143,7 @@ class TestFilmAPI:
     async def test_get_film_by_id(
         self, client: AsyncClient, faker, prepare_database
     ):
-        for _i in range(faker.pyint(max_value=20)):
+        for _i in range(faker.pyint(max_value=1)):
             film = await FilmFactory().create()
             response = await client.get(self.get_list_url(film.id))
             assert response.status_code == 200

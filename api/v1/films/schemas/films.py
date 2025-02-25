@@ -61,7 +61,7 @@ class FilmInfoSchema(BaseModel):
     date_rent_end: datetime
 
     @classmethod
-    def as_form(cls, film: Film) -> "FilmInfoSchema":
+    def to_schema(cls, film: Film) -> "FilmInfoSchema":
         return cls(
             poster=film.poster,
             title=film.title,

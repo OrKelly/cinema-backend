@@ -80,4 +80,4 @@ async def get_film_by_id(
     film_id_service: BaseFilmService = container.resolve(BaseFilmService)
     film = await film_id_service.get_by_id(id_=id)
 
-    return ApiResponse(data=FilmInfoSchema.as_form(film))
+    return ApiResponse(data=FilmInfoSchema.to_schema(film))
