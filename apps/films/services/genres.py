@@ -50,12 +50,8 @@ class ORMGenreService(BaseGenreService, BaseOrmService):
             order_=order_,
         )
 
-    async def get_by_id(
-        self, id_, join_: set[str] | None = None
-    ) -> Genre | None:
-        genre = await super(BaseGenreService, self).get_by_id(
-            id_=id_, join_=join_
-        )
+    async def get_by_id(self, id_, join_: set[str] | None = None) -> Genre | None:
+        genre = await super(BaseGenreService, self).get_by_id(id_=id_, join_=join_)
         if not genre:
             raise GenreNotFoundException()
         return genre

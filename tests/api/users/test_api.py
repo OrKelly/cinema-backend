@@ -1,7 +1,6 @@
 import pytest
-from httpx import AsyncClient
-
 from apps.users.services.users import BaseUserService
+from httpx import AsyncClient
 from tests.factories.user import UserFactory
 
 
@@ -13,6 +12,10 @@ class TestUserApi:
     @staticmethod
     def get_login_url(**kwargs):
         return "api/v1/users/login"
+
+    @staticmethod
+    def get_all_users_list_url(*args, **kwargs):
+        return "api/v1/users/" + "/".join(map(str, args))
 
     @pytest.mark.asyncio
     async def test_user_register(self, client: AsyncClient, faker, container):
@@ -70,10 +73,16 @@ class TestUserApi:
         response = await client.post(self.get_login_url(), json=payload)
         assert response.status_code == 200
 
-    async def test_user_login_with_wrong_password(
-        self, client: AsyncClient, faker
-    ):
+    async def test_user_login_with_wrong_password(self, client: AsyncClient, faker):
         user = await UserFactory().create()
         payload = {"email": user.email, "password": faker.password()}
         response = await client.post(self.get_login_url(), json=payload)
         assert response.status_code == 401
+
+    async def test_get_all_users(self, client: AsyncClient, faker, prepare_datebase):
+        amount_users = faker.pyint(max_value=20)
+        await UserFactory().create_batch(amount_users)
+        response = await client.get(self.get_all_users_list_url("users"))
+        response_json = response.json()["data"]
+        assert response.status_code == 200
+        assert len(response_json["users"]) == amount_users
