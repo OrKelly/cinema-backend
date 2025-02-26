@@ -118,3 +118,19 @@ class TestUserApi:
         response_json = response.json()["data"]
         assert response.status_code == 200
         assert response_json["genre_ids"] == selected_genre_ids
+
+    async def test_add_user_favourite_genres_without_authentication(
+        self,
+        client: AsyncClient,
+        faker,
+        prepare_database,
+    ):
+        selected_genre_ids = list(
+            {faker.random_int(min=1, max=10) for _ in range(7)}
+        )
+        payload = {"genre_ids": selected_genre_ids}
+        response = await client.post(
+            self.get_genres_url(), json=payload
+        )  # E501
+        assert response.status_code == 403
+        assert response.json()["detail"] == "Доступ запрещен"
