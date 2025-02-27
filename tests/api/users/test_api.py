@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 from apps.users.services.users import BaseUserService
+from tests.factories.genres import GenreFactory
 from tests.factories.user import UserFactory
 
 
@@ -13,6 +14,10 @@ class TestUserApi:
     @staticmethod
     def get_login_url(**kwargs):
         return "api/v1/users/login"
+
+    @staticmethod
+    def get_genres_url(**kwargs):
+        return "api/v1/users/genres"
 
     @staticmethod
     def get_all_users_list_url(*args, **kwargs):
@@ -83,7 +88,7 @@ class TestUserApi:
         assert response.status_code == 401
 
     async def test_get_all_users(
-        self, client: AsyncClient, faker, prepare_datebase
+        self, client: AsyncClient, faker, prepare_database
     ):
         amount_users = faker.pyint(max_value=20)
         await UserFactory().create_batch(amount_users)
@@ -91,3 +96,55 @@ class TestUserApi:
         response_json = response.json()["data"]
         assert response.status_code == 200
         assert len(response_json["users"]) == amount_users
+
+    @pytest.mark.parametrize(
+        "selected_genre_ids", [[1, 2, 3], [1, 3, 5, 8], [4, 8, 1]]
+    )
+    async def test_add_user_favourite_genres(
+        self,
+        selected_genre_ids,
+        logged_client,
+    ):
+        await GenreFactory().create_batch(instances_count=10)
+        payload = {"genre_ids": selected_genre_ids}
+        response = await logged_client.post(
+            self.get_genres_url(), json=payload
+        )  # E501
+        response_json = response.json()["data"]
+        assert response.status_code == 200
+        assert response_json["genre_ids"] == selected_genre_ids
+
+    async def test_add_already_exist_user_favourite_genres(
+        self,
+        prepare_database,
+        logged_client,
+        faker,
+    ):
+        await GenreFactory().create_batch(instances_count=10)
+        selected_genre_ids = list(
+            {faker.random_int(min=1, max=10) for _ in range(7)}
+        )
+        payload = {"genre_ids": selected_genre_ids}
+        await logged_client.post(self.get_genres_url(), json=payload)  # E501
+        response = await logged_client.post(
+            self.get_genres_url(), json=payload
+        )  # E501
+        response_json = response.json()["data"]
+        assert response.status_code == 200
+        assert response_json["genre_ids"] == selected_genre_ids
+
+    async def test_add_user_favourite_genres_without_authentication(
+        self,
+        client: AsyncClient,
+        faker,
+        prepare_database,
+    ):
+        selected_genre_ids = list(
+            {faker.random_int(min=1, max=10) for _ in range(7)}
+        )
+        payload = {"genre_ids": selected_genre_ids}
+        response = await client.post(
+            self.get_genres_url(), json=payload
+        )  # E501
+        assert response.status_code == 403
+        assert response.json()["detail"] == "Доступ запрещен"

@@ -2,6 +2,15 @@ from functools import lru_cache
 
 import punq
 
+from apps.association_tables.models import user_genre_association
+from apps.association_tables.repositories.user_genre_associations import (
+    BaseUserGenreAssociationRepository,
+    ORMUserGenreAssociationRepository,
+)
+from apps.association_tables.services.user_genre_associations import (
+    BaseUserGenreAssociationService,
+    ORMUserGenreAssociationService,
+)
 from apps.cinema.models.halls import Hall
 from apps.cinema.models.places import Place
 from apps.cinema.models.rows import Row
@@ -112,7 +121,14 @@ def _initialize_storage(container: punq.Container) -> None:
 
 
 def _initialize_repositories(container: punq.Container) -> None:
-    container.register(BaseUserRepository, ORMUserRepository, model_class=User)
+    # apps/association_tables
+    container.register(
+        BaseUserGenreAssociationRepository,
+        ORMUserGenreAssociationRepository,
+        model_class=user_genre_association,
+    )
+
+    # apps/cinema
     container.register(BaseHallRepository, ORMHallRepository, model_class=Hall)
     container.register(BaseRowRepository, ORMRowRepository, model_class=Row)
     container.register(
@@ -123,6 +139,8 @@ def _initialize_repositories(container: punq.Container) -> None:
         ORMFilmSessionRepository,
         model_class=FilmSession,
     )
+
+    # apps/films
     container.register(BaseFilmRepository, ORMFilmRepository, model_class=Film)
     container.register(
         BaseGenreRepository, ORMGenreRepository, model_class=Genre
@@ -132,6 +150,9 @@ def _initialize_repositories(container: punq.Container) -> None:
         ORMNotificationRepository,
         model_class=Notification,
     )
+
+    # apps/users
+    container.register(BaseUserRepository, ORMUserRepository, model_class=User)
 
 
 def _initialize_services(container: punq.Container) -> None:
@@ -151,25 +172,25 @@ def _initialize_services(container: punq.Container) -> None:
             ]
         )
 
-    container.register(UniqueEmailValidatorService)
-    container.register(PasswordIncorrectValidatorService)
-    container.register(FilmRentDatesValidatorService)
-    container.register(BaseUserService, ORMUserService)
+    # apps/association_tables
     container.register(
-        BaseRegisterValidatorService, factory=build_user_validators
+        BaseUserGenreAssociationService, ORMUserGenreAssociationService
     )
-    container.register(BaseRowService, ORMRowService)
-    container.register(BaseRowValidatorService, RowAlreadyExistsValidator)
+
+    # apps/cinema
     container.register(BaseHallService, ORMHallService)
     container.register(
         BaseHallValidatorService, UniqueTitleHallValidatorService
     )
-    container.register(BaseFilmSessionService, ORMFilmSessionService)
-    container.register(BaseHallService, ORMHallService)
-    container.register(BaseFilmService, ORMFilmService)
-    container.register(BaseFilmValidatorService, FilmRentDatesValidatorService)
     container.register(BasePlaceService, ORMPlaceService)
     container.register(BasePlaceValidatorService, PlaceAlreadyExistsValidator)
+    container.register(BaseRowService, ORMRowService)
+    container.register(BaseRowValidatorService, RowAlreadyExistsValidator)
+
+    # apps/films
+    container.register(BaseFilmSessionService, ORMFilmSessionService)
+    container.register(BaseFilmService, ORMFilmService)
+    container.register(BaseFilmValidatorService, FilmRentDatesValidatorService)
     container.register(FilmSessionIsDateTimeFreeValidatorService)
     container.register(FilmSessionValidatorService)
     container.register(
@@ -177,16 +198,29 @@ def _initialize_services(container: punq.Container) -> None:
     )
     container.register(BaseGenreService, ORMGenreService)
 
+    # apps/users
+    container.register(BaseUserService, ORMUserService)
+    container.register(
+        BaseRegisterValidatorService, factory=build_user_validators
+    )
+    container.register(UniqueEmailValidatorService)
+    container.register(PasswordIncorrectValidatorService)
+
 
 def _initialize_use_cases(container: punq.Container) -> None:
+    # apps/cinema
+    container.register(CreateHallUseCase)
+    container.register(CreatePlaceUseCase)
+    container.register(CreateRowUseCase)
+
+    # apps/films
+    container.register(CreateFilmUseCase)
+    container.register(CreateFilmSessionUseCase)
+
+    # apps/users
     container.register(RegisterUserUseCase)
     container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
     container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
-    container.register(CreateFilmUseCase)
-    container.register(CreateHallUseCase)
-    container.register(CreateRowUseCase)
-    container.register(CreatePlaceUseCase)
-    container.register(CreateFilmSessionUseCase)
 
 
 def _initialize_external_staff(container: punq.Container) -> None:

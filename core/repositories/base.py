@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Generic
 
-from sqlalchemy import Select, func
+from sqlalchemy import Select, func, insert
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.sql.expression import select
 
@@ -54,6 +54,9 @@ class BaseRepository(ABC):
     async def update(
         self, instance_id: int, attributes: dict[str, Any] = None
     ): ...
+
+    @abstractmethod
+    async def insert_association_table(self, insert_values: list[dict]): ...
 
 
 @dataclass
@@ -204,6 +207,13 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
             await session.commit()
 
         return instance
+
+    async def insert_association_table(self, insert_values: list[dict]):
+        query = insert(self.model_class).values(insert_values)
+        async with get_session() as session:
+            result = await session.execute(query)
+            await session.commit()
+        return result
 
     def _query(
         self,

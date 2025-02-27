@@ -16,7 +16,7 @@ class BaseAuthUserUseCase:
 
     async def execute(
         self, credentials_data: dict[str, Any]
-    ) -> User | None: ...
+    ) -> Token | None: ...
 
 
 @dataclass

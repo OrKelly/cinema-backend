@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from typing import Annotated
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -51,3 +52,14 @@ class GetAllUsersSchema(BaseModel):
         return cls(
             users=[GetUserSchema.to_schema(user) for user in users_list]
         )
+
+
+class GenreSelectionSchema(BaseModel):
+    genre_ids: list[Annotated[int, Field(gt=0, default=1)]]
+
+
+class GenreSelectionCompleteSchema(BaseModel):
+    genre_ids: list[int]
+    status: str = Field(
+        default="Выбранные жанры успешно добавлены в избранные"
+    )
