@@ -1,7 +1,8 @@
 from collections.abc import Iterable
 
-from apps.films.models import Genre
 from pydantic import BaseModel
+
+from apps.films.models import Genre
 
 
 class GetGenreSchema(BaseModel):
@@ -21,4 +22,6 @@ class GetAllGenresSchema(BaseModel):
 
     @classmethod
     def to_schema(cls, genres_list: Iterable[Genre]) -> "GetAllGenresSchema":
-        return cls(genres=[GetGenreSchema.to_schema(genre) for genre in genres_list])
+        return cls(
+            genres=[GetGenreSchema.to_schema(genre) for genre in genres_list]
+        )

@@ -1,7 +1,8 @@
 from collections.abc import Iterable
 
-from apps.users.models.users import User
 from pydantic import BaseModel, EmailStr, Field
+
+from apps.users.models.users import User
 
 
 class UserRegisterSchema(BaseModel):
@@ -47,4 +48,6 @@ class GetAllUsersSchema(BaseModel):
 
     @classmethod
     def to_schema(cls, users_list: Iterable[User]) -> "GetAllUsersSchema":
-        return cls(users=[GetUserSchema.to_schema(user) for user in users_list])
+        return cls(
+            users=[GetUserSchema.to_schema(user) for user in users_list]
+        )

@@ -57,8 +57,12 @@ class ORMUserService(BaseUserService, BaseOrmService):
             order_=order_,
         )
 
-    async def get_by_id(self, id_: int, join_: set[str] | None = None) -> User | None:
-        user = await super(BaseUserService, self).get_by_id(id_=id_, join_=join_)
+    async def get_by_id(
+        self, id_: int, join_: set[str] | None = None
+    ) -> User | None:
+        user = await super(BaseUserService, self).get_by_id(
+            id_=id_, join_=join_
+        )
         if not user:
             raise UserNotFoundException()
         return user

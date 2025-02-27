@@ -1,3 +1,7 @@
+from fastapi import Depends
+from fastapi.requests import Request
+from fastapi.routing import APIRouter
+
 from api.v1.users.schemas import (
     GetAllUsersSchema,
     UserLoginSchema,
@@ -10,9 +14,6 @@ from apps.users.use_cases.register import BaseRegisterUserUseCase
 from core.containers import get_container
 from core.schemas.extras.auth import Token
 from core.schemas.responses.api_response import ApiResponse
-from fastapi import Depends
-from fastapi.requests import Request
-from fastapi.routing import APIRouter
 
 router = APIRouter()
 
@@ -23,7 +24,9 @@ async def user_register_handler(
     user_data: UserRegisterSchema,
     container=Depends(get_container),  # noqa: B008
 ) -> ApiResponse[UserRegisterCompleteSchema]:
-    use_case: BaseRegisterUserUseCase = container.resolve(BaseRegisterUserUseCase)
+    use_case: BaseRegisterUserUseCase = container.resolve(
+        BaseRegisterUserUseCase
+    )
     user_data = user_data.model_dump()
     user = await use_case.execute(user_data=user_data)
     return ApiResponse(
@@ -50,7 +53,7 @@ async def user_login_handler(
 @router.get("")
 async def get_users_handler(
     request: Request,
-    container=Depends(get_container),
+    container=Depends(get_container),  # noqa: B008
 ) -> ApiResponse[GetAllUsersSchema]:
     user_service: BaseUserService = container.resolve(BaseUserService)
     users_list = await user_service.get_all()
