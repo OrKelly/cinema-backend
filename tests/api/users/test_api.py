@@ -88,7 +88,7 @@ class TestUserApi:
         assert response.status_code == 401
 
     async def test_get_all_users(
-        self, client: AsyncClient, faker, prepare_datebase
+        self, client: AsyncClient, faker, prepare_database
     ):
         amount_users = faker.pyint(max_value=20)
         await UserFactory().create_batch(amount_users)
