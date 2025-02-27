@@ -11,10 +11,9 @@ from core.database import Base
 from core.database.mixins import IntegerIdMixin, TimeStampMixin
 from core.enums.users import RoleKindEnum
 
-# условие для обхода цикличного импорта
-# (либо можно убрать взаимосвязь от user к genre)
 if TYPE_CHECKING:
     from apps.films.models import Genre
+    from apps.notifications.models.notification import Notification
 
 
 class User(Base, IntegerIdMixin, TimeStampMixin):
@@ -36,3 +35,11 @@ class User(Base, IntegerIdMixin, TimeStampMixin):
         back_populates="users",
     )
     __mapper_args__ = {"eager_defaults": True}
+
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification", back_populates="user"
+    )
+
+    @property
+    def full_name(self) -> str:
+        return f"{self.last_name} {self.first_name} {self.patronymic}"

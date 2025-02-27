@@ -5,6 +5,7 @@ from fastapi.routing import APIRouter
 from api.v1.users.schemas import (
     GenreSelectionCompleteSchema,
     GenreSelectionSchema,
+    GetAllUsersSchema,
     UserLoginSchema,
     UserRegisterCompleteSchema,
     UserRegisterSchema,
@@ -12,6 +13,7 @@ from api.v1.users.schemas import (
 from apps.association_tables.services.user_genre_associations import (
     BaseUserGenreAssociationService,
 )
+from apps.users.services.users import BaseUserService
 from apps.users.use_cases.auth import BaseAuthUserUseCase
 from apps.users.use_cases.register import BaseRegisterUserUseCase
 from core.containers import get_container
@@ -53,6 +55,16 @@ async def user_login_handler(
     credentials_data = credentials_data.model_dump()
     tokens = await use_case.execute(credentials_data=credentials_data)
     return ApiResponse(data=tokens)
+
+
+@router.get("")
+async def get_users_handler(
+    request: Request,
+    container=Depends(get_container),  # noqa: B008
+) -> ApiResponse[GetAllUsersSchema]:
+    user_service: BaseUserService = container.resolve(BaseUserService)
+    users_list = await user_service.get_all()
+    return ApiResponse(data=GetAllUsersSchema.to_schema(users_list))
 
 
 @router.post("/genres")

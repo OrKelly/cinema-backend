@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -48,7 +49,13 @@ class ORMUserService(BaseUserService, BaseOrmService):
         limit: int = 100,
         join_: set[str, Any] = None,
         order_: dict | None = None,
-    ): ...
+    ) -> Iterable[User]:
+        return await super(BaseUserService, self).get_all(
+            skip=skip,
+            limit=limit,
+            join_=join_,
+            order_=order_,
+        )
 
     async def get_by_id(
         self, id_: int, join_: set[str] | None = None
