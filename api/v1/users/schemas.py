@@ -1,9 +1,9 @@
 from collections.abc import Iterable
-from typing import Annotated
+from typing import Annotated, Self
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
-from apps.users.exceptions.auth import InvalidFieldException
+from apps.users.exceptions.auth import NoDataInFieldException
 from apps.users.models.users import User
 
 
@@ -75,13 +75,15 @@ class NewEmployeeRegisterSchema(BaseModel):
 
 class EmployeeRegisterSchema(BaseModel):
     user_id: int = None
-    employee_data: NewEmployeeRegisterSchema = None
+    employee_data: NewEmployeeRegisterSchema | None = None
 
-    @field_validator("employee_data", mode="before")
-    def employee_data_validator(cls, value, info):
-        if info.data.get("user_id") is not None:
-            raise InvalidFieldException
-        return value
+    @model_validator(mode="after")
+    def employee_data_validator(self) -> Self:
+        if not self.user_id and not self.employee_data:
+            raise NoDataInFieldException
+        if self.user_id:
+            self.employee_data = None
+        return self
 
 
 class EmployeeRegisterCompleteSchema(BaseModel):

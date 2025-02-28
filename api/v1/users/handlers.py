@@ -68,11 +68,10 @@ async def employee_register_handler(
     user_data: EmployeeRegisterSchema,
     container=Depends(get_container),  # noqa: B008
 ) -> ApiResponse[EmployeeRegisterCompleteSchema]:
-    user_data = user_data.model_dump()
     use_case: RegisterEmployeeUseCase = container.resolve(
         RegisterEmployeeUseCase
     )
-    employee = await use_case.execute(user_data=user_data)
+    employee = await use_case.execute(user_data=user_data.model_dump())
     return ApiResponse(data=EmployeeRegisterCompleteSchema(id=employee.id))
 
 

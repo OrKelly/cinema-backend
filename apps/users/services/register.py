@@ -18,7 +18,7 @@ class BaseRegisterValidatorService(ABC):
 
 class BaseExistingUserValidatorService(ABC):
     @abstractmethod
-    async def validate(self, _id: int) -> None: ...
+    async def validate(self, id_: int) -> None: ...
 
 
 @dataclass
@@ -49,10 +49,11 @@ class ComposedRegisterValidatorService(BaseRegisterValidatorService):
             await validator.validate(user_data)
 
 
+@dataclass
 class ExistingUserValidatorService(BaseExistingUserValidatorService):
     user_service: BaseUserService
 
-    async def validate(self, _id):
-        user = self.user_service.get_by_id(_id)
+    async def validate(self, id_):
+        user = await self.user_service.get_by_id(id_=id_)
         if not user:
             raise UserNotExistException
