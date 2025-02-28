@@ -8,15 +8,15 @@ from apps.cinema.exceptions.rows import (
     RowNotFoundException,
 )
 from apps.cinema.models.rows import Row
-from apps.cinema.repositories.halls import BaseHallRepository
 from apps.cinema.repositories.rows import BaseRowRepository
+from apps.cinema.services.places import BasePlaceService
 from core.services.base import BaseOrmService
 
 
 @dataclass
 class BaseRowService:
     repository: BaseRowRepository
-    hall_repository: BaseHallRepository
+    place_service: BasePlaceService
 
     @abstractmethod
     async def create(self, attributes: dict[str, Any]): ...
@@ -49,11 +49,19 @@ class BaseRowService:
         unique: bool | None = False,
     ): ...
 
+    @abstractmethod
+    async def get_with_places_by_id(self, id_: int) -> Row: ...
+
 
 @dataclass
 class ORMRowService(BaseRowService, BaseOrmService):
     async def create(self, attributes: dict[str, Any]):
-        return await super(BaseRowService, self).create(attributes)
+        row = await super(BaseRowService, self).create(attributes)
+        place_attributes = {"row_id": row.id}
+        for i in range(1, row.capacity + 1):
+            place_attributes["number"] = i
+            await self.place_service.create(attributes=place_attributes)
+        return row
 
     async def get_all(
         self,
@@ -72,6 +80,14 @@ class ORMRowService(BaseRowService, BaseOrmService):
             raise RowNotFoundException()
         return row
 
+    async def get_with_places_by_id(self, id_: int) -> Row:
+        row = await self.get_by_filter(
+            filter_params={"id": id_}, join_={"places"}, unique=True
+        )
+        if not row:
+            raise RowNotFoundException
+        return row[0]
+
     async def get_by_hall(self, hall_id: int) -> Iterable[Row] | list[None]:
         return await self.repository.get_by_hall(hall_id)
 
@@ -83,7 +99,10 @@ class ORMRowService(BaseRowService, BaseOrmService):
         unique: bool | None = False,
     ):
         return await super(BaseRowService, self).get_by_filter(
-            filter_params=filter_params, join_=join_, order_=order_
+            filter_params=filter_params,
+            join_=join_,
+            order_=order_,
+            unique=unique,
         )
 
 

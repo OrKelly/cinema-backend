@@ -6,7 +6,9 @@ class TestMinio:
         self, minio_client, fake_file, faker, minio_cleanup
     ):
         file_name = faker.file_name()
-        minio_client.upload_file(file_path=fake_file, object_name=file_name)
+        minio_client.upload_file_by_file_path(
+            file_path=fake_file, object_name=file_name
+        )
         response = minio_client.get_object(object_name=file_name)
         assert response.status == 200
 
@@ -14,7 +16,9 @@ class TestMinio:
         self, minio_client, fake_file, faker, minio_cleanup, tmp_path
     ):
         file_name = faker.file_name()
-        minio_client.upload_file(file_path=fake_file, object_name=file_name)
+        minio_client.upload_file_by_file_path(
+            file_path=fake_file, object_name=file_name
+        )
 
         download_path = tmp_path / file_name
         response = minio_client.download_file(
@@ -31,7 +35,9 @@ class TestMinio:
         self, minio_client, fake_file, faker, minio_cleanup
     ):
         file_name = faker.file_name()
-        minio_client.upload_file(file_path=fake_file, object_name=file_name)
+        minio_client.upload_file_by_file_path(
+            file_path=fake_file, object_name=file_name
+        )
         response = minio_client.delete_file(file_name)
         assert response.status == 200
         assert minio_client.get_object(object_name=file_name).status == 404

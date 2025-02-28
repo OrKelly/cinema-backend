@@ -9,6 +9,7 @@ from core.database.mixins.id import IntegerIdMixin
 # условие для обхода цикличного импорта
 # (либо можно убрать взаимосвязь)
 if TYPE_CHECKING:
+    from halls import Hall
     from places import Place
 
 
@@ -21,5 +22,7 @@ class Row(Base, IntegerIdMixin):
         nullable=False,
     )
     number: Mapped[int] = mapped_column(Integer, nullable=False)
+    capacity: Mapped[int] = mapped_column(Integer, nullable=False)
 
     places: Mapped[list["Place"]] = relationship("Place", back_populates="row")
+    hall: Mapped["Hall"] = relationship("Hall", back_populates="rows")

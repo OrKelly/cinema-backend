@@ -3,6 +3,9 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
+from sqlalchemy import Select
+from sqlalchemy.orm import joinedload
+
 from apps.cinema.models.rows import Row
 from core.database import Propagation, Transactional
 from core.repositories.base import BaseORMRepository
@@ -24,10 +27,12 @@ class BaseRowRepository:
     @abstractmethod
     async def get_by_filter(
         self,
-        field: str,
-        value: Any,
+        filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        skip: int = 0,
+        limit: int = 100,
+        unique: bool = False,
     ) -> Iterable[Row] | list[None]: ...
 
 
@@ -51,11 +56,21 @@ class ORMRowRepository(BaseRowRepository, BaseORMRepository[Row]):
 
     async def get_by_filter(
         self,
-        field: str,
-        value: Any,
+        filter_params: dict,
         join_: set[str, Any] = None,
         order_: dict | None = None,
+        skip: int = 0,
+        limit: int = 100,
+        unique: bool = False,
     ) -> Iterable[Row] | list[None]:
-        return await super(BaseRowRepository, self).get_by(
-            field=field, value=value, join_=join_
+        return await super(BaseRowRepository, self).get_by_filter(
+            filter_params=filter_params,
+            join_=join_,
+            order_=order_,
+            skip=skip,
+            limit=limit,
+            unique=unique,
         )
+
+    def _join_places(self, query: Select):
+        return query.options(joinedload(Row.places))

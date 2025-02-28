@@ -1,6 +1,7 @@
 from typing import Literal
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
 
 
 class Config(BaseSettings):
@@ -37,8 +38,15 @@ class Config(BaseSettings):
         return (f"postgresql+asyncpg://{self.DB_TEST_USER}:{self.DB_TEST_PASS}@{self.DB_TEST_HOST}:"
                 f"{self.DB_TEST_PORT}/{self.DB_TEST_NAME}")
 
-    class Config:
-        env_file = '.env'
+    SMTP_SERVER: str
+    SMTP_PORT: int
+    SMTP_USERNAME: str
+    SMTP_PASSWORD: str
+
+    model_config = SettingsConfigDict(
+        env_file=os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'),
+        env_file_encoding='utf-8',
+    )
 
 
 config = Config()

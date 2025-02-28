@@ -136,7 +136,7 @@ class BaseFactory(Generic[ModelType, InstanceSchemaType]):
         instance_data = await self._get_instance_data()
         if self.kwargs:
             for attr, value in self.kwargs.items():
-                if attr in instance_data:
+                if attr in instance_data or hasattr(self.model_class, attr):
                     instance_data[attr] = value
         return instance_data
 

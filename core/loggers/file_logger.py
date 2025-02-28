@@ -1,0 +1,109 @@
+import os
+from dataclasses import dataclass
+from sys import stdout
+from typing import Any
+
+from loguru import logger
+
+from core.loggers.base import BaseLogger
+
+
+@dataclass
+class FileLogger(BaseLogger):
+    def __post_init__(self):
+        self.log = logger
+        self.log_path = self.__get_or_create_log_path()
+        self.handlers: list = self.__set_handlers()
+        self.configs: dict[str, Any] = self.__set_configs()
+        self.log = self.log.patch(
+            lambda record: record.update(name=self.module_name)
+        )
+        self.setup_lib_configs()
+
+    def __get_or_create_log_path(self):
+        logs_directory = os.path.join(
+            os.path.dirname(__file__), "..", "..", "logs"
+        )
+        if not os.path.exists(logs_directory):
+            os.makedirs(logs_directory)
+        return logs_directory
+
+    def __set_handlers(self):
+        return [
+            {
+                "sink": f"{self.log_path}/{self.module_name}.log",
+                "rotation": "10 mb",
+                "level": "INFO",
+                "compression": "zip",
+                "retention": 10,
+                "enqueue": True,
+            },
+            {
+                "sink": stdout,
+                "format": "{time} | {level} | {module} :: {function} : "
+                "{line} - {message}",
+                "level": "DEBUG",
+            },
+            {
+                "sink": f"{self.log_path}/{self.module_name}_error.log",
+                "rotation": "5 mb",
+                "level": "ERROR",
+                "compression": "zip",
+                "encoding": "utf-8",
+                "serialize": True,
+            },
+        ]
+
+    def __set_configs(self):
+        return {
+            "handlers": self.__set_handlers(),
+            "extra": {"ip": "localhost"},
+        }
+
+    def add_handler(self, handler: list):
+        if self.handlers is None:
+            self.handlers: list = handler
+        self.handlers.append(handler)
+
+    def setup_config_loggers(self, config: dict):
+        """Метод для настройки логера через конфиг"""
+        self.log.remove()
+        self.log.configure(**config)
+        return self
+
+    def setup_lib_configs(self):
+        """Метод для настройки логера через конфиг библиотеки"""
+        self.setup_config_loggers(self.configs)
+
+    def get_full_format(self):
+        return (
+            "{time} - [{level}] - {name} {module} - ({file} - "
+            "{function}: {line}) {extra} - {message}"
+        )
+
+    def trace(self, message: str):
+        self.log.trace(message)
+
+    def debug(self, message: str):
+        self.log.debug(message)
+        return self
+
+    def success(self, message: str):
+        self.log.success(message)
+        return self
+
+    def info(self, message: str):
+        self.log.info(message)
+        return self
+
+    def warning(self, message: str):
+        self.log.warning(message)
+        return self
+
+    def error(self, message: str):
+        self.log.error(message)
+        return self
+
+    def critical(self, message: str):
+        self.log.critical(message)
+        return self

@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -42,8 +43,9 @@ class BaseUserService:
 
     @abstractmethod
     async def get_by_filter(
-        self, filter_params: dict[str, Any],
-    ) -> User | None:
+        self,
+        filter_params: dict[str, Any],
+    ) -> User | None: ...
 
 
 @dataclass
@@ -58,7 +60,13 @@ class ORMUserService(BaseUserService, BaseOrmService):
         limit: int = 100,
         join_: set[str, Any] = None,
         order_: dict | None = None,
-    ): ...
+    ) -> Iterable[User]:
+        return await super(BaseUserService, self).get_all(
+            skip=skip,
+            limit=limit,
+            join_=join_,
+            order_=order_,
+        )
 
     async def get_by_id(
         self, id_: int, join_: set[str] | None = None
@@ -76,6 +84,6 @@ class ORMUserService(BaseUserService, BaseOrmService):
         return await super(BaseUserService, self).get_by_filter(
             filter_params={"email": email}, join_=join_, unique=unique
         )
-    
-    async def update(self, id_, attributes = None):
+
+    async def update(self, id_, attributes=None):
         return await super(BaseUserService, self).update(id_, attributes)

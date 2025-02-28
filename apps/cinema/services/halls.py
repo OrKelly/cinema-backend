@@ -46,6 +46,14 @@ class BaseHallService:
     @abstractmethod
     async def get_by_title(self, title: str) -> Hall | None: ...
 
+    @abstractmethod
+    async def get_with_rows_and_places_by_id(self, id: int) -> Hall | None: ...
+
+    @abstractmethod
+    async def update(
+        self, id_: int, attributes: dict[str, Any]
+    ) -> Hall | None: ...
+
 
 @dataclass
 class ORMHallService(BaseHallService, BaseOrmService):
@@ -68,7 +76,10 @@ class ORMHallService(BaseHallService, BaseOrmService):
         unique: bool | None = False,
     ):
         return await super(BaseHallService, self).get_by_filter(
-            filter_params=filter_params, join_=join_, order_=order_
+            filter_params=filter_params,
+            join_=join_,
+            order_=order_,
+            unique=unique,
         )
 
     async def get_by_id(
@@ -84,6 +95,22 @@ class ORMHallService(BaseHallService, BaseOrmService):
     async def get_by_title(self, title: str) -> Hall | None:
         return await self.get_by_filter(
             filter_params={"title": title}, unique=True
+        )
+
+    async def get_with_rows_and_places_by_id(self, id_: int) -> Hall | None:
+        hall = await self.get_by_filter(
+            filter_params={"id": id_}, join_={"rows"}, unique=True
+        )
+        if not hall:
+            raise HallNotFoundException
+        return hall[0]
+
+    async def update(
+        self, id_: int, attributes: dict[str, Any]
+    ) -> Hall | None:
+        await self.get_by_id(id_=id_)
+        return await super(BaseHallService, self).update(
+            id_=id_, attributes=attributes
         )
 
 

@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import BinaryIO
+
+from urllib3 import HTTPResponse
 
 from core.config import config
 from core.generics import S3ClientType
@@ -46,13 +49,39 @@ class BaseS3Storage(ABC):
         ...
 
     @abstractmethod
-    def upload_file(self, file_path: str, object_name: str) -> None:
+    def upload_file_by_file_path(
+        self, file_path: str, object_name: str
+    ) -> HTTPResponse:
         """
-        Метод для загрузки файла в S3 хранилище
+        Метод для загрузки файла в S3 хранилище по локальному пути
 
         :param file_path: файл для загрузки (путь до него)
         :param object_name: имя файла
-        :return: None
+        :return: HTTPResponse
+        """
+        ...
+
+    @abstractmethod
+    def upload_file_from_stream(
+        self, file_name: str, file: BinaryIO, length: int
+    ) -> HTTPResponse:
+        """
+        Метод для загрузки файла в S3 хранилище из памяти (UploadFile)
+
+        :param file_name: имя файла
+        :param file: сам файл
+        :param length: размер файла
+        :return: HTTPResponse
+        """
+        ...
+
+    @abstractmethod
+    def get_object(self, object_name: str) -> HTTPResponse:
+        """
+        Метод для получения файла из S3 хранилища
+
+        :param object_name: имя файла
+        :return: HTTPResponse с файлом и всей информацией о нём
         """
         ...
 

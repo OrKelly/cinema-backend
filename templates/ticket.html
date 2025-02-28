@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Билет</title>
+    <style>
+        * {
+        margin: 0;
+        padding: 0;
+        }
+
+        html {
+        font-family: 'Roboto', sans-serif; ;
+        font-weight: regular;
+        scroll-behavior: smooth;
+        }
+
+        body {
+        background-color: #fdfdfd;
+        height: 100%;
+        width: 100%;
+        min-height: 100%;
+        }
+
+        .text {
+        font-size: 14px;
+        }
+
+        .container {
+        margin: 0 auto;
+        padding-top: 50px;
+        width: 600px;
+        }
+
+        .ticket {
+        background-color: #f6f6f6;
+        box-shadow: 0px 0px 10px #c4c4c4;
+        width: 600px;
+        }
+
+        .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        height: 90px;
+        padding: 20px 20px 20px 20px;
+        }
+
+        .ticket-header__qr {
+        width: 90px;
+        height: 90px;
+        border-style: outset;
+        background-color: #cad1d2;
+        }
+
+        .film-data__location {
+        width: 300px;
+        }
+
+        .film-data__price {
+        width: 250px;
+        }
+
+        .film-data__name {
+        font-size: 26px;
+        padding-bottom: 15px;
+        font-weight: bold;
+        }
+
+        .film-data__text {
+        font-size: 20px;
+        padding-bottom: 10px;
+        }
+
+        .film-data__number {
+        font-size: 26px;
+        font-weight: bold;
+        }
+
+        .ticket-middle__border {
+        display: flex;
+        margin: 0 auto;
+        padding: 20px 0px 20px 0px;
+        height: 200px;
+        width: 560px;
+        border-top: solid 1px;
+        border-bottom: solid 1px;
+        border-color: #8d8d8d;
+        }
+
+        .ticket-middle__price {
+        width: 150px;
+        }
+
+        .ticket-footer {
+        height: 70px;
+        padding: 20px 20px 20px 20px;
+        }
+
+        .ticket-footer__company {
+        font-size: 26px;
+        font-weight: bold;
+        padding-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <div class="ticket">
+        <div class="ticket-header">
+            <div class="ticket-header__film-data film-data">
+                <div class="film-data__name">Славные парни</div>
+                <p class="text">Номер электронных билетов</p>
+                <div class="film-data__number">507 438 981</div>
+            </div>
+            <br>
+            <div class="ticket-header__qr">
+                QR
+            </div>
+        </div>
+        <div class="ticket-middle">
+            <div class="ticket-middle__border">
+                <div class="film-data__location">
+                    <p class="text">Кинотеатр</p>
+                    <div class="film-data__text">cinema-backend</div>
+                    <p class="text">Дата мероприятия</p>
+                    <div class="film-data__text">9 июня 2025 г. 18:05</div>
+                    <p class="text">Зал</p>
+                    <div class="film-data__text">Зал 2</div>
+                    <p class="text">Места</p>
+                    <div class="film-data__text">ряд 5, место 10 (1 билет)</div>
+                </div>
+                <div class="film-data__price">
+                    <p class="text">Стоимость билетов</p>
+                    <div class="film-data__text">170 р.</div>
+                    <p class="text">Итог</p>
+                    <div class="film-data__text">170 р.</div>
+
+                </div>
+            </div>
+        </div>
+        <div class="ticket-footer">
+            <div class="ticket-footer__company">
+                CINEMA-BACKEND
+            </div>
+            <div class="ticket-footer__address">
+                г.Санкт-Петербург, Балканская пл., 5, литера И, м.Купчино
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+</html>
