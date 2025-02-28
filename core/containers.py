@@ -137,11 +137,6 @@ def _initialize_repositories(container: punq.Container) -> None:
     container.register(
         BasePlaceRepository, ORMPlaceRepository, model_class=Place
     )
-    container.register(
-        BaseFilmSessionRepository,
-        ORMFilmSessionRepository,
-        model_class=FilmSession,
-    )
 
     # apps/films
     container.register(BaseFilmRepository, ORMFilmRepository, model_class=Film)
@@ -149,13 +144,20 @@ def _initialize_repositories(container: punq.Container) -> None:
         BaseGenreRepository, ORMGenreRepository, model_class=Genre
     )
     container.register(
-        BaseNotificationRepository,
-        ORMNotificationRepository,
-        model_class=Notification,
+        BaseFilmSessionRepository,
+        ORMFilmSessionRepository,
+        model_class=FilmSession,
     )
 
     # apps/users
     container.register(BaseUserRepository, ORMUserRepository, model_class=User)
+
+    # apps/notifications
+    container.register(
+        BaseNotificationRepository,
+        ORMNotificationRepository,
+        model_class=Notification,
+    )
 
 
 def _initialize_services(container: punq.Container) -> None:
@@ -211,7 +213,6 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(
         BaseExistingUserValidatorService, ExistingUserValidatorService
     )
-    container.register(BaseHallService, ORMHallService)
 
 
 def _initialize_use_cases(container: punq.Container) -> None:

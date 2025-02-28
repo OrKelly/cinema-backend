@@ -37,14 +37,14 @@ class BaseUserService:
     ) -> User | None: ...
 
     @abstractmethod
-    async def update(
-        self, id_: int, attributes: dict[str, Any] = None
-    ) -> User | None: ...
-
-    @abstractmethod
     async def get_by_filter(
         self,
         filter_params: dict[str, Any],
+    ) -> User | None: ...
+
+    @abstractmethod
+    async def update(
+        self, id_: int, attributes: dict[str, Any] = None
     ) -> User | None: ...
 
 
@@ -84,6 +84,11 @@ class ORMUserService(BaseUserService, BaseOrmService):
         return await super(BaseUserService, self).get_by_filter(
             filter_params={"email": email}, join_=join_, unique=unique
         )
+
+    async def get_by_filter(
+        self, filter_params: dict[str, Any]
+    ) -> User | None:
+        pass
 
     async def update(self, id_, attributes=None):
         return await super(BaseUserService, self).update(id_, attributes)
