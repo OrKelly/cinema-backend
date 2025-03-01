@@ -22,7 +22,7 @@ from apps.users.use_cases.register import (
     RegisterEmployeeUseCase,
 )
 from core.containers import get_container
-from core.permissions.base import AuthenticatedPermission
+from core.permissions.base import AdminPermission, AuthenticatedPermission
 from core.permissions.depends import permissions
 from core.schemas.extras.auth import Token
 from core.schemas.responses.api_response import ApiResponse
@@ -67,6 +67,7 @@ async def employee_register_handler(
     request: Request,
     user_data: EmployeeRegisterSchema,
     container=Depends(get_container),  # noqa: B008
+    permission=permissions([AdminPermission]),  # noqa: B008
 ) -> ApiResponse[EmployeeRegisterCompleteSchema]:
     use_case: RegisterEmployeeUseCase = container.resolve(
         RegisterEmployeeUseCase
@@ -90,7 +91,7 @@ async def user_add_favourite_genres(
     request: Request,
     selected_genres: GenreSelectionSchema,
     container=Depends(get_container),  # noqa: B008
-    auth_result=permissions([AuthenticatedPermission]),  # noqa: B008
+    permission=permissions([AuthenticatedPermission]),  # noqa: B008
 ) -> ApiResponse[GenreSelectionCompleteSchema]:
     user_genre_service = container.resolve(BaseUserGenreAssociationService)
     await user_genre_service.insert_user_genre_association(
