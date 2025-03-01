@@ -59,7 +59,7 @@ class RegisterUserUseCase(BaseRegisterUserUseCase):
 
 
 @dataclass
-class RegisterEmployeeUseCase:
+class RegisterEmployeeUseCase(BaseRegisterUserUseCase):
     user_service: BaseUserService
     existing_user_validator: BaseExistingUserValidatorService
     not_existing_user_validators: BaseRegisterValidatorService
@@ -67,9 +67,11 @@ class RegisterEmployeeUseCase:
     password: str = field(default_factory=PasswordHandler.generate_password)
 
     async def create_employee_from_user(self, id_: int):
-        return await self.user_service.update(
+        user = await self.user_service.update(
             id_=id_, attributes={"role": self.employee_role}
         )
+        await self._send_notification(user)
+        return user
 
     async def create_new_employee(self, user_data: dict[str, Any]):
         # ToDo добавить отправку нотификации и пароля после успешной
@@ -77,7 +79,9 @@ class RegisterEmployeeUseCase:
         attributes = {"role": self.employee_role, "password": self.password}
         user_data.update(attributes)
         await self.not_existing_user_validators.validate(user_data=user_data)
-        return await self.user_service.create(attributes=user_data)
+        user = await self.user_service.create(attributes=user_data)
+        await self._send_notification(user)
+        return user
 
     async def execute(self, user_data: dict):
         if user_id := user_data.get("user_id"):
@@ -86,3 +90,23 @@ class RegisterEmployeeUseCase:
         return await self.create_new_employee(
             user_data=user_data["employee_data"]
         )
+
+    @Transactional(Propagation.REQUIRED_NEW)
+    async def _send_notification(self, user: User) -> None:
+        notification = await self.notification_repository.create(
+            attributes=self.__get_notification_attrs(user)
+        )
+        await self.notification_service.notify(
+            notification, kwargs=self.__get_user_kwargs(user)
+        )
+
+    def __get_user_kwargs(self, user: User) -> dict[str, Any]:
+        return {"full_name": user.full_name}
+
+    def __get_notification_attrs(self, user: User) -> dict[str, Any]:
+        return {
+            "user_id": user.id,
+            "title": "Добро пожаловать в команду!",
+            "email": user.email,
+            "kind": NotificationKindEnum.EMPLOYEE_GREETING,
+        }
