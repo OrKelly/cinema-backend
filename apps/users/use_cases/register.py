@@ -74,8 +74,6 @@ class RegisterEmployeeUseCase(BaseRegisterUserUseCase):
         return user
 
     async def create_new_employee(self, user_data: dict[str, Any]):
-        # ToDo добавить отправку нотификации и пароля после успешной
-        #  регистрации после введения их в систему
         attributes = {"role": self.employee_role, "password": self.password}
         user_data.update(attributes)
         await self.not_existing_user_validators.validate(user_data=user_data)
@@ -101,7 +99,11 @@ class RegisterEmployeeUseCase(BaseRegisterUserUseCase):
         )
 
     def __get_user_kwargs(self, user: User) -> dict[str, Any]:
-        return {"full_name": user.full_name}
+        return {
+            "full_name": user.full_name,
+            "email": user.email,
+            "password": self.password,
+        }
 
     def __get_notification_attrs(self, user: User) -> dict[str, Any]:
         return {
