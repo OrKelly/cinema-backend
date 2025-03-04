@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -35,6 +36,17 @@ class BaseUserService:
         self, email: str, join_: set[str] | None = None, unique: bool = True
     ) -> User | None: ...
 
+    @abstractmethod
+    async def get_by_filter(
+        self,
+        filter_params: dict[str, Any],
+    ) -> Iterable[User] | User | None: ...
+
+    @abstractmethod
+    async def update(
+        self, id_: int, attributes: dict[str, Any] = None
+    ) -> User | None: ...
+
 
 @dataclass
 class ORMUserService(BaseUserService, BaseOrmService):
@@ -48,7 +60,13 @@ class ORMUserService(BaseUserService, BaseOrmService):
         limit: int = 100,
         join_: set[str, Any] = None,
         order_: dict | None = None,
-    ): ...
+    ) -> Iterable[User]:
+        return await super(BaseUserService, self).get_all(
+            skip=skip,
+            limit=limit,
+            join_=join_,
+            order_=order_,
+        )
 
     async def get_by_id(
         self, id_: int, join_: set[str] | None = None
@@ -65,4 +83,16 @@ class ORMUserService(BaseUserService, BaseOrmService):
     ) -> User | None:
         return await super(BaseUserService, self).get_by_filter(
             filter_params={"email": email}, join_=join_, unique=unique
+        )
+
+    async def get_by_filter(
+        self, filter_params: dict[str, Any]
+    ) -> Iterable[User] | User | None:
+        return await super(BaseUserService, self).get_by_filter(
+            filter_params=filter_params
+        )
+
+    async def update(self, id_, attributes=None):
+        return await super(BaseUserService, self).update(
+            id_=id_, attributes=attributes
         )

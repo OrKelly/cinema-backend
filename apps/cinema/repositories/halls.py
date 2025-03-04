@@ -46,10 +46,14 @@ class ORMHallRepository(BaseHallRepository, BaseORMRepository[Hall]):
         )
 
     async def get_by_title(self, title: str) -> Hall | None:
-        return await self.get_by(field="title", value=title)
+        return await super(BaseHallRepository, self).get_by(
+            field="title", value=title
+        )
 
     async def get_by_id(self, id_: int) -> Hall | None:
-        return await self.get_by(field="id", value=id_)
+        return await super(BaseHallRepository, self).get_by(
+            field="id", value=id_
+        )
 
     async def get_by_filter(
         self,

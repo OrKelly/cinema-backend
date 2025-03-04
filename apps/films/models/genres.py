@@ -3,6 +3,9 @@ from typing import TYPE_CHECKING
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from apps.association_tables.models.user_genre_association import (
+    user_genre_association,
+)
 from core.database.base import Base
 from core.database.mixins.id import IntegerIdMixin
 
@@ -10,6 +13,8 @@ from core.database.mixins.id import IntegerIdMixin
 # (либо можно убрать взаимосвязь от жанра к фильму)
 if TYPE_CHECKING:
     from films import Film
+
+    from apps.users.models import User
 
 
 class Genre(Base, IntegerIdMixin):
@@ -19,4 +24,9 @@ class Genre(Base, IntegerIdMixin):
 
     films: Mapped[list["Film"]] = relationship(
         "Film", secondary="film_genre_association", back_populates="genres"
+    )
+    users: Mapped[list["User"]] = relationship(
+        argument="User",
+        secondary=user_genre_association,
+        back_populates="genres",
     )

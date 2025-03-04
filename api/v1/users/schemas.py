@@ -1,4 +1,10 @@
-from pydantic import BaseModel, EmailStr, Field
+from collections.abc import Iterable
+from typing import Annotated, Self
+
+from pydantic import BaseModel, EmailStr, Field, model_validator
+
+from apps.users.exceptions.auth import NoDataInFieldException
+from apps.users.models.users import User
 
 
 class UserRegisterSchema(BaseModel):
@@ -17,3 +23,69 @@ class UserRegisterCompleteSchema(BaseModel):
 class UserLoginSchema(BaseModel):
     email: EmailStr
     password: str
+
+
+class GetUserSchema(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    patronymic: str
+    email: str
+    role: str
+
+    @classmethod
+    def to_schema(cls, user: User) -> "GetUserSchema":
+        return cls(
+            id=user.id,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            patronymic=user.patronymic,
+            email=user.email,
+            role=user.role.value[1],
+        )
+
+
+class GetAllUsersSchema(BaseModel):
+    users: Iterable[GetUserSchema]
+
+    @classmethod
+    def to_schema(cls, users_list: Iterable[User]) -> "GetAllUsersSchema":
+        return cls(
+            users=[GetUserSchema.to_schema(user) for user in users_list]
+        )
+
+
+class GenreSelectionSchema(BaseModel):
+    genre_ids: list[Annotated[int, Field(gt=0, default=1)]]
+
+
+class GenreSelectionCompleteSchema(BaseModel):
+    genre_ids: list[int]
+    status: str = Field(
+        default="Выбранные жанры успешно добавлены в избранные"
+    )
+
+
+class NewEmployeeRegisterSchema(BaseModel):
+    first_name: str
+    last_name: str
+    patronymic: str = None
+    email: EmailStr
+
+
+class EmployeeRegisterSchema(BaseModel):
+    user_id: int = None
+    employee_data: NewEmployeeRegisterSchema | None = None
+
+    @model_validator(mode="after")
+    def employee_data_validator(self) -> Self:
+        if not self.user_id and not self.employee_data:
+            raise NoDataInFieldException
+        if self.user_id:
+            self.employee_data = None
+        return self
+
+
+class EmployeeRegisterCompleteSchema(BaseModel):
+    id: int
+    status: str = Field(default="Сотрудник успешно зарегистрирован")
