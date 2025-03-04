@@ -81,3 +81,18 @@ async def get_film_by_id(
     film = await film_id_service.get_by_id(id_=id)
 
     return ApiResponse(data=FilmInfoSchema.to_schema(film))
+
+
+@router.delete("/{id}")
+async def delete_film_by_id(
+    request: Request,
+    id: Annotated[
+        int,
+        Path(gt=0, description="Введите id фильма, для удаления"),
+    ],
+    container=Depends(get_container),  # noqa: B008
+):
+    film_id_service: BaseFilmService = container.resolve(BaseFilmService)
+    film = await film_id_service.get_by_id(id_=id)
+
+    return await film_id_service.delete(film=film)

@@ -50,6 +50,11 @@ class BaseFilmService:
         limit=100,
     ) -> list[Film]: ...
 
+    @abstractmethod
+    async def delete(
+        self, film: Film, join_: set[str] | None = None
+    ) -> Film | None: ...
+
 
 @dataclass
 class ORMFilmService(BaseFilmService, BaseOrmService):
@@ -111,3 +116,8 @@ class ORMFilmService(BaseFilmService, BaseOrmService):
             unique=unique,
             limit=limit,
         )
+
+    async def delete(
+        self, film: Film, join_: set[str] | None = None
+    ) -> Film | None:
+        return await super(BaseFilmService, self).delete(instance=film)

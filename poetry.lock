@@ -4,9 +4,9 @@
 name = "aiosmtplib"
 version = "4.0.0"
 description = "asyncio SMTP client"
-category = "main"
 optional = false
 python-versions = ">=3.9"
+groups = ["main"]
 files = [
     {file = "aiosmtplib-4.0.0-py3-none-any.whl", hash = "sha256:33c72021cd9e9da495823952751e2dd927014a04a0eca711ee4af9812f2f04af"},
     {file = "aiosmtplib-4.0.0.tar.gz", hash = "sha256:9629a0d8786ab1e5f790ebbbf5cbe7886fedf949a3f52fd7b27a0360f6233422"},
@@ -694,9 +694,9 @@ files = [
 name = "jinja2"
 version = "3.1.5"
 description = "A very fast and expressive template engine."
-category = "main"
 optional = false
 python-versions = ">=3.7"
+groups = ["main"]
 files = [
     {file = "jinja2-3.1.5-py3-none-any.whl", hash = "sha256:aba0f4dc9ed8013c424088f68a5c226f7d6097ed89b246d7749c2ec4175c6adb"},
     {file = "jinja2-3.1.5.tar.gz", hash = "sha256:8fefff8dc3034e27bb80d67c671eb8a9bc424c0ef4c0826edbff304cceff43bb"},
