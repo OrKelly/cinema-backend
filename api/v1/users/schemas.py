@@ -1,9 +1,8 @@
 from collections.abc import Iterable
-from typing import Annotated, Self
+from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic import BaseModel, EmailStr, Field
 
-from apps.users.exceptions.auth import NoDataInFieldException
 from apps.users.models.users import User
 
 
@@ -64,28 +63,3 @@ class GenreSelectionCompleteSchema(BaseModel):
     status: str = Field(
         default="Выбранные жанры успешно добавлены в избранные"
     )
-
-
-class NewEmployeeRegisterSchema(BaseModel):
-    first_name: str
-    last_name: str
-    patronymic: str = None
-    email: EmailStr
-
-
-class EmployeeRegisterSchema(BaseModel):
-    user_id: int = None
-    employee_data: NewEmployeeRegisterSchema | None = None
-
-    @model_validator(mode="after")
-    def employee_data_validator(self) -> Self:
-        if not self.user_id and not self.employee_data:
-            raise NoDataInFieldException
-        if self.user_id:
-            self.employee_data = None
-        return self
-
-
-class EmployeeRegisterCompleteSchema(BaseModel):
-    id: int
-    status: str = Field(default="Сотрудник успешно зарегистрирован")

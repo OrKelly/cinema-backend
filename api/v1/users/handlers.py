@@ -3,8 +3,6 @@ from fastapi.requests import Request
 from fastapi.routing import APIRouter
 
 from api.v1.users.schemas import (
-    EmployeeRegisterCompleteSchema,
-    EmployeeRegisterSchema,
     GenreSelectionCompleteSchema,
     GenreSelectionSchema,
     GetAllUsersSchema,
@@ -17,12 +15,9 @@ from apps.association_tables.services.user_genre_associations import (
 )
 from apps.users.services.users import BaseUserService
 from apps.users.use_cases.auth import BaseAuthUserUseCase
-from apps.users.use_cases.register import (
-    BaseRegisterUserUseCase,
-    RegisterEmployeeUseCase,
-)
+from apps.users.use_cases.register import BaseRegisterUserUseCase
 from core.containers import get_container
-from core.permissions.base import AdminPermission, AuthenticatedPermission
+from core.permissions.base import AuthenticatedPermission
 from core.permissions.depends import permissions
 from core.schemas.extras.auth import Token
 from core.schemas.responses.api_response import ApiResponse
@@ -60,20 +55,6 @@ async def user_login_handler(
     credentials_data = credentials_data.model_dump()
     tokens = await use_case.execute(credentials_data=credentials_data)
     return ApiResponse(data=tokens)
-
-
-@router.post("/employee")
-async def employee_register_handler(
-    request: Request,
-    user_data: EmployeeRegisterSchema,
-    container=Depends(get_container),  # noqa: B008
-    permission=permissions([AdminPermission]),  # noqa: B008
-) -> ApiResponse[EmployeeRegisterCompleteSchema]:
-    use_case: RegisterEmployeeUseCase = container.resolve(
-        RegisterEmployeeUseCase
-    )
-    employee = await use_case.execute(user_data=user_data.model_dump())
-    return ApiResponse(data=EmployeeRegisterCompleteSchema(id=employee.id))
 
 
 @router.get("")
