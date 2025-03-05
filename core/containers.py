@@ -91,8 +91,10 @@ from apps.notifications.services.send_services.email import (
 from apps.users.models.users import User
 from apps.users.repositories.users import BaseUserRepository, ORMUserRepository
 from apps.users.services.register import (
+    BaseExistingUserValidatorService,
     BaseRegisterValidatorService,
     ComposedRegisterValidatorService,
+    ExistingUserValidatorService,
     PasswordIncorrectValidatorService,
     UniqueEmailValidatorService,
 )
@@ -103,6 +105,7 @@ from apps.users.use_cases.auth import (
 )
 from apps.users.use_cases.register import (
     BaseRegisterUserUseCase,
+    RegisterEmployeeUseCase,
     RegisterUserUseCase,
 )
 from core.loggers import FileLogger
@@ -134,11 +137,6 @@ def _initialize_repositories(container: punq.Container) -> None:
     container.register(
         BasePlaceRepository, ORMPlaceRepository, model_class=Place
     )
-    container.register(
-        BaseFilmSessionRepository,
-        ORMFilmSessionRepository,
-        model_class=FilmSession,
-    )
 
     # apps/films
     container.register(BaseFilmRepository, ORMFilmRepository, model_class=Film)
@@ -146,13 +144,20 @@ def _initialize_repositories(container: punq.Container) -> None:
         BaseGenreRepository, ORMGenreRepository, model_class=Genre
     )
     container.register(
-        BaseNotificationRepository,
-        ORMNotificationRepository,
-        model_class=Notification,
+        BaseFilmSessionRepository,
+        ORMFilmSessionRepository,
+        model_class=FilmSession,
     )
 
     # apps/users
     container.register(BaseUserRepository, ORMUserRepository, model_class=User)
+
+    # apps/notifications
+    container.register(
+        BaseNotificationRepository,
+        ORMNotificationRepository,
+        model_class=Notification,
+    )
 
 
 def _initialize_services(container: punq.Container) -> None:
@@ -205,6 +210,9 @@ def _initialize_services(container: punq.Container) -> None:
     )
     container.register(UniqueEmailValidatorService)
     container.register(PasswordIncorrectValidatorService)
+    container.register(
+        BaseExistingUserValidatorService, ExistingUserValidatorService
+    )
 
 
 def _initialize_use_cases(container: punq.Container) -> None:
@@ -219,6 +227,7 @@ def _initialize_use_cases(container: punq.Container) -> None:
 
     # apps/users
     container.register(RegisterUserUseCase)
+    container.register(RegisterEmployeeUseCase)
     container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
     container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
 

@@ -32,6 +32,11 @@ class BaseUserRepository:
         unique: bool = False,
     ) -> Iterable[User] | list[None] | User: ...
 
+    @abstractmethod
+    async def update(
+        self, id_: int, attributes: dict[str, Any] = None
+    ) -> User | None: ...
+
 
 @dataclass
 class ORMUserRepository(BaseUserRepository, BaseORMRepository[User]):
@@ -63,6 +68,9 @@ class ORMUserRepository(BaseUserRepository, BaseORMRepository[User]):
             order_=order_,
             unique=unique,
         )
+
+    async def update(self, id_, attributes=None):
+        return await super(BaseUserRepository, self).update(id_, attributes)
 
     def _join_genres(self, query: Select):
         return query.options(joinedload(User.genres))

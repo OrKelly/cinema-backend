@@ -28,7 +28,7 @@ class EmailNotificationService(BaseNotificationService):
     password = config.SMTP_PASSWORD
     template_folder = Path(__file__).resolve().parents[4] / "templates"
     _template_to_kind = {
-        NotificationKindEnum.EMPLOYEE_GREETING: "onboadring.html",
+        NotificationKindEnum.EMPLOYEE_GREETING: "onboarding.html",
         NotificationKindEnum.CLIENT_GREETING: "welcome.html",
     }
 

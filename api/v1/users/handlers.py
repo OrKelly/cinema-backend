@@ -72,7 +72,7 @@ async def user_add_favourite_genres(
     request: Request,
     selected_genres: GenreSelectionSchema,
     container=Depends(get_container),  # noqa: B008
-    auth_result=permissions([AuthenticatedPermission]),  # noqa: B008
+    permission=permissions([AuthenticatedPermission]),  # noqa: B008
 ) -> ApiResponse[GenreSelectionCompleteSchema]:
     user_genre_service = container.resolve(BaseUserGenreAssociationService)
     await user_genre_service.insert_user_genre_association(

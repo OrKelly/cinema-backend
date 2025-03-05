@@ -24,7 +24,7 @@ class AdminPermission(BasePermission):
     async def check_permission(self, *args, **kwargs) -> bool:
         if self.user:
             return self.user.role == RoleKindEnum.ADMIN
-        return None
+        return False
 
 
 @dataclass

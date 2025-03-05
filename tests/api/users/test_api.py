@@ -2,29 +2,20 @@ import pytest
 from httpx import AsyncClient
 
 from apps.users.services.users import BaseUserService
+from core.containers import get_container
 from tests.factories.genres import GenreFactory
 from tests.factories.user import UserFactory
+
+user_service = get_container().resolve(BaseUserService)
 
 
 class TestUserApi:
     @staticmethod
-    def get_register_url(**kwargs):
-        return "api/v1/users/register"
-
-    @staticmethod
-    def get_login_url(**kwargs):
-        return "api/v1/users/login"
-
-    @staticmethod
-    def get_genres_url(**kwargs):
-        return "api/v1/users/genres"
-
-    @staticmethod
-    def get_all_users_list_url(*args, **kwargs):
-        return "api/v1/users/" + "/".join(map(str, args))
+    def get_list_url(*args, **kwargs):
+        return "/".join(("api/v1/users", *map(str, args)))
 
     @pytest.mark.asyncio
-    async def test_user_register(self, client: AsyncClient, faker, container):
+    async def test_user_register(self, client: AsyncClient, faker):
         payload = {
             "first_name": faker.first_name(),
             "last_name": faker.last_name(),
@@ -32,9 +23,10 @@ class TestUserApi:
             "email": faker.email(),
         }
 
-        response = await client.post(self.get_register_url(), json=payload)
+        response = await client.post(
+            self.get_list_url("register"), json=payload
+        )
         assert response.status_code == 200
-        user_service = container.resolve(BaseUserService)
         user = await user_service.get_by_id(response.json()["data"]["id"])
         assert user.id == response.json()["data"]["id"]
         for attr, value in payload.items():
@@ -42,7 +34,7 @@ class TestUserApi:
                 assert getattr(user, attr) == value
 
     async def test_user_register_with_exist_email(
-        self, client: AsyncClient, faker, container
+        self, client: AsyncClient, faker
     ):
         user = await UserFactory().create()
         payload = {
@@ -51,14 +43,15 @@ class TestUserApi:
             "password": faker.password(length=8, digits=True, upper_case=True),
             "email": user.email,
         }
-        response = await client.post(self.get_register_url(), json=payload)
+        response = await client.post(
+            self.get_list_url("register"), json=payload
+        )  # E501
         assert response.status_code == 409
-        user_service = container.resolve(BaseUserService)
         user = await user_service.get_by_email(payload["email"], unique=False)
         assert len(user) == 1
 
     async def test_user_register_with_bad_password(
-        self, client: AsyncClient, faker, container
+        self, client: AsyncClient, faker
     ):
         payload = {
             "first_name": faker.first_name(),
@@ -66,9 +59,10 @@ class TestUserApi:
             "password": "simplepass",
             "email": faker.email(),
         }
-        response = await client.post(self.get_register_url(), json=payload)
+        response = await client.post(
+            self.get_list_url("register"), json=payload
+        )  # E501
         assert response.status_code == 400
-        user_service = container.resolve(BaseUserService)
         user = await user_service.get_by_email(payload["email"])
         assert not user
 
@@ -76,7 +70,7 @@ class TestUserApi:
         password = faker.password(length=8, digits=True, upper_case=True)
         user = await UserFactory(password=password).create()
         payload = {"email": user.email, "password": password}
-        response = await client.post(self.get_login_url(), json=payload)
+        response = await client.post(self.get_list_url("login"), json=payload)
         assert response.status_code == 200
 
     async def test_user_login_with_wrong_password(
@@ -84,7 +78,7 @@ class TestUserApi:
     ):
         user = await UserFactory().create()
         payload = {"email": user.email, "password": faker.password()}
-        response = await client.post(self.get_login_url(), json=payload)
+        response = await client.post(self.get_list_url("login"), json=payload)
         assert response.status_code == 401
 
     async def test_get_all_users(
@@ -92,7 +86,7 @@ class TestUserApi:
     ):
         amount_users = faker.pyint(max_value=20)
         await UserFactory().create_batch(amount_users)
-        response = await client.get(self.get_all_users_list_url("users"))
+        response = await client.get(self.get_list_url())
         response_json = response.json()["data"]
         assert response.status_code == 200
         assert len(response_json["users"]) == amount_users
@@ -103,12 +97,12 @@ class TestUserApi:
     async def test_add_user_favourite_genres(
         self,
         selected_genre_ids,
-        logged_client,
+        logged_client: AsyncClient,
     ):
         await GenreFactory().create_batch(instances_count=10)
         payload = {"genre_ids": selected_genre_ids}
         response = await logged_client.post(
-            self.get_genres_url(), json=payload
+            self.get_list_url("genres"), json=payload
         )  # E501
         response_json = response.json()["data"]
         assert response.status_code == 200
@@ -117,7 +111,7 @@ class TestUserApi:
     async def test_add_already_exist_user_favourite_genres(
         self,
         prepare_database,
-        logged_client,
+        logged_client: AsyncClient,
         faker,
     ):
         await GenreFactory().create_batch(instances_count=10)
@@ -125,9 +119,11 @@ class TestUserApi:
             {faker.random_int(min=1, max=10) for _ in range(7)}
         )
         payload = {"genre_ids": selected_genre_ids}
-        await logged_client.post(self.get_genres_url(), json=payload)  # E501
+        await logged_client.post(
+            self.get_list_url("genres"), json=payload
+        )  # E501
         response = await logged_client.post(
-            self.get_genres_url(), json=payload
+            self.get_list_url("genres"), json=payload
         )  # E501
         response_json = response.json()["data"]
         assert response.status_code == 200
@@ -135,16 +131,16 @@ class TestUserApi:
 
     async def test_add_user_favourite_genres_without_authentication(
         self,
+        prepare_database,
         client: AsyncClient,
         faker,
-        prepare_database,
     ):
         selected_genre_ids = list(
             {faker.random_int(min=1, max=10) for _ in range(7)}
         )
         payload = {"genre_ids": selected_genre_ids}
         response = await client.post(
-            self.get_genres_url(), json=payload
+            self.get_list_url("genres"), json=payload
         )  # E501
         assert response.status_code == 403
         assert response.json()["detail"] == "Доступ запрещен"
