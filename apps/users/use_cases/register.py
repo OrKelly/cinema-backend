@@ -22,7 +22,7 @@ from core.security.password import PasswordHandler
 @dataclass
 class BaseRegisterUserUseCase:
     user_service: BaseUserService
-    validator: BaseRegisterValidatorService
+    registration_validator: BaseRegisterValidatorService
     notification_service: BaseNotificationService
     notification_repository: BaseNotificationRepository
 
@@ -32,7 +32,7 @@ class BaseRegisterUserUseCase:
 @dataclass
 class RegisterUserUseCase(BaseRegisterUserUseCase):
     async def execute(self, user_data: dict[str, Any]) -> User:
-        await self.validator.validate(user_data)
+        await self.registration_validator.validate(user_data)
         user = await self.user_service.create(attributes=user_data)
         await self._send_notification(user)
         return user
@@ -60,9 +60,7 @@ class RegisterUserUseCase(BaseRegisterUserUseCase):
 
 @dataclass
 class RegisterEmployeeUseCase(BaseRegisterUserUseCase):
-    user_service: BaseUserService
-    existing_user_validator: BaseExistingUserValidatorService
-    not_existing_user_validators: BaseRegisterValidatorService
+    existing_user_id_validator: BaseExistingUserValidatorService
     employee_role = RoleKindEnum.EMPLOYEE
     password: str = field(default_factory=PasswordHandler.generate_password)
 
@@ -76,14 +74,14 @@ class RegisterEmployeeUseCase(BaseRegisterUserUseCase):
     async def create_new_employee(self, user_data: dict[str, Any]):
         attributes = {"role": self.employee_role, "password": self.password}
         user_data.update(attributes)
-        await self.not_existing_user_validators.validate(user_data=user_data)
+        await self.registration_validator.validate(user_data=user_data)
         user = await self.user_service.create(attributes=user_data)
         await self._send_notification(user)
         return user
 
     async def execute(self, user_data: dict):
         if user_id := user_data.get("user_id"):
-            await self.existing_user_validator.validate(id_=user_id)
+            await self.existing_user_id_validator.validate(id_=user_id)
             return await self.create_employee_from_user(id_=user_id)
         return await self.create_new_employee(
             user_data=user_data["employee_data"]
