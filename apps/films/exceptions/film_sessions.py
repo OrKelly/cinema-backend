@@ -29,3 +29,10 @@ class FilmSessionDateConflict(ServerException):
             "Сеанс не может начаться, пока будет идти другой фильм,"
             "либо заканчиваться позже начала другого сеанса"
         )
+
+
+@dataclass
+class FilmSessionAssignedException(ServerException):
+    @property
+    def message(self):
+        return "Невозможно удалить фильм с назначенным сеансом"

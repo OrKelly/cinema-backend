@@ -143,7 +143,7 @@ class TestFilmAPI:
     async def test_get_film_by_id(
         self, client: AsyncClient, faker, prepare_database
     ):
-        for _i in range(faker.pyint(max_value=1)):
+        for _i in range(faker.pyint(max_value=20)):
             film = await FilmFactory().create()
             response = await client.get(self.get_list_url(film.id))
             assert response.status_code == 200
@@ -158,3 +158,50 @@ class TestFilmAPI:
 
         assert response.status_code == 404
         assert response_json["message"] == FilmNotFoundException().message
+
+    async def test_delete_film_by_id_client(
+        self, client: AsyncClient, faker, prepare_database
+    ):
+        film = await FilmFactory().create()
+
+        response_delete = await client.delete(self.get_list_url(film.id))
+
+        assert response_delete.status_code == 403
+        assert response_delete.json()["detail"] == "Доступ запрещен"
+
+    async def test_delete_film_by_id_employee(
+        self, employee_client: AsyncClient, faker, prepare_database
+    ):
+        film = await FilmFactory().create()
+
+        response_delete = await employee_client.delete(
+            self.get_list_url(film.id)
+        )
+        response_search_after_delete = await employee_client.get(
+            self.get_list_url(film.id)
+        )
+
+        assert response_delete.status_code == 200
+        assert response_search_after_delete.status_code == 404
+
+        assert (
+            response_search_after_delete.json()["message"] == "Фильм не найден"
+        )
+        assert response_delete.json()["data"]["id"] == film.id
+        assert response_delete.json()["data"]["status"] == "Фильм удален"
+
+    async def test_delete_film_by_id_with_session_employee(
+        self, employee_client: AsyncClient, faker, prepare_database
+    ):
+        film = await FilmFactory().create()
+        await FilmSessionFactory(film_id=film.id).create()
+
+        response_delete = await employee_client.delete(
+            self.get_list_url(film.id)
+        )
+
+        assert response_delete.status_code == 400
+        assert (
+            response_delete.json()["message"]
+            == "Невозможно удалить фильм с назначенным сеансом"
+        )

@@ -73,3 +73,8 @@ class FilmInfoSchema(BaseModel):
             date_rent_start=film.date_rent_start,
             date_rent_end=film.date_rent_end,
         )
+
+
+class FilmDeletedSchema(BaseModel):
+    id: int
+    status: str = Field(default="Фильм удален")

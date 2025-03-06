@@ -117,7 +117,5 @@ class ORMFilmService(BaseFilmService, BaseOrmService):
             limit=limit,
         )
 
-    async def delete(
-        self, film: Film, join_: set[str] | None = None
-    ) -> Film | None:
+    async def delete(self, film: Film, join_: set[str] | None = None) -> None:
         return await super(BaseFilmService, self).delete(instance=film)
