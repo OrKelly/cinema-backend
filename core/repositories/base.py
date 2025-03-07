@@ -132,6 +132,8 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         query = await self._get_by(query, field, value)
 
         if join_ is not None:
+            if unique:
+                return await self._one_or_none(query)
             return await self._all_unique(query)
         if unique:
             return await self._one(query)
@@ -274,7 +276,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         """
         async with get_session() as session:
             query = await session.scalars(query)
-            return query.one_or_none()
+            return query.unique().one_or_none()
 
     async def _one(self, query: Select) -> ModelType | None:
         """

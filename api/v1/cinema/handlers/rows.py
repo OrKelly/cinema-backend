@@ -40,5 +40,5 @@ async def get_row_handler(
     container=Depends(get_container),  # noqa: B008
 ) -> ApiResponse[GetRowSchema]:
     row_service: BaseRowService = container.resolve(BaseRowService)
-    row = await row_service.get_with_places_by_id(id)
+    row = await row_service.get_by_id(id_=id, join_={"places"})
     return ApiResponse(data=GetRowSchema.to_schema(row))

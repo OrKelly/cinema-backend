@@ -4,6 +4,7 @@ import pytest
 from faker import Faker
 from httpx import AsyncClient
 
+from apps.cinema.exceptions.halls import HallNotFoundException
 from apps.cinema.services.halls import BaseHallService
 from apps.cinema.services.rows import BaseRowService
 from core.containers import get_container
@@ -71,6 +72,17 @@ class TestHallApi:
         assert len(response_json["rows"]) == rows_amount
         assert response_json["rows"][0]["capacity"] == rows_capacity
         assert len(response_json["rows"][0]["places"]) == rows_capacity
+
+    async def test_hall_get_with_rows_and_places_not_exist(
+        self, prepare_database, client: AsyncClient, container, faker
+    ):
+        response = await client.get(
+            self.get_list_url(faker.pyint(max_value=30))
+        )
+        response_json = response.json()
+
+        assert response.status_code == 404
+        assert response_json["message"] == HallNotFoundException().message
 
     @pytest.mark.parametrize(
         ("payload", "flag"),
