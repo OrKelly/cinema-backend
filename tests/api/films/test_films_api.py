@@ -160,7 +160,7 @@ class TestFilmAPI:
         assert response_json["message"] == FilmNotFoundException().message
 
     async def test_delete_film_by_id_client(
-        self, client: AsyncClient, faker, prepare_database
+        self, prepare_database, client: AsyncClient, faker
     ):
         film = await FilmFactory().create()
 
@@ -170,7 +170,7 @@ class TestFilmAPI:
         assert response_delete.json()["detail"] == "Доступ запрещен"
 
     async def test_delete_film_by_id_employee(
-        self, employee_client: AsyncClient, faker, prepare_database
+        self, prepare_database, employee_client: AsyncClient, faker
     ):
         film = await FilmFactory().create()
 
@@ -191,7 +191,7 @@ class TestFilmAPI:
         assert response_delete.json()["data"]["status"] == "Фильм удален"
 
     async def test_delete_film_by_id_with_session_employee(
-        self, employee_client: AsyncClient, faker, prepare_database
+        self, prepare_database, employee_client: AsyncClient, faker
     ):
         film = await FilmFactory().create()
         await FilmSessionFactory(film_id=film.id).create()

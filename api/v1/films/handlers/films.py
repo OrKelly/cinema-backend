@@ -18,6 +18,8 @@ from apps.films.services.genres import BaseGenreService
 from apps.films.use_cases.film_create import CreateFilmUseCase
 from apps.films.use_cases.film_delete import DeleteFilmUseCase
 from core.containers import get_container
+from core.permissions.base import EmployeePermission
+from core.permissions.depends import permissions
 from core.schemas.responses.api_response import ApiResponse
 
 router = APIRouter()
@@ -93,7 +95,7 @@ async def delete_film_by_id(
         Path(gt=0, description="Введите id фильма, для удаления"),
     ],
     container=Depends(get_container),  # noqa: B008
-    # permission = permissions([EmployeePermission]),  # noqa: B008
+    permission=permissions([EmployeePermission]),  # noqa: B008
 ) -> ApiResponse[FilmDeletedSchema]:
     film_del_use_case: DeleteFilmUseCase = container.resolve(DeleteFilmUseCase)
 
