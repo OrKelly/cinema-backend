@@ -98,6 +98,14 @@ class ORMHallService(BaseHallService, BaseOrmService):
         self, id_: int, attributes: dict[str, Any]
     ) -> Hall | None:
         await self.get_by_id(id_=id_)
+        hall = await super(BaseHallService, self).get_by_filter(
+            filter_params={"title": attributes.get("title")}, unique=True
+        )
+        if hall:
+            if hall.id == id_:
+                attributes.pop("title")
+            else:
+                raise HallAlreadyExists()
         return await super(BaseHallService, self).update(
             id_=id_, attributes=attributes
         )
