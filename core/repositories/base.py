@@ -37,7 +37,7 @@ class BaseRepository(ABC):
     ): ...
 
     @abstractmethod
-    async def delete(self, instance: Any) -> None: ...
+    async def delete(self, instance: ModelType) -> None: ...
 
     @abstractmethod
     async def get_by_filter(
@@ -140,7 +140,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
 
         return await self._all(query)
 
-    async def delete(self, instance: Any) -> None:
+    async def delete(self, instance: ModelType) -> None:
         """
         Метод для удаления инстанса
 

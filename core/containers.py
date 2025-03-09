@@ -77,6 +77,7 @@ from apps.films.use_cases.film_create import (
     CreateFilmUseCase,
 )
 from apps.films.use_cases.film_delete import DeleteFilmUseCase
+from apps.films.use_cases.film_session_check import FilmSessionCheckUseCase
 from apps.films.use_cases.film_session_create import CreateFilmSessionUseCase
 from apps.notifications.models.notification import Notification
 from apps.notifications.repositories.notification import (
@@ -226,6 +227,7 @@ def _initialize_use_cases(container: punq.Container) -> None:
     container.register(CreateFilmUseCase)
     container.register(CreateFilmSessionUseCase)
     container.register(DeleteFilmUseCase)
+    container.register(FilmSessionCheckUseCase)
 
     # apps/users
     container.register(RegisterUserUseCase)
