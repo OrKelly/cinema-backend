@@ -15,4 +15,4 @@ class HallNotFoundException(NotFoundException):
 class HallAlreadyExists(InstanceAlreadyExistException):
     @property
     def message(self):
-        return "Кинозал с таким название уже существует"
+        return "Кинозал с таким названием уже существует"

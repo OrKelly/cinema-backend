@@ -28,7 +28,7 @@ class ORMUserGenreAssociationService(
     ):
         user = await self.user_service.get_by_id(id_=user_id, join_={"genres"})
         new_genre_ids = list(
-            set(genre_ids) - set(map(lambda item: item.id, user[0].genres))
+            set(genre_ids) - set(map(lambda item: item.id, user.genres))
         )
         if new_genre_ids:
             return await self.repository.insert_user_genre_association(

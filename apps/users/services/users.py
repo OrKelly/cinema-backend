@@ -27,9 +27,7 @@ class BaseUserService:
     ): ...
 
     @abstractmethod
-    async def get_by_id(
-        self, id_: int, join_: set[str] | None = None
-    ) -> User | None: ...
+    async def get_by_id(self, id_: int, join_: set[str] | None = None): ...
 
     @abstractmethod
     async def get_by_email(

@@ -4,6 +4,10 @@ import pytest
 from faker import Faker
 from httpx import AsyncClient
 
+from apps.cinema.exceptions.halls import (
+    HallAlreadyExists,
+    HallNotFoundException,
+)
 from apps.cinema.services.halls import BaseHallService
 from apps.cinema.services.rows import BaseRowService
 from core.containers import get_container
@@ -72,6 +76,17 @@ class TestHallApi:
         assert response_json["rows"][0]["capacity"] == rows_capacity
         assert len(response_json["rows"][0]["places"]) == rows_capacity
 
+    async def test_hall_get_with_rows_and_places_not_exist(
+        self, prepare_database, client: AsyncClient, container, faker
+    ):
+        response = await client.get(
+            self.get_list_url(faker.pyint(max_value=30))
+        )
+        response_json = response.json()
+
+        assert response.status_code == 404
+        assert response_json["message"] == HallNotFoundException().message
+
     @pytest.mark.parametrize(
         ("payload", "flag"),
         [
@@ -105,6 +120,22 @@ class TestHallApi:
         if flag == "change_only_title":
             assert initial_hall_title != response_json["title"]
             assert initial_hall_description == response_json["description"]
+
+    async def test_update_hall_with_exist_title(
+        self, client: AsyncClient, faker
+    ):
+        first_hall = await HallFactory().create()
+        second_hall = await HallFactory().create()
+        payload = {
+            "title": first_hall.title,
+            "description": faker.pystr(),
+        }
+        response = await client.patch(
+            self.get_list_url(second_hall.id), json=payload
+        )
+        response_json = response.json()
+        assert response.status_code == 409
+        assert response_json["message"] == HallAlreadyExists().message
 
     async def test_update_hall_with_invalid_length_title(
         self, client: AsyncClient
