@@ -140,7 +140,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
 
         return await self._all(query)
 
-    async def delete(self, instance: ModelType) -> None:
+    async def delete(self, instance: Any) -> None:
         """
         Метод для удаления инстанса
 
@@ -149,6 +149,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         """
         async with get_session() as session:
             await session.delete(instance)
+            await session.commit()
 
     async def get_by_filter(
         self,
