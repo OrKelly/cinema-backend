@@ -39,7 +39,7 @@ async def get_hall_handler(
     container=Depends(get_container),  # noqa: B008
 ) -> ApiResponse[GetHallSchema]:
     hall_service: BaseHallService = container.resolve(BaseHallService)
-    hall = await hall_service.get_with_rows_and_places_by_id(id)
+    hall = await hall_service.get_by_id(id_=id, join_={"rows"})
     return ApiResponse(data=GetHallSchema.to_schema(hall))
 
 
