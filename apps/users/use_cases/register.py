@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any
 
-from apps.notifications.services.notifications import (
+from apps.notifications.services.senders import (
     NotificationServicesFactory,
 )
 from apps.users.models.users import User

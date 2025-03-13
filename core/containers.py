@@ -77,13 +77,13 @@ from apps.films.use_cases.film_create import (
     CreateFilmUseCase,
 )
 from apps.films.use_cases.film_session_create import CreateFilmSessionUseCase
-from apps.mail_service.base import BaseMailClient, MailClient
+from apps.mail_service.base import BaseMailClient, HtmlMailClient
 from apps.notifications.models.notification import Notification
 from apps.notifications.repositories.notification import (
     BaseNotificationRepository,
     ORMNotificationRepository,
 )
-from apps.notifications.services.notifications import (
+from apps.notifications.services.senders import (
     ClientGreetingNotificationService,
     EmployeeGreetingNotificationService,
     NotificationServicesFactory,
@@ -203,7 +203,7 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(BaseGenreService, ORMGenreService)
 
     # apps/mail_service
-    container.register(BaseMailClient, MailClient)
+    container.register(BaseMailClient, HtmlMailClient)
 
     # apps/notifications
     container.register(NotificationServicesFactory)

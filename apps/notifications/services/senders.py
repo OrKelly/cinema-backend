@@ -28,7 +28,7 @@ class EmailNotificationService(ABC):
 
 
 class ClientGreetingNotificationService(EmailNotificationService):
-    template = "welcome.html"
+    template = "client_greeting.html"
 
     @Transactional(Propagation.REQUIRED_NEW)
     async def send_notification(self, user: User) -> None:
@@ -52,7 +52,7 @@ class ClientGreetingNotificationService(EmailNotificationService):
 
 
 class EmployeeGreetingNotificationService(EmailNotificationService):
-    template = "onboarding.html"
+    template = "employee_greeting.html"
 
     @Transactional(Propagation.REQUIRED_NEW)
     async def send_notification(

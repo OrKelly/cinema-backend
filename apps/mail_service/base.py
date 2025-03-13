@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
 from email.mime.multipart import MIMEMultipart
@@ -14,23 +15,26 @@ from core.loggers.base import BaseLogger
 
 
 @dataclass
-class BaseMailClient:
+class BaseMailClient(ABC):
+    logger: BaseLogger
+
+    @abstractmethod
     async def notify(
         self, notification: Notification, template: str, kwargs: dict = None
     ) -> None:
         """Переопределить в дочерних классах"""
 
+    @abstractmethod
     async def _validate(self, errors: dict[list]) -> None:
         """Переопределить в дочерних классах"""
 
+    @abstractmethod
     async def _notify(self) -> None:
         """Переопределить в дочерних классах"""
 
 
 @dataclass
-class MailClient(BaseMailClient):
-    logger: BaseLogger
-
+class HtmlMailClient(BaseMailClient):
     smtp_server = config.SMTP_SERVER
     smtp_port = config.SMTP_PORT
     smtp_username = config.SMTP_USERNAME
@@ -78,7 +82,7 @@ class MailClient(BaseMailClient):
                 port=self.smtp_port,
                 username=self.smtp_username,
                 password=self.smtp_password,
-                start_tls=True,
+                use_tls=True,
             )
             self.notification.send_status = NotificationSendStatus.SENT
             self.logger.info(
