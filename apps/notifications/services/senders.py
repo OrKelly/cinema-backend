@@ -13,6 +13,9 @@ from core.enums.notifications import NotificationKindEnum
 HTMLTemplate = TypeVar("HTMLTemplate")
 RenderedTemplate = TypeVar("RenderedTemplate")
 
+# TODO переработать шаблоны уведомлений
+#  (работа стилей, логотип, улучшить тексты приветствий)
+
 
 @dataclass
 class EmailNotificationService(ABC):
