@@ -8,7 +8,6 @@ from tests.factories.base import BaseFactory, BaseFakeSchema, SubFactory
 from .halls import HallFactory
 
 fake = Faker(locale="ru_RU")
-Faker.seed(4321)
 
 
 @dataclass

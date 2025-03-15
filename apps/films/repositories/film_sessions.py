@@ -22,6 +22,9 @@ class BaseFilmSessionRepository:
     ) -> FilmSession | None: ...
 
     @abstractmethod
+    async def get_by_id(self, id_: int) -> FilmSession | None: ...
+
+    @abstractmethod
     async def filter_by(
         self,
         filter_params: dict,
@@ -46,6 +49,11 @@ class ORMFilmSessionRepository(
     ) -> FilmSession | None:
         return await super(BaseFilmSessionRepository, self).create(
             attributes=attributes
+        )
+
+    async def get_by_id(self, id_: int) -> FilmSession | None:
+        return await super(BaseFilmSessionRepository, self).get_by(
+            field="id", value=id_, unique=True
         )
 
     async def filter_by(

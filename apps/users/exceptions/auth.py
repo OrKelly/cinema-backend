@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 
 from core.exceptions.base import (
+    FieldValidationException,
     InstanceAlreadyExistException,
+    NotFoundException,
     ServerException,
     UnauthorizedException,
-    NotFoundException,
-    FieldValidationException,
 )
-
 
 
 @dataclass

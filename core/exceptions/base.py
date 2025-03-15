@@ -49,5 +49,9 @@ class InstanceAlreadyExistException(ServerException):
 
 @dataclass
 class FieldValidationException(ServerException):
-    code: status.HTTP_422_UNPROCESSABLE_ENTITY = status.HTTP_422_UNPROCESSABLE_ENTITY
-    error_code: status.HTTP_422_UNPROCESSABLE_ENTITY = status.HTTP_422_UNPROCESSABLE_ENTITY
+    code: status.HTTP_422_UNPROCESSABLE_ENTITY = (
+        status.HTTP_422_UNPROCESSABLE_ENTITY
+    )
+    error_code: status.HTTP_422_UNPROCESSABLE_ENTITY = (
+        status.HTTP_422_UNPROCESSABLE_ENTITY
+    )
