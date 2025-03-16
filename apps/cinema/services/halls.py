@@ -31,7 +31,7 @@ class BaseHallService:
     async def get_by_id(
         self,
         id_: int,
-        join_: set[str] | None = None,
+        join_: set[str, Any] | None = None,
     ) -> Hall | None: ...
 
     @abstractmethod
@@ -45,6 +45,9 @@ class BaseHallService:
 
     @abstractmethod
     async def get_by_title(self, title: str) -> Hall | None: ...
+
+    @abstractmethod
+    async def get_with_rows_and_places_by_id(self, id: int) -> Hall | None: ...
 
     @abstractmethod
     async def update(
@@ -94,18 +97,18 @@ class ORMHallService(BaseHallService, BaseOrmService):
             filter_params={"title": title}, unique=True
         )
 
+    async def get_with_rows_and_places_by_id(self, id_: int) -> Hall | None:
+        hall = await self.get_by_filter(
+            filter_params={"id": id_}, join_={"rows"}, unique=True
+        )
+        if not hall:
+            raise HallNotFoundException
+        return hall[0]
+
     async def update(
         self, id_: int, attributes: dict[str, Any]
     ) -> Hall | None:
         await self.get_by_id(id_=id_)
-        hall = await super(BaseHallService, self).get_by_filter(
-            filter_params={"title": attributes.get("title")}, unique=True
-        )
-        if hall:
-            if hall.id == id_:
-                attributes.pop("title")
-            else:
-                raise HallAlreadyExists()
         return await super(BaseHallService, self).update(
             id_=id_, attributes=attributes
         )
@@ -125,3 +128,15 @@ class UniqueTitleHallValidatorService(BaseHallValidatorService):
         hall = await self.hall_service.get_by_title(title=attributes["title"])
         if hall:
             raise HallAlreadyExists()
+
+
+@dataclass
+class HallCheckValidatorService(BaseHallValidatorService):
+    hall_service: BaseHallService
+
+    async def validate(self, attributes: dict[str, Any]) -> None:
+        hall = await self.hall_service.get_by_id(
+            id_=attributes["cinemahall_id"]
+        )
+        if hall is None:
+            raise HallNotFoundException()
