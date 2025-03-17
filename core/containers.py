@@ -77,16 +77,16 @@ from apps.films.use_cases.film_create import (
     CreateFilmUseCase,
 )
 from apps.films.use_cases.film_session_create import CreateFilmSessionUseCase
+from apps.mail_service.base import BaseMailClient, HtmlMailClient
 from apps.notifications.models.notification import Notification
 from apps.notifications.repositories.notification import (
     BaseNotificationRepository,
     ORMNotificationRepository,
 )
-from apps.notifications.services.send_services.base import (
-    BaseNotificationService,
-)
-from apps.notifications.services.send_services.email import (
-    EmailNotificationService,
+from apps.notifications.services.senders import (
+    ClientGreetingNotificationService,
+    EmployeeGreetingNotificationService,
+    NotificationServicesFactory,
 )
 from apps.users.models.users import User
 from apps.users.repositories.users import BaseUserRepository, ORMUserRepository
@@ -104,7 +104,6 @@ from apps.users.use_cases.auth import (
     JwtBasedAuthUserUseCase,
 )
 from apps.users.use_cases.register import (
-    BaseRegisterUserUseCase,
     RegisterEmployeeUseCase,
     RegisterUserUseCase,
 )
@@ -203,6 +202,14 @@ def _initialize_services(container: punq.Container) -> None:
     )
     container.register(BaseGenreService, ORMGenreService)
 
+    # apps/mail_service
+    container.register(BaseMailClient, HtmlMailClient)
+
+    # apps/notifications
+    container.register(NotificationServicesFactory)
+    container.register(ClientGreetingNotificationService)
+    container.register(EmployeeGreetingNotificationService)
+
     # apps/users
     container.register(BaseUserService, ORMUserService)
     container.register(
@@ -228,20 +235,11 @@ def _initialize_use_cases(container: punq.Container) -> None:
     # apps/users
     container.register(RegisterUserUseCase)
     container.register(RegisterEmployeeUseCase)
-    container.register(BaseRegisterUserUseCase, RegisterUserUseCase)
     container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
 
 
 def _initialize_external_staff(container: punq.Container) -> None:
-    def _initialize_notification_service():
-        return EmailNotificationService(
-            logger=container.resolve(BaseLogger, module_name="notification")
-        )
-
     container.register(BaseLogger, FileLogger)
-    container.register(
-        BaseNotificationService, factory=_initialize_notification_service
-    )
 
 
 def _initialize_container() -> punq.Container:
