@@ -8,7 +8,7 @@ class BaseLogger(ABC):
     Базовый класс для логирования
     """
 
-    module_name: str
+    module_name: str = ""
 
     @abstractmethod
     def setup_config_loggers(self, config: dict):

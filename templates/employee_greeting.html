@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добро пожаловать</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #ff6f61; /* Living Coral */
+            color: #ffffff;
+            border-radius: 8px 8px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .content {
+            padding: 20px;
+        }
+        .content h2, h3 {
+            color: #333333;
+        }
+        .content p {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .steps {
+            margin: 20px 0;
+        }
+        .steps div {
+            margin-bottom: 10px;
+        }
+        .cta-button {
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin: 20px auto;
+            margin-bottom: 0;
+            padding: 15px 20px;
+            text-align: center;
+            background-color: #ff6f61; /* Living Coral */
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+        .footer {
+            text-align: center;
+            color: #999999;
+            border-top: 1px solid #eeeeee;
+        }
+        .footer p {
+            color: #999999;
+            margin: 0px;
+            line-height: 1.6;
+        }
+        .icons {
+            text-align: center;
+            cursor: pointer;
+        }
+        .icon {
+            padding: 20px;
+            width: 40px;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Добро пожаловать в команду <br>cinema-backend!</h1>
+        </div>
+        <div class="content">
+            <h2>Здравствуйте, {{ full_name }}!</h2>
+            <p>Мы рады приветствовать вас в команде cinema-backend! <br>Ваш опыт и навыки станут ценным вкладом в развитие и успех компании.
+            <br>Мы уверены, что вместе мы достигнем новых высот и реализуем амбициозные цели.</p>
+            <div class="steps">
+                {% if password %}
+                <div>
+                    <h3>Ваши данные: </h3>
+                    <p>Login {{ email }}</p>
+                    <p>Password {{ password }}</p>
+                </div>
+                {% endif %}
+                <div>
+                    <h3>Контактная информация:</h3>
+                    <p>HR-менеджер: [Имя HR-менеджера], [Телефон], [Email]</p>
+                    <p>Ваш руководитель: [Имя руководителя], [Телефон], [Email]</p>
+                    <p>Если у вас возникнут какие-либо вопросы до начала работы, не стесняйтесь обращаться к нам. Мы всегда готовы помочь!</p>
+                </div>
+            </div>
+            <a href="#" class="cta-button">Перейти к профилю</a>
+        </div>
+        <div class="footer">
+            <div class="icons">
+                <img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg"
+                    alt="facebook icon">
+                <img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Rutube_icon.svg"
+                    alt="google icon">
+                <img class="icon" src="https://htmljstemplates.com/static_files/svgs/linkedin.svg"
+                    alt="linkedin icon">
+            </div>
+            <div>
+            <p>&copy; 2024 cinema-backend. Все права защищены.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
