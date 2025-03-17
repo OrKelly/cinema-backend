@@ -14,6 +14,7 @@ from core.enums.users import RoleKindEnum
 if TYPE_CHECKING:
     from apps.films.models import Genre
     from apps.notifications.models.notification import Notification
+    from apps.orders.models.order import Order
 
 
 class User(Base, IntegerIdMixin, TimeStampMixin):
@@ -38,6 +39,10 @@ class User(Base, IntegerIdMixin, TimeStampMixin):
 
     notifications: Mapped[list["Notification"]] = relationship(
         "Notification", back_populates="user"
+    )
+
+    orders: Mapped[list["Order"]] = relationship(
+        "Order", back_populates="user"
     )
 
     @property

@@ -6,7 +6,6 @@ from apps.cinema.models.halls import Hall
 from tests.factories.base import BaseFactory, BaseFakeSchema
 
 fake = Faker(locale="ru_RU")
-Faker.seed(4321)
 
 
 @dataclass

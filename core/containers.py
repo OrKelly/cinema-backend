@@ -88,6 +88,23 @@ from apps.notifications.services.senders import (
     EmployeeGreetingNotificationService,
     NotificationServicesFactory,
 )
+from apps.orders.models.order import Order
+from apps.orders.repositories.orders import (
+    BaseOrderRepository,
+    ORMOrderRepository,
+)
+from apps.orders.services.orders import (
+    BaseOrderService,
+    BaseOrderValidatorService,
+    ComposedOrderValidatorService,
+    ExistsFilmSessionValidatorService,
+    ExistsPlaceValidatorService,
+    ExistsUserOrEmailValidatorService,
+    ExistsUserValidatorService,
+    ORMOrderService,
+    PlaceIsFreeValidatorService,
+)
+from apps.orders.use_cases.order_create import CreateOrderUseCase
 from apps.users.models.users import User
 from apps.users.repositories.users import BaseUserRepository, ORMUserRepository
 from apps.users.services.register import (
@@ -109,6 +126,8 @@ from apps.users.use_cases.register import (
 )
 from core.loggers import FileLogger
 from core.loggers.base import BaseLogger
+from core.payment.base import BasePaymentService
+from core.payment.mock import MockPaymentService
 from core.storages.s3.base import BaseS3Storage
 from core.storages.s3.minio import MinioS3Storage
 
@@ -158,6 +177,11 @@ def _initialize_repositories(container: punq.Container) -> None:
         model_class=Notification,
     )
 
+    # apps/orders
+    container.register(
+        BaseOrderRepository, ORMOrderRepository, model_class=Order
+    )
+
 
 def _initialize_services(container: punq.Container) -> None:
     def build_user_validators() -> BaseRegisterValidatorService:
@@ -173,6 +197,17 @@ def _initialize_services(container: punq.Container) -> None:
             validators=[
                 container.resolve(FilmSessionValidatorService),
                 container.resolve(FilmSessionIsDateTimeFreeValidatorService),
+            ]
+        )
+
+    def build_order_validators() -> BaseOrderValidatorService:
+        return ComposedOrderValidatorService(
+            validators=[
+                container.resolve(ExistsUserValidatorService),
+                container.resolve(ExistsFilmSessionValidatorService),
+                container.resolve(ExistsUserOrEmailValidatorService),
+                container.resolve(ExistsPlaceValidatorService),
+                container.resolve(PlaceIsFreeValidatorService),
             ]
         )
 
@@ -221,6 +256,17 @@ def _initialize_services(container: punq.Container) -> None:
         BaseExistingUserValidatorService, ExistingUserValidatorService
     )
 
+    # apps/orders
+    container.register(BaseOrderService, ORMOrderService)
+    container.register(ExistsUserValidatorService)
+    container.register(ExistsFilmSessionValidatorService)
+    container.register(ExistsUserOrEmailValidatorService)
+    container.register(ExistsPlaceValidatorService)
+    container.register(PlaceIsFreeValidatorService)
+    container.register(
+        BaseOrderValidatorService, factory=build_order_validators
+    )
+
 
 def _initialize_use_cases(container: punq.Container) -> None:
     # apps/cinema
@@ -237,9 +283,17 @@ def _initialize_use_cases(container: punq.Container) -> None:
     container.register(RegisterEmployeeUseCase)
     container.register(BaseAuthUserUseCase, JwtBasedAuthUserUseCase)
 
+    # apps/orders
+    container.register(CreateOrderUseCase)
+
 
 def _initialize_external_staff(container: punq.Container) -> None:
     container.register(BaseLogger, FileLogger)
+    container.register(
+        BaseNotificationService, factory=_initialize_notification_service
+    )
+    container.register(BasePaymentService, MockPaymentService)
+
 
 
 def _initialize_container() -> punq.Container:

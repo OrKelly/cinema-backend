@@ -29,6 +29,7 @@ from apps.films.models import Film, FilmSession, Genre
 from apps.association_tables.models import film_genre_association, user_genre_association
 from apps.cinema.models import Hall, Row, Place
 from apps.notifications.models.notification import Notification
+from apps.orders.models.order import Order
 # For auto generate schemas
 from core.config import config as app_config
 
