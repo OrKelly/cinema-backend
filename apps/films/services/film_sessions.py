@@ -7,7 +7,6 @@ from typing import Any
 import pytz
 
 from apps.films.exceptions.film_sessions import (
-    FilmSessionAssignedException,
     FilmSessionDateConflict,
     FilmSessionIncorrectDateException,
     FilmSessionNotFoundException,
@@ -205,20 +204,3 @@ class ComposedFilmSessionValidator(BaseFilmSessionValidatorService):
     ) -> None:
         for validator in self.validators:
             await validator.validate(attributes, args, kwargs)
-
-
-@dataclass
-class FilmSessionCheckValidator(BaseFilmSessionValidatorService):
-    film_session_service: BaseFilmSessionService
-
-    async def validate(
-        self, attributes: dict[str, Any], *args, **kwargs
-    ) -> None: ...
-
-    async def validate_session(self, id_: int):
-        film_sessions = (
-            await self.film_session_service.get_sessions_by_film_id(id_)
-        )
-
-        if film_sessions:
-            raise FilmSessionAssignedException()

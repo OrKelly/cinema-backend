@@ -63,7 +63,6 @@ from apps.films.services.film_sessions import (
     BaseFilmSessionService,
     BaseFilmSessionValidatorService,
     ComposedFilmSessionValidator,
-    FilmSessionCheckValidator,
     FilmSessionIsDateTimeFreeValidatorService,
     FilmSessionValidatorService,
     ORMFilmSessionService,
@@ -71,8 +70,10 @@ from apps.films.services.film_sessions import (
 from apps.films.services.films import BaseFilmService, ORMFilmService
 from apps.films.services.genres import BaseGenreService, ORMGenreService
 from apps.films.services.validation import (
+    BaseFilmDeleteValidatorService,
     BaseFilmValidatorService,
     FilmRentDatesValidatorService,
+    FilmSessionCheckValidator,
 )
 from apps.films.use_cases.film_create import (
     CreateFilmUseCase,
@@ -200,7 +201,9 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(BaseFilmValidatorService, FilmRentDatesValidatorService)
     container.register(FilmSessionIsDateTimeFreeValidatorService)
     container.register(FilmSessionValidatorService)
-    (container.register(FilmSessionCheckValidator),)
+    container.register(
+        BaseFilmDeleteValidatorService, FilmSessionCheckValidator
+    )
     container.register(
         BaseFilmSessionValidatorService, factory=build_film_session_validators
     )
