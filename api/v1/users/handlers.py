@@ -6,9 +6,11 @@ from api.v1.users.schemas import (
     GenreSelectionCompleteSchema,
     GenreSelectionSchema,
     GetAllUsersSchema,
+    GetUserSchema,
     UserLoginSchema,
     UserRegisterCompleteSchema,
     UserRegisterSchema,
+    UserUpdateSchema,
 )
 from apps.association_tables.services.user_genre_associations import (
     BaseUserGenreAssociationService,
@@ -79,3 +81,18 @@ async def user_add_favourite_genres(
     return ApiResponse(
         data=GenreSelectionCompleteSchema(genre_ids=selected_genres.genre_ids)
     )
+
+
+@router.patch("/me")
+async def user_update_handler(
+    request: Request,
+    user_data: UserUpdateSchema,
+    container=Depends(get_container),  # noqa: B008
+    permission=permissions([AuthenticatedPermission]),  # noqa: B008
+):
+    user_service: BaseUserService = container.resolve(BaseUserService)
+    updated_user = await user_service.update(
+        id_=request.user.id, attributes=user_data.model_dump()
+    )
+
+    return ApiResponse(data=GetUserSchema.to_schema(updated_user))

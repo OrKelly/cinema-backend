@@ -144,3 +144,33 @@ class TestUserApi:
         )  # E501
         assert response.status_code == 403
         assert response.json()["detail"] == "Доступ запрещен"
+
+    async def test_user_update_with_auth(
+        self, prepare_database, logged_client, faker
+    ):
+        payload = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "patronymic": faker.last_name(),
+        }
+
+        response = await logged_client.patch(
+            self.get_list_url("me"), json=payload
+        )  # E501
+        assert response.status_code == 200
+
+    async def test_user_update_without_auth(
+        self, prepare_database, client, faker
+    ):
+        payload = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "patronymic": faker.last_name(),
+        }
+
+        response = await client.patch(
+            self.get_list_url("me"), json=payload
+        )  # E501
+
+        assert response.status_code == 403
+        assert response.json()["detail"] == "Доступ запрещен"
