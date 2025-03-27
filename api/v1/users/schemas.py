@@ -63,3 +63,9 @@ class GenreSelectionCompleteSchema(BaseModel):
     status: str = Field(
         default="Выбранные жанры успешно добавлены в избранные"
     )
+
+
+class UserUpdateSchema(BaseModel):
+    first_name: str
+    last_name: str
+    patronymic: str
