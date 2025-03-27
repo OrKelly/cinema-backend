@@ -5,6 +5,7 @@ from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from apps.orders.models.ticket import Ticket
 from core.database import Base
 from core.database.mixins import IntegerIdMixin
 from core.enums.orders import OrderPaymentStatusEnum
@@ -36,3 +37,4 @@ class Order(Base, IntegerIdMixin):
         default=OrderPaymentStatusEnum.NOT_PAID,
     )
     user: Mapped["User"] = relationship("User", back_populates="orders")
+    ticket: Mapped["Ticket"] = relationship(back_populates="order")

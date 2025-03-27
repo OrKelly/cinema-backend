@@ -44,9 +44,7 @@ from apps.cinema.services.rows import (
 from apps.cinema.use_cases.hall_create import CreateHallUseCase
 from apps.cinema.use_cases.place_create import CreatePlaceUseCase
 from apps.cinema.use_cases.row_create import CreateRowUseCase
-from apps.films.models import FilmSession
-from apps.films.models.films import Film
-from apps.films.models.genres import Genre
+from apps.films.models import Film, FilmSession, Genre
 from apps.films.repositories.film_sessions import (
     BaseFilmSessionRepository,
     ORMFilmSessionRepository,
@@ -91,10 +89,14 @@ from apps.notifications.services.senders import (
     EmployeeGreetingNotificationService,
     NotificationServicesFactory,
 )
-from apps.orders.models.order import Order
+from apps.orders.models import Order, Ticket
 from apps.orders.repositories.orders import (
     BaseOrderRepository,
     ORMOrderRepository,
+)
+from apps.orders.repositories.tickets import (
+    BaseTicketRepository,
+    ORMTicketRepository,
 )
 from apps.orders.services.orders import (
     BaseOrderService,
@@ -106,6 +108,12 @@ from apps.orders.services.orders import (
     ExistsUserValidatorService,
     ORMOrderService,
     PlaceIsFreeValidatorService,
+)
+from apps.orders.services.tickets import (
+    BaseTicketService,
+    BaseTicketValidatorService,
+    ExistsTicketForOrderValidatorService,
+    ORMTicketService,
 )
 from apps.orders.use_cases.order_create import CreateOrderUseCase
 from apps.users.models.users import User
@@ -183,6 +191,9 @@ def _initialize_repositories(container: punq.Container) -> None:
     # apps/orders
     container.register(
         BaseOrderRepository, ORMOrderRepository, model_class=Order
+    )
+    container.register(
+        BaseTicketRepository, ORMTicketRepository, model_class=Ticket
     )
 
 
@@ -271,6 +282,10 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(PlaceIsFreeValidatorService)
     container.register(
         BaseOrderValidatorService, factory=build_order_validators
+    )
+    container.register(BaseTicketService, ORMTicketService)
+    container.register(
+        BaseTicketValidatorService, ExistsTicketForOrderValidatorService
     )
 
 
