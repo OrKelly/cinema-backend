@@ -3,10 +3,12 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
+from apps.films.exceptions.film_sessions import FilmSessionAssignedException
 from apps.films.exceptions.rent_date import (
     EndDateIncorrectException,
     StartDateIncorrectException,
 )
+from apps.films.services.film_sessions import BaseFilmSessionService
 from apps.films.services.films import BaseFilmService
 
 
@@ -34,3 +36,24 @@ class ComposedFilmValidatorService(BaseFilmValidatorService):
     async def validate(self, film_data: dict[str, any]) -> None:
         for validator in self.validators:
             await validator.validate(film_data)
+
+
+@dataclass
+class BaseFilmDeleteValidatorService(ABC):
+    @abstractmethod
+    def validate(self, film_data: dict[str, any]) -> None: ...
+
+
+@dataclass
+class FilmSessionCheckValidator(BaseFilmDeleteValidatorService):
+    film_session_service: BaseFilmSessionService
+
+    async def validate(self, film_data: dict[str, any]) -> None:
+        film_sessions = (
+            await self.film_session_service.get_sessions_by_film_id(
+                film_data["id"]
+            )
+        )
+
+        if film_sessions:
+            raise FilmSessionAssignedException()

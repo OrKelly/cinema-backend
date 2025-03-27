@@ -51,7 +51,8 @@ class BaseOrmService(BaseService):
     ):
         return await self.repository.get_all(skip, limit, join_, order_)
 
-    async def delete(self, instance: Any) -> None: ...
+    async def delete(self, instance: Any) -> None:
+        return await self.repository.delete(instance)
 
     async def get_by_id(
         self, id_: int, join_: set[str] | None = None

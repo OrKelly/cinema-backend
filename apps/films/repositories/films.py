@@ -29,6 +29,9 @@ class BaseFilmRepository:
         unique: bool = False,
     ) -> Iterable[Film] | Film | list[None]: ...
 
+    @abstractmethod
+    async def delete(self, film: Film) -> None: ...
+
 
 @dataclass
 class ORMFilmRepository(BaseFilmRepository, BaseORMRepository[Film]):
@@ -56,3 +59,6 @@ class ORMFilmRepository(BaseFilmRepository, BaseORMRepository[Film]):
             order_=order_,
             unique=unique,
         )
+
+    async def delete(self, film: Film) -> None:
+        return await super(BaseFilmRepository, self).delete(instance=film)

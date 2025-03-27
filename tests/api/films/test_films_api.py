@@ -139,3 +139,68 @@ class TestFilmAPI:
         response_json = response.json()["data"]
         assert response.status_code == 200
         assert len(response_json["genres"]) == amount_genres
+
+    async def test_get_film_by_id(
+        self, client: AsyncClient, faker, prepare_database
+    ):
+        for _i in range(faker.pyint(max_value=20)):
+            film = await FilmFactory().create()
+            response = await client.get(self.get_list_url(film.id))
+            assert response.status_code == 200
+
+    async def test_get_film_by_id_not_exist_id(
+        self, client: AsyncClient, faker, prepare_database
+    ):
+        film = await FilmFactory().create()
+        film.id = 10001
+        response = await client.get(self.get_list_url(film.id))
+        response_json = response.json()
+
+        assert response.status_code == 404
+        assert response_json["message"] == FilmNotFoundException().message
+
+    async def test_delete_film_by_id_client(
+        self, prepare_database, client: AsyncClient, faker
+    ):
+        film = await FilmFactory().create()
+
+        response_delete = await client.delete(self.get_list_url(film.id))
+
+        assert response_delete.status_code == 403
+        assert response_delete.json()["detail"] == "Доступ запрещен"
+
+    async def test_delete_film_by_id_employee(
+        self, prepare_database, employee_client: AsyncClient
+    ):
+        film = await FilmFactory().create()
+
+        response_delete = await employee_client.delete(
+            self.get_list_url(film.id)
+        )
+        response_search_after_delete = await employee_client.get(
+            self.get_list_url(film.id)
+        )
+        assert response_delete.status_code == 200
+        assert response_search_after_delete.status_code == 404
+
+        assert (
+            response_search_after_delete.json()["message"] == "Фильм не найден"
+        )
+        assert response_delete.json()["data"]["id"] == film.id
+        assert response_delete.json()["data"]["status"] == "Фильм удален"
+
+    async def test_delete_film_by_id_with_session_employee(
+        self, prepare_database, employee_client: AsyncClient, faker
+    ):
+        film = await FilmFactory().create()
+        await FilmSessionFactory(film_id=film.id).create()
+
+        response_delete = await employee_client.delete(
+            self.get_list_url(film.id)
+        )
+
+        assert response_delete.status_code == 400
+        assert (
+            response_delete.json()["message"]
+            == "Невозможно удалить фильм с назначенным сеансом"
+        )

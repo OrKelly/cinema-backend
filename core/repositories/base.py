@@ -37,7 +37,7 @@ class BaseRepository(ABC):
     ): ...
 
     @abstractmethod
-    async def delete(self, instance: Any) -> None: ...
+    async def delete(self, instance: ModelType) -> None: ...
 
     @abstractmethod
     async def get_by_filter(
@@ -149,6 +149,7 @@ class BaseORMRepository(BaseRepository, Generic[ModelType]):
         """
         async with get_session() as session:
             await session.delete(instance)
+            await session.commit()
 
     async def get_by_filter(
         self,

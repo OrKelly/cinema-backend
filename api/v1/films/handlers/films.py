@@ -5,12 +5,21 @@ from fastapi.requests import Request
 from fastapi.routing import APIRouter
 
 from api.v1.films.schemas.film_sessions import GetSessionsByFilmID
-from api.v1.films.schemas.films import AddFilmCompleteSchema, FilmAddSchema
+from api.v1.films.schemas.films import (
+    AddFilmCompleteSchema,
+    FilmAddSchema,
+    FilmDeletedSchema,
+    FilmInfoSchema,
+)
 from api.v1.films.schemas.genres import GetAllGenresSchema
 from apps.films.services.film_sessions import BaseFilmSessionService
+from apps.films.services.films import BaseFilmService
 from apps.films.services.genres import BaseGenreService
 from apps.films.use_cases.film_create import CreateFilmUseCase
+from apps.films.use_cases.film_delete import DeleteFilmUseCase
 from core.containers import get_container
+from core.permissions.base import EmployeePermission
+from core.permissions.depends import permissions
 from core.schemas.responses.api_response import ApiResponse
 
 router = APIRouter()
@@ -57,3 +66,39 @@ async def get_film_genres(
     genres = await genre_service.get_all()
 
     return ApiResponse(data=GetAllGenresSchema.to_schema(genres))
+
+
+@router.get("/{id}")
+async def get_film_by_id(
+    request: Request,
+    id: Annotated[
+        int,
+        Path(
+            gt=0,
+            description="Введите id фильма, для получения информации "
+            "о фильме",
+        ),
+    ],
+    container=Depends(get_container),  # noqa: B008
+) -> ApiResponse[FilmInfoSchema]:
+    film_id_service: BaseFilmService = container.resolve(BaseFilmService)
+    film = await film_id_service.get_by_id(id_=id)
+
+    return ApiResponse(data=FilmInfoSchema.to_schema(film))
+
+
+@router.delete("/{id}")
+async def delete_film_by_id(
+    request: Request,
+    id: Annotated[
+        int,
+        Path(gt=0, description="Введите id фильма, для удаления"),
+    ],
+    container=Depends(get_container),  # noqa: B008
+    permission=permissions([EmployeePermission]),  # noqa: B008
+) -> ApiResponse[FilmDeletedSchema]:
+    film_del_use_case: DeleteFilmUseCase = container.resolve(DeleteFilmUseCase)
+
+    await film_del_use_case.delete_by_id(id_=id)
+
+    return ApiResponse(data=FilmDeletedSchema(id=id))

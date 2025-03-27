@@ -70,12 +70,15 @@ from apps.films.services.film_sessions import (
 from apps.films.services.films import BaseFilmService, ORMFilmService
 from apps.films.services.genres import BaseGenreService, ORMGenreService
 from apps.films.services.validation import (
+    BaseFilmDeleteValidatorService,
     BaseFilmValidatorService,
     FilmRentDatesValidatorService,
+    FilmSessionCheckValidator,
 )
 from apps.films.use_cases.film_create import (
     CreateFilmUseCase,
 )
+from apps.films.use_cases.film_delete import DeleteFilmUseCase
 from apps.films.use_cases.film_session_create import CreateFilmSessionUseCase
 from apps.mail_service.base import BaseMailClient, HtmlMailClient
 from apps.notifications.models.notification import Notification
@@ -233,6 +236,9 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(FilmSessionIsDateTimeFreeValidatorService)
     container.register(FilmSessionValidatorService)
     container.register(
+        BaseFilmDeleteValidatorService, FilmSessionCheckValidator
+    )
+    container.register(
         BaseFilmSessionValidatorService, factory=build_film_session_validators
     )
     container.register(BaseGenreService, ORMGenreService)
@@ -277,6 +283,7 @@ def _initialize_use_cases(container: punq.Container) -> None:
     # apps/films
     container.register(CreateFilmUseCase)
     container.register(CreateFilmSessionUseCase)
+    container.register(DeleteFilmUseCase)
 
     # apps/users
     container.register(RegisterUserUseCase)
