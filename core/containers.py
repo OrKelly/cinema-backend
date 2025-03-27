@@ -296,11 +296,7 @@ def _initialize_use_cases(container: punq.Container) -> None:
 
 def _initialize_external_staff(container: punq.Container) -> None:
     container.register(BaseLogger, FileLogger)
-    container.register(
-        BaseNotificationService, factory=_initialize_notification_service
-    )
     container.register(BasePaymentService, MockPaymentService)
-
 
 
 def _initialize_container() -> punq.Container:

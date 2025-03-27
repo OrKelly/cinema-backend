@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from apps.notifications.services.send_services.base import (
-    BaseNotificationService,
-)
+from apps.mail_service.base import BaseMailClient
 from apps.orders.models.order import Order
 from apps.orders.services.orders import (
     BaseOrderService,
@@ -20,7 +18,7 @@ class CreateOrderUseCase:
     service: BaseOrderService
     validator: BaseOrderValidatorService
     payment_service: BasePaymentService
-    notification_service: BaseNotificationService
+    notification_service: BaseMailClient
 
     @Transactional(propagation=Propagation.REQUIRED)
     async def execute(self, attributes: dict[str, Any]) -> Order:
