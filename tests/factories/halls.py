@@ -10,7 +10,7 @@ fake = Faker(locale="ru_RU")
 
 @dataclass
 class HallCreate(BaseFakeSchema):
-    title: str = fake.company
+    title: str = fake.unique.word
     description: str = fake.text
 
     class Meta:

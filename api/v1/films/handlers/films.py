@@ -99,6 +99,6 @@ async def delete_film_by_id(
 ) -> ApiResponse[FilmDeletedSchema]:
     film_del_use_case: DeleteFilmUseCase = container.resolve(DeleteFilmUseCase)
 
-    await film_del_use_case.delete_by_id(id_=id)
+    await film_del_use_case.execute(id_=id)
 
     return ApiResponse(data=FilmDeletedSchema(id=id))
