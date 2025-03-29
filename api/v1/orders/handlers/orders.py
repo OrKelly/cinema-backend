@@ -19,5 +19,5 @@ async def create_order_handler(
     order_data = order_data.model_dump()
     if request.user:
         order_data["user_id"] = request.user.id
-    order = await use_case.execute(attributes=order_data)
-    return ApiResponse(data=OrderCompleteSchema(id=order.id))
+    order_ids = await use_case.execute(attributes=order_data)
+    return ApiResponse(data=OrderCompleteSchema(order_ids=order_ids))

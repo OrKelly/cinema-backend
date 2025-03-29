@@ -20,13 +20,13 @@ class TestOrderAPI:
     async def get_payload() -> dict:
         session = await FilmSessionFactory().create()
         place = await PlaceFactory().create()
-        return {"session_id": session.id, "place_id": place.id}
+        return {"session_id": session.id, "place_ids": [place.id]}
 
     @staticmethod
     def compare_instances(order: Order, payload: dict):
         order_payload = {
             "session_id": order.session_id,
-            "place_id": order.place_id,
+            "place_ids": [order.place_id],
         }
         return order_payload == payload
 
@@ -42,7 +42,9 @@ class TestOrderAPI:
         response = await logged_client.post(self.get_list_url(), json=payload)
         assert response.status_code == 200
 
-        order = await service.get_by_id(id_=response.json()["data"]["id"])
+        order = await service.get_by_id(
+            id_=response.json()["data"]["order_ids"][0]
+        )
         self.compare_instances(order, payload)
 
     async def test_create_with_email(
@@ -58,7 +60,9 @@ class TestOrderAPI:
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 200
 
-        order = await service.get_by_id(id_=response.json()["data"]["id"])
+        order = await service.get_by_id(
+            id_=response.json()["data"]["order_ids"][0]
+        )
         self.compare_instances(order, payload)
 
     async def test_create_without_email_and_user_id(
@@ -106,7 +110,7 @@ class TestOrderAPI:
         self, prepare_database, logged_client, container, faker
     ):
         payload = await self.get_payload()
-        payload["place_id"] = faker.pyint()
+        payload["place_ids"].append(faker.pyint())
 
         service: BaseOrderService = container.resolve(BaseOrderService)
         orders = await service.get_all()
@@ -124,7 +128,10 @@ class TestOrderAPI:
         self, prepare_database, logged_client, container, faker
     ):
         order = await OrderFactory().create()
-        payload = {"place_id": order.place_id, "session_id": order.session_id}
+        payload = {
+            "place_ids": [order.place_id],
+            "session_id": order.session_id,
+        }
 
         service: BaseOrderService = container.resolve(BaseOrderService)
         orders = await service.get_all()
