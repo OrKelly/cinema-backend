@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from apps.mail_service.base import BaseMailClient
-from apps.orders.models.order import Order
 from apps.orders.services.orders import (
     BaseOrderService,
     BaseOrderValidatorService,
@@ -21,23 +20,38 @@ class CreateOrderUseCase:
     notification_service: BaseMailClient
 
     @Transactional(propagation=Propagation.REQUIRED)
-    async def execute(self, attributes: dict[str, Any]) -> Order:
-        await self.validator.validate(attributes)
-        order = await self.service.create(attributes)
-        payment_status = self.payment_service.make_payment(attributes)
-        if payment_status == OrderPaymentStatusEnum.PAID:
-            # ToDo добавить формирование и отправку билета
+    async def execute(self, attributes: dict[str, Any]) -> list[int]:
+        order_ids = []
+        while attributes.get("place_ids"):
+            order_attributes = {
+                attr: value
+                for attr, value in attributes.items()
+                if attr != "place_ids"
+            }
+            order_attributes["place_id"] = attributes.get("place_ids").pop()
+
+            await self.validator.validate(attributes=order_attributes)
+            order = await self.service.create(attributes=order_attributes)
+            payment_status = self.payment_service.make_payment(
+                attributes=order_attributes
+            )
+            if payment_status == OrderPaymentStatusEnum.PAID:
+                # ToDo добавить формирование и отправку билета
+                await self.service.update(
+                    id_=order.id,
+                    attributes={"payment_status": OrderPaymentStatusEnum.PAID},
+                )
+                await self.notificate(attributes=order_attributes)
+                order_ids.append(order.id)
+                continue
             await self.service.update(
                 id_=order.id,
-                attributes={"payment_status": OrderPaymentStatusEnum.PAID},
+                attributes={
+                    "payment_status": OrderPaymentStatusEnum.CANCELLED
+                },
             )
-            await self.notificate(attributes)
-            return order
-        await self.service.update(
-            id_=order.id,
-            attributes={"payment_status": OrderPaymentStatusEnum.CANCELLED},
-        )
-        raise PaymentFailedException
+            raise PaymentFailedException
+        return order_ids
 
     async def notificate(self, attributes: dict[str, Any]) -> None:
         # ToDo реализовать нотификацию после рефактора и добавления билетов
