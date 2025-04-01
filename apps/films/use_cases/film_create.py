@@ -3,6 +3,7 @@ from typing import Any
 
 from fastapi import UploadFile
 
+from apps.cinema.services.halls import HallCheckValidatorService
 from apps.films.models.films import Film
 from apps.films.services.films import BaseFilmService
 from apps.films.services.validation import BaseFilmValidatorService
@@ -14,6 +15,7 @@ from core.storages.s3.utils import remove_file_on_exception
 class CreateFilmUseCase:
     film_service: BaseFilmService
     validator: BaseFilmValidatorService
+    hall_validator: HallCheckValidatorService
     poster_creator: BaseS3Storage
 
     async def execute(self, film_data: dict[str, Any]) -> Film:
@@ -25,6 +27,7 @@ class CreateFilmUseCase:
             poster_url = self.upload_poster(poster)
             film_data["poster"] = poster_url
             await self.validator.validate(film_data)
+            await self.hall_validator.validate(film_data)
             return await self.film_service.create(attributes=film_data)
 
     def upload_poster(self, poster: UploadFile) -> str:

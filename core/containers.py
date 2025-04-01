@@ -26,6 +26,7 @@ from apps.cinema.repositories.rows import BaseRowRepository, ORMRowRepository
 from apps.cinema.services.halls import (
     BaseHallService,
     BaseHallValidatorService,
+    HallCheckValidatorService,
     ORMHallService,
     UniqueTitleHallValidatorService,
 )
@@ -235,6 +236,7 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(
         BaseHallValidatorService, UniqueTitleHallValidatorService
     )
+    container.register(BaseHallValidatorService, HallCheckValidatorService)
     container.register(BasePlaceService, ORMPlaceService)
     container.register(BasePlaceValidatorService, PlaceAlreadyExistsValidator)
     container.register(BaseRowService, ORMRowService)
@@ -246,6 +248,7 @@ def _initialize_services(container: punq.Container) -> None:
     container.register(BaseFilmValidatorService, FilmRentDatesValidatorService)
     container.register(FilmSessionIsDateTimeFreeValidatorService)
     container.register(FilmSessionValidatorService)
+    container.register(HallCheckValidatorService)
     container.register(
         BaseFilmDeleteValidatorService, FilmSessionCheckValidator
     )
