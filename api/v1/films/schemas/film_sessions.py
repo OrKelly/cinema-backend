@@ -13,6 +13,7 @@ class AddFilmSessionCompleteSchema(BaseModel):
 
 class FilmSessionAddSchema(BaseModel):
     film_id: int
+    hall_id: int
     date_time: datetime
     price: float
 

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, Float, String, Text
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -14,17 +14,12 @@ from core.enums.films import AgeRatingEnum, FilmStatusEnum
 if TYPE_CHECKING:
     from film_sessions import FilmSession
 
-    from apps.cinema.models.halls import Hall
     from apps.films.models.genres import Genre
 
 
 class Film(Base, IntegerIdMixin):
     __tablename__ = "films"
 
-    cinemahall_id: Mapped[int] = mapped_column(
-        Integer,
-        ForeignKey("halls.id", onupdate="CASCADE", ondelete="SET NULL"),
-    )
     title: Mapped[str] = mapped_column(String(45))
     description: Mapped[str] = mapped_column(Text)
     poster: Mapped[str] = mapped_column(String(255))
@@ -37,7 +32,6 @@ class Film(Base, IntegerIdMixin):
     genres: Mapped[list["Genre"]] = relationship(
         "Genre", secondary="film_genre_association", back_populates="films"
     )
-    hall: Mapped["Hall"] = relationship("Hall", back_populates="films")
     filmsessions: Mapped[list["FilmSession"]] = relationship(
         "FilmSession", back_populates="film"
     )

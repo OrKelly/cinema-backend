@@ -11,6 +11,7 @@ from api.v1.cinema.schemas import (
     UpdateHallSchema,
 )
 from apps.cinema.services.halls import BaseHallService
+from apps.cinema.use_cases.free_place_data import GetFreePlaceHall
 from apps.cinema.use_cases.hall_create import CreateHallUseCase
 from core.containers import get_container
 from core.schemas.responses.api_response import ApiResponse
@@ -54,4 +55,15 @@ async def update_hall_handler(
     hall = await hall_service.update(
         id_=id, attributes=update_data.model_dump(exclude_unset=True)
     )
+    return ApiResponse(data=CreateHallSchema.to_schema(hall))
+
+
+@router.get("/{id}/places")
+async def get_free_and_taken_place_hall_per_filmsession(
+    request: Request,
+    id: Annotated[int, Path(gt=0, description="Enter session id")],
+    container=Depends(get_container),  # noqa: B008
+) -> ApiResponse[CreateHallSchema]:
+    hall_use_case: GetFreePlaceHall = container.resolve(GetFreePlaceHall)
+    hall = await hall_use_case.execute(filmsession_id=id)
     return ApiResponse(data=CreateHallSchema.to_schema(hall))

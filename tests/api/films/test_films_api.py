@@ -9,7 +9,6 @@ from apps.films.services.films import BaseFilmService
 from tests.factories.film_sessions import FilmSessionFactory
 from tests.factories.films import FilmFactory
 from tests.factories.genres import GenreFactory
-from tests.factories.halls import HallFactory
 
 
 class TestFilmAPI:
@@ -19,10 +18,8 @@ class TestFilmAPI:
 
     @staticmethod
     async def generate_payload(date_rent_start, date_rent_end):
-        hall = await HallFactory().create()
         film = await FilmFactory().row()
         return {
-            "cinemahall_id": hall.id,
             "title": film["title"],
             "description": film["description"],
             "age_rating": film["age_rating"].value,
@@ -149,7 +146,7 @@ class TestFilmAPI:
             assert response.status_code == 200
 
     async def test_get_film_by_id_not_exist_id(
-        self, client: AsyncClient, faker, prepare_database
+        self, client: AsyncClient, prepare_database
     ):
         film = await FilmFactory().create()
         film.id = 10001
@@ -160,7 +157,7 @@ class TestFilmAPI:
         assert response_json["message"] == FilmNotFoundException().message
 
     async def test_delete_film_by_id_client(
-        self, prepare_database, client: AsyncClient, faker
+        self, prepare_database, client: AsyncClient
     ):
         film = await FilmFactory().create()
 
@@ -190,7 +187,7 @@ class TestFilmAPI:
         assert response_delete.json()["data"]["status"] == "Фильм удален"
 
     async def test_delete_film_by_id_with_session_employee(
-        self, prepare_database, employee_client: AsyncClient, faker
+        self, prepare_database, employee_client: AsyncClient
     ):
         film = await FilmFactory().create()
         await FilmSessionFactory(film_id=film.id).create()

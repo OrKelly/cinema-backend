@@ -7,7 +7,6 @@ from typing import Any
 from sqlalchemy import Select
 from sqlalchemy.orm import selectinload
 
-from apps.cinema.models import Hall
 from apps.films.models import Film, FilmSession
 from apps.users.models.users import User
 from core.database import Propagation, Transactional
@@ -74,14 +73,14 @@ class ORMFilmSessionRepository(
         self, hall_id: int, date_time: datetime, join_: set = None
     ) -> Iterable[FilmSession] | Iterable[None]:
         if join_ is None:
-            join_ = {"film_hall"}
+            join_ = {"film"}
         start_of_day = date_time.replace(
             hour=0, minute=0, second=0, microsecond=0
         )
         end_of_day = start_of_day + timedelta(days=1)
         query = self._query(join_)
         query = query.filter(
-            Hall.id == hall_id,
+            FilmSession.hall_id == hall_id,
             FilmSession.date_time >= start_of_day,
             FilmSession.date_time <= end_of_day,
         )

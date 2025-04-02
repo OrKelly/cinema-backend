@@ -6,6 +6,9 @@ from typing import Any
 
 import pytz
 
+from apps.cinema.exceptions.halls import HallNotFoundException
+from apps.cinema.models import Hall
+from apps.cinema.services.halls import BaseHallService
 from apps.films.exceptions.film_sessions import (
     FilmSessionDateConflict,
     FilmSessionIncorrectDateException,
@@ -127,13 +130,17 @@ class BaseFilmSessionValidatorService(ABC):
 @dataclass
 class FilmSessionValidatorService(BaseFilmSessionValidatorService):
     film_service: BaseFilmService
+    hall_service: BaseHallService
 
     async def validate(
         self, attributes: dict[str, Any], *args, **kwargs
     ) -> None:
-        film = await self.get_film(attributes)
+        film = await self.get_film(attributes["film_id"])
+        hall = await self.get_hall(attributes["hall_id"])
         if not film:
             raise FilmNotFoundException
+        if not hall:
+            raise HallNotFoundException
         timezone = pytz.UTC
         date_time = attributes.get("date_time")
         if date_time:
@@ -145,8 +152,11 @@ class FilmSessionValidatorService(BaseFilmSessionValidatorService):
             ):
                 raise FilmSessionIncorrectDateException
 
-    async def get_film(self, attributes: dict[str, Any]) -> Film:
-        return await self.film_service.get_by_id(attributes["film_id"])
+    async def get_film(self, film_id: int) -> Film:
+        return await self.film_service.get_by_id(id_=film_id)
+
+    async def get_hall(self, hall_id: int) -> Hall:
+        return await self.hall_service.get_by_id(id_=hall_id)
 
 
 @dataclass
@@ -155,12 +165,16 @@ class FilmSessionIsDateTimeFreeValidatorService(
 ):
     session_service: BaseFilmSessionService
     film_service: BaseFilmService
+    hall_service: BaseHallService
 
     async def validate(
         self, attributes: dict[str, Any], *args, **kwargs
     ) -> None:
         film = await self.get_film(attributes["film_id"])
-        sessions = await self.get_film_sessions(film, attributes["date_time"])
+        hall = await self.get_hall(attributes["hall_id"])
+        sessions = await self.get_film_sessions(
+            hall=hall, date_time=attributes["date_time"]
+        )
         for session in sessions:
             if not self.validate_session(
                 session=session,
@@ -172,11 +186,14 @@ class FilmSessionIsDateTimeFreeValidatorService(
     async def get_film(self, film_id: int) -> Film:
         return await self.film_service.get_by_id(id_=film_id)
 
+    async def get_hall(self, hall_id: int) -> Hall:
+        return await self.hall_service.get_by_id(id_=hall_id)
+
     async def get_film_sessions(
-        self, film: Film, date_time: datetime
+        self, hall: Hall, date_time: datetime
     ) -> Iterable[FilmSession] | None:
         return await self.session_service.get_sessions_by_hall_id_and_date(
-            hall_id=film.cinemahall_id, date_time=date_time
+            hall_id=hall.id, date_time=date_time
         )
 
     def validate_session(
