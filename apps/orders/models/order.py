@@ -23,7 +23,7 @@ class Order(Base, IntegerIdMixin):
         nullable=True,
     )
     email: Mapped[str] = mapped_column(String(255), nullable=True)
-    session_id: Mapped[int] = mapped_column(
+    filmsession_id: Mapped[int] = mapped_column(
         ForeignKey("filmsessions.id", onupdate="CASCADE", ondelete="SET NULL")
     )
     place_id: Mapped[int] = mapped_column(

@@ -125,8 +125,8 @@ class ExistsFilmSessionValidatorService(BaseOrderValidatorService):
     session_repository: BaseFilmSessionRepository
 
     async def validate(self, attributes: dict[str, Any]) -> None:
-        session_id = attributes.get("session_id")
-        session = await self.session_repository.get_by_id(session_id)
+        filmsession_id = attributes.get("filmsession_id")
+        session = await self.session_repository.get_by_id(id_=filmsession_id)
         if not session:
             raise FilmSessionNotFoundException
 
@@ -155,9 +155,12 @@ class PlaceIsFreeValidatorService(BaseOrderValidatorService):
 
     async def validate(self, attributes: dict[str, Any]) -> None:
         place_id = attributes.get("place_id")
-        session_id = attributes.get("session_id")
+        filmsession_id = attributes.get("filmsession_id")
         orders = await self.order_repository.get_by_filter(
-            filter_params={"place_id": place_id, "session_id": session_id}
+            filter_params={
+                "place_id": place_id,
+                "filmsession_id": filmsession_id,
+            }
         )
         if orders:
             raise PlaceAlreadyTakenException

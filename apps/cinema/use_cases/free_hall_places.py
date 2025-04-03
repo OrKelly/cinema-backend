@@ -17,7 +17,7 @@ class GetFreeHallPlaces:
             id_=filmsession_id, join_={"hall"}
         )
         orders = await self.order_service.get_by_filter(
-            filter_params={"session_id": filmsession_id}
+            filter_params={"filmsession_id": filmsession_id}
         )
         taken_places = {order.place_id for order in orders}
         hall = await self.hals_service.get_by_id(

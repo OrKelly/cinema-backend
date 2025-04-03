@@ -170,7 +170,7 @@ class TestHallApi:
             taken_place = random.choice(row_places)
             taken_places_ids.add(taken_place.id)
             await OrderFactory(
-                session_id=filmsession.id,
+                filmsession_id=filmsession.id,
                 user_id=user.id,
                 email=user.email,
                 place_id=taken_place.id,

@@ -14,7 +14,7 @@ fake = Faker(locale="ru_RU")
 
 @dataclass
 class OrderCreate(BaseFakeSchema):
-    session_id = SubFactory(factory=FilmSessionFactory)
+    filmsession_id = SubFactory(factory=FilmSessionFactory)
     place_id = SubFactory(factory=PlaceFactory)
     create_time: datetime = fake.date_time
 
