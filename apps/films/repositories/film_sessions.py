@@ -7,7 +7,7 @@ from typing import Any
 from sqlalchemy import Select
 from sqlalchemy.orm import selectinload
 
-from apps.films.models import Film, FilmSession
+from apps.films.models import FilmSession
 from apps.users.models.users import User
 from core.database import Propagation, Transactional
 from core.repositories.base import BaseORMRepository
@@ -91,9 +91,7 @@ class ORMFilmSessionRepository(
             selectinload(FilmSession.film)
         )
 
-    def _join_film_hall(self, query: Select):
-        return (
-            query.join(FilmSession.film)
-            .join(Film.hall)
-            .options(selectinload(FilmSession.film).selectinload(Film.hall))
+    def _join_hall(self, query: Select):
+        return query.join(FilmSession.hall).options(
+            selectinload(FilmSession.hall)
         )

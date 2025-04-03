@@ -41,6 +41,15 @@ class BaseOrderService(ABC):
     ) -> Iterable[Order] | Order | None: ...
 
     @abstractmethod
+    async def get_by_filter(
+        self,
+        filter_params: dict,
+        join_: set[str] = None,
+        order_: dict | None = None,
+        unique: bool | None = False,
+    ): ...
+
+    @abstractmethod
     async def update(
         self, id_: int, attributes: dict[str, Any]
     ) -> Order | None: ...
@@ -73,6 +82,17 @@ class ORMOrderService(BaseOrderService, BaseOrmService):
             limit=limit,
             join_=join_,
             order_=order_,
+        )
+
+    async def get_by_filter(
+        self,
+        filter_params: dict,
+        join_: set[str] = None,
+        order_: dict | None = None,
+        unique: bool | None = False,
+    ):
+        return await super(BaseOrderService, self).get_by_filter(
+            filter_params=filter_params, join_=join_, order_=order_
         )
 
     async def update(

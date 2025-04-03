@@ -41,7 +41,7 @@ from apps.cinema.services.rows import (
     ORMRowService,
     RowAlreadyExistsValidator,
 )
-from apps.cinema.use_cases.free_place_data import GetFreePlaceHall
+from apps.cinema.use_cases.free_hall_places import GetFreeHallPlaces
 from apps.cinema.use_cases.hall_create import CreateHallUseCase
 from apps.cinema.use_cases.place_create import CreatePlaceUseCase
 from apps.cinema.use_cases.row_create import CreateRowUseCase
@@ -295,7 +295,7 @@ def _initialize_use_cases(container: punq.Container) -> None:
     container.register(CreateHallUseCase)
     container.register(CreatePlaceUseCase)
     container.register(CreateRowUseCase)
-    container.register(GetFreePlaceHall)
+    container.register(GetFreeHallPlaces)
 
     # apps/films
     container.register(CreateFilmUseCase)
