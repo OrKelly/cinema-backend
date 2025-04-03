@@ -126,8 +126,10 @@ class ExistsFilmSessionValidatorService(BaseOrderValidatorService):
 
     async def validate(self, attributes: dict[str, Any]) -> None:
         filmsession_id = attributes.get("filmsession_id")
-        session = await self.session_repository.get_by_id(id_=filmsession_id)
-        if not session:
+        filmsession = await self.session_repository.get_by_id(
+            id_=filmsession_id
+        )
+        if not filmsession:
             raise FilmSessionNotFoundException
 
 
