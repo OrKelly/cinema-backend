@@ -22,6 +22,7 @@ class FilmAddSchema(BaseModel):
     status: FilmStatusEnum
     date_rent_start: datetime
     date_rent_end: datetime
+    genres: list[int] = []
 
     @classmethod
     def as_form(
@@ -35,7 +36,9 @@ class FilmAddSchema(BaseModel):
         status: FilmStatusEnum = Form(...),  # noqa: B008
         date_rent_start: datetime = Form(...),  # noqa: B008
         date_rent_end: datetime = Form(...),  # noqa: B008
+        genres_id: str= Form(""),
     ) -> "FilmAddSchema":
+        genres = list(map(int, genres_id.split(",")))
         return cls(
             poster=poster,
             title=title,
@@ -46,6 +49,7 @@ class FilmAddSchema(BaseModel):
             status=status,
             date_rent_start=date_rent_start,
             date_rent_end=date_rent_end,
+            genres=genres   
         )
 
 

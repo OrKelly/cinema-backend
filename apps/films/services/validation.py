@@ -10,6 +10,7 @@ from apps.films.exceptions.rent_date import (
 )
 from apps.films.services.film_sessions import BaseFilmSessionService
 from apps.films.services.films import BaseFilmService
+from apps.films.exceptions.genres import GenreExistValidateException
 
 
 @dataclass
@@ -57,3 +58,16 @@ class FilmSessionCheckValidator(BaseFilmDeleteValidatorService):
 
         if film_sessions:
             raise FilmSessionAssignedException()
+
+
+@dataclass
+class FilmGenresValidatorService(BaseFilmValidatorService):
+    genre_service: BaseGenreService
+
+    async def validate(self, film_data: dict[str, any]):
+        genres = await self.genre_service.get_all()
+        exists_genres_ids = {genre.id for genre in genres}
+        selected_genres_ids = set(film_data.get('genres', {}))
+        error_ids = selected_genres_ids.difference(exists_genres_ids)
+        if error_ids:
+            raise GenreExistValidateException(error_ids)
