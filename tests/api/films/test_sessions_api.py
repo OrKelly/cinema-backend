@@ -15,17 +15,24 @@ class TestFilmAPI:
         return "api/v1/films/sessions"
 
     async def test_create_film_session(
-        self, client: AsyncClient, faker, container
+        self,
+        client: AsyncClient,
+        faker,
+        container,
+        current_date_time,
+        prepare_database,
     ):
         date_time = datetime.date.today()
         film = await FilmFactory(
             date_rent_start=date_time,
             date_rent_end=date_time + datetime.timedelta(days=7),
         ).create()
+        hall = await HallFactory().create()
         payload = {
             "film_id": film.id,
-            "date_time": date_time.strftime("%Y-%m-%d"),
-            "price": faker.pyfloat(),
+            "hall_id": hall.id,
+            "date_time": current_date_time.strftime("%Y-%m-%d"),
+            "price": faker.pyint(min_value=100, max_value=1000),
         }
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 200
@@ -53,10 +60,14 @@ class TestFilmAPI:
             date_rent_start=current_date_time + datetime.timedelta(days=7),
             date_rent_end=current_date_time + datetime.timedelta(days=14),
         ).create()
+        hall = await HallFactory().create()
         payload = {
             "film_id": film.id,
+            "hall_id": hall.id,
             "date_time": current_date_time.strftime("%Y-%m-%d"),
-            "price": faker.pyfloat(),
+            "price": faker.pyfloat(
+                max_value=10000, min_value=100, right_digits=2
+            ),
         }
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 400
@@ -78,8 +89,11 @@ class TestFilmAPI:
 
         payload = {
             "film_id": film.id,
+            "hall_id": hall.id,
             "date_time": current_date_time.strftime("%Y-%m-%d"),
-            "price": faker.pyfloat(),
+            "price": faker.pyfloat(
+                max_value=10000, min_value=100, right_digits=2
+            ),
         }
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 400
@@ -95,23 +109,28 @@ class TestFilmAPI:
             duration=120,
             date_rent_end=current_date_time + datetime.timedelta(days=7),
         ).create()
-
+        hall = await HallFactory().create()
         await FilmSessionFactory(
             date_time=current_date_time
             + datetime.timedelta(hours=2, minutes=30),
             film_id=film.id,
+            hall_id=hall.id,
         ).create()
         await FilmSessionFactory(
             date_time=current_date_time - datetime.timedelta(hours=1),
             film_id=film.id,
+            hall_id=hall.id,
         ).create()
         conflict_time = current_date_time + datetime.timedelta(hours=1)
         # Сессия будет налезать на первую сессию, начинающуюся позже
         payload = {
             "film_id": film.id,
+            "hall_id": hall.id,
             "date_time": conflict_time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
             + "Z",
-            "price": faker.pyfloat(),
+            "price": faker.pyfloat(
+                max_value=10000, min_value=100, right_digits=2
+            ),
         }
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 400
@@ -143,36 +162,38 @@ class TestFilmAPI:
             date_rent_start=current_date_time - datetime.timedelta(days=1),
             duration=120,
             date_rent_end=current_date_time + datetime.timedelta(days=7),
-            cinemahall_id=hall.id,
         ).create()
         film2 = await FilmFactory(
             date_rent_start=current_date_time - datetime.timedelta(days=1),
             duration=120,
             date_rent_end=current_date_time + datetime.timedelta(days=7),
-            cinemahall_id=hall.id,
         ).create()
         await FilmSessionFactory(
             date_time=current_date_time
             + datetime.timedelta(hours=2, minutes=30),
             film_id=film1.id,
+            hall_id=hall.id,
         ).create()
         await FilmSessionFactory(
             date_time=current_date_time - datetime.timedelta(hours=1),
             film_id=film2.id,
+            hall_id=hall.id,
         ).create()
         new_film = await FilmFactory(
             date_rent_start=current_date_time - datetime.timedelta(days=1),
             duration=120,
             date_rent_end=current_date_time + datetime.timedelta(days=7),
-            cinemahall_id=hall.id,
         ).create()
 
         conflict_time = current_date_time + datetime.timedelta(hours=1)
         payload = {
             "film_id": new_film.id,
+            "hall_id": hall.id,
             "date_time": conflict_time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
             + "Z",
-            "price": faker.pyfloat(),
+            "price": faker.pyfloat(
+                max_value=10000, min_value=100, right_digits=2
+            ),
         }
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 400

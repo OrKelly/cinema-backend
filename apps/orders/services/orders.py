@@ -41,6 +41,15 @@ class BaseOrderService(ABC):
     ) -> Iterable[Order] | Order | None: ...
 
     @abstractmethod
+    async def get_by_filter(
+        self,
+        filter_params: dict,
+        join_: set[str] = None,
+        order_: dict | None = None,
+        unique: bool | None = False,
+    ): ...
+
+    @abstractmethod
     async def update(
         self, id_: int, attributes: dict[str, Any]
     ) -> Order | None: ...
@@ -75,6 +84,17 @@ class ORMOrderService(BaseOrderService, BaseOrmService):
             order_=order_,
         )
 
+    async def get_by_filter(
+        self,
+        filter_params: dict,
+        join_: set[str] = None,
+        order_: dict | None = None,
+        unique: bool | None = False,
+    ):
+        return await super(BaseOrderService, self).get_by_filter(
+            filter_params=filter_params, join_=join_, order_=order_
+        )
+
     async def update(
         self, id_: int, attributes: dict[str, Any]
     ) -> Order | None:
@@ -105,9 +125,11 @@ class ExistsFilmSessionValidatorService(BaseOrderValidatorService):
     session_repository: BaseFilmSessionRepository
 
     async def validate(self, attributes: dict[str, Any]) -> None:
-        session_id = attributes.get("session_id")
-        session = await self.session_repository.get_by_id(session_id)
-        if not session:
+        filmsession_id = attributes.get("filmsession_id")
+        filmsession = await self.session_repository.get_by_id(
+            id_=filmsession_id
+        )
+        if not filmsession:
             raise FilmSessionNotFoundException
 
 
@@ -135,9 +157,12 @@ class PlaceIsFreeValidatorService(BaseOrderValidatorService):
 
     async def validate(self, attributes: dict[str, Any]) -> None:
         place_id = attributes.get("place_id")
-        session_id = attributes.get("session_id")
+        filmsession_id = attributes.get("filmsession_id")
         orders = await self.order_repository.get_by_filter(
-            filter_params={"place_id": place_id, "session_id": session_id}
+            filter_params={
+                "place_id": place_id,
+                "filmsession_id": filmsession_id,
+            }
         )
         if orders:
             raise PlaceAlreadyTakenException

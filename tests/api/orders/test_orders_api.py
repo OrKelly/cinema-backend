@@ -18,14 +18,14 @@ class TestOrderAPI:
 
     @staticmethod
     async def get_payload() -> dict:
-        session = await FilmSessionFactory().create()
+        filmsession = await FilmSessionFactory().create()
         place = await PlaceFactory().create()
-        return {"session_id": session.id, "place_ids": [place.id]}
+        return {"filmsession_id": filmsession.id, "place_ids": [place.id]}
 
     @staticmethod
     def compare_instances(order: Order, payload: dict):
         order_payload = {
-            "session_id": order.session_id,
+            "filmsession_id": order.filmsession_id,
             "place_ids": [order.place_id],
         }
         return order_payload == payload
@@ -89,7 +89,7 @@ class TestOrderAPI:
         self, prepare_database, logged_client, container, faker
     ):
         payload = await self.get_payload()
-        payload["session_id"] = faker.pyint()
+        payload["filmsession_id"] = faker.pyint()
 
         service: BaseOrderService = container.resolve(BaseOrderService)
         orders = await service.get_all()
@@ -130,7 +130,7 @@ class TestOrderAPI:
         order = await OrderFactory().create()
         payload = {
             "place_ids": [order.place_id],
-            "session_id": order.session_id,
+            "filmsession_id": order.filmsession_id,
         }
 
         service: BaseOrderService = container.resolve(BaseOrderService)

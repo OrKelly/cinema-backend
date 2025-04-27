@@ -7,14 +7,17 @@ from apps.films.models import FilmSession
 from tests.factories.base import BaseFactory, BaseFakeSchema, SubFactory
 from tests.factories.films import FilmFactory
 
+from .halls import HallFactory
+
 fake = Faker(locale="ru_RU")
 
 
 @dataclass
 class FilmSessionCreate(BaseFakeSchema):
     film_id = SubFactory(factory=FilmFactory)
+    hall_id = SubFactory(factory=HallFactory)
     date_time: datetime = fake.date_time
-    price: float = fake.pyfloat
+    price: int = fake.pyint(min_value=100, max_value=1000)
 
     class Meta:
         model = FilmSession

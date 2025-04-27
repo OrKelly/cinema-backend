@@ -15,7 +15,6 @@ class AddFilmCompleteSchema(BaseModel):
 class FilmAddSchema(BaseModel):
     poster: UploadFile
     title: str
-    cinemahall_id: int
     description: str
     age_rating: AgeRatingEnum
     duration: float
@@ -28,7 +27,6 @@ class FilmAddSchema(BaseModel):
         cls,
         poster: UploadFile = File(...),  # noqa: B008
         title: str = Form(...),  # noqa: B008
-        cinemahall_id: int = Form(...),  # noqa: B008
         description: str = Form(...),  # noqa: B008
         age_rating: AgeRatingEnum = Form(...),  # noqa: B008
         duration: float = Form(...),  # noqa: B008
@@ -39,7 +37,6 @@ class FilmAddSchema(BaseModel):
         return cls(
             poster=poster,
             title=title,
-            cinemahall_id=cinemahall_id,
             description=description,
             age_rating=age_rating,
             duration=duration,
@@ -50,7 +47,6 @@ class FilmAddSchema(BaseModel):
 
 
 class FilmInfoSchema(BaseModel):
-    cinemahall_id: int
     title: str
     description: str
     poster: str
@@ -65,7 +61,6 @@ class FilmInfoSchema(BaseModel):
         return cls(
             poster=film.poster,
             title=film.title,
-            cinemahall_id=film.cinemahall_id,
             description=film.description,
             age_rating=film.age_rating,
             duration=film.duration,

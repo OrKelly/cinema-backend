@@ -11,8 +11,13 @@ from apps.cinema.exceptions.halls import (
 from apps.cinema.services.halls import BaseHallService
 from apps.cinema.services.rows import BaseRowService
 from core.containers import get_container
+from tests.factories.film_sessions import FilmSessionFactory
+from tests.factories.films import FilmFactory
 from tests.factories.halls import HallFactory
+from tests.factories.orders import OrderFactory
+from tests.factories.place import PlaceFactory
 from tests.factories.row import RowFactory
+from tests.factories.user import UserFactory
 
 fake = Faker(locale="ru_RU")
 hall_service: BaseHallService = get_container().resolve(BaseHallService)
@@ -77,7 +82,7 @@ class TestHallApi:
         assert len(response_json["rows"][0]["places"]) == rows_capacity
 
     async def test_hall_get_with_rows_and_places_not_exist(
-        self, prepare_database, client: AsyncClient, container, faker
+        self, prepare_database, client: AsyncClient, faker
     ):
         response = await client.get(
             self.get_list_url(faker.pyint(max_value=30))
@@ -145,3 +150,45 @@ class TestHallApi:
         payload["title"] = fake.pystr(min_chars=50, max_chars=50)
         response = await client.patch(self.get_list_url(hall.id), json=payload)
         assert response.status_code == 422
+
+    async def test_get_free_hall_places_per_filmsession(
+        self, client: AsyncClient, prepare_database
+    ):
+        hall = await HallFactory().create()
+        hall_rows = await RowFactory(hall_id=hall.id).create_batch(5)
+        film = await FilmFactory().create()
+        filmsession = await FilmSessionFactory(
+            hall_id=hall.id, film_id=film.id
+        ).create()
+        taken_places_ids = set()
+
+        for row in hall_rows:
+            row_places = await PlaceFactory(row_id=row.id).create_batch(
+                row.capacity
+            )
+            user = await UserFactory().create()
+            taken_place = random.choice(row_places)
+            taken_places_ids.add(taken_place.id)
+            await OrderFactory(
+                filmsession_id=filmsession.id,
+                user_id=user.id,
+                email=user.email,
+                place_id=taken_place.id,
+            ).create()
+
+        response = await client.get(
+            self.get_list_url(filmsession.id, "places")
+        )
+        response_json = response.json()["data"]
+        response_taken_places_ids = set()
+        for row in response_json["rows"]:
+            response_taken_places_ids.update(
+                {
+                    place["id"]
+                    for place in row["places"]
+                    if not place["is_free"]
+                }
+            )
+
+        assert response.status_code == 200
+        assert taken_places_ids == response_taken_places_ids

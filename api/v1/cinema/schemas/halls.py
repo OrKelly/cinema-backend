@@ -2,7 +2,7 @@ from typing import Annotated, Optional
 
 from pydantic import AfterValidator, BaseModel
 
-from api.v1.cinema.schemas.rows import GetRowSchema
+from api.v1.cinema.schemas.rows import GetFreeRowPlacesSchema, GetRowSchema
 from apps.cinema.models.halls import Hall
 
 
@@ -47,4 +47,27 @@ class GetHallSchema(BaseModel):
             title=hall.title,
             description=hall.description,
             rows=[GetRowSchema.to_schema(row) for row in hall.rows],
+        )
+
+
+class GetFreeHallPlacesSchema(BaseModel):
+    id: int
+    title: str
+    description: str
+    rows: list[GetFreeRowPlacesSchema]
+
+    @classmethod
+    def to_schema(
+        cls, hall: Hall, taken_places: set
+    ) -> "GetFreeHallPlacesSchema":
+        return cls(
+            id=hall.id,
+            title=hall.title,
+            description=hall.description,
+            rows=[
+                GetFreeRowPlacesSchema.to_schema(
+                    row=row, taken_places=taken_places
+                )
+                for row in hall.rows
+            ],
         )

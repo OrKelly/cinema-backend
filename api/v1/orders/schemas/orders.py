@@ -6,7 +6,7 @@ from pydantic import BaseModel, EmailStr, Field, model_validator
 class OrderAddSchema(BaseModel):
     user_id: int | None = None
     email: EmailStr | None = None
-    session_id: int
+    filmsession_id: int
     place_ids: list[int]
 
     @model_validator(mode="after")

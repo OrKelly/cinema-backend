@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from api.v1.cinema.schemas.places import GetPlaceSchema
+from api.v1.cinema.schemas.places import GetFreePlaceSchema, GetPlaceSchema
 from apps.cinema.models import Row
 
 
@@ -32,4 +32,27 @@ class GetRowSchema(BaseModel):
             number=row.number,
             capacity=row.capacity,
             places=[GetPlaceSchema.to_schema(place) for place in row.places],
+        )
+
+
+class GetFreeRowPlacesSchema(BaseModel):
+    id: int
+    number: int
+    capacity: int
+    places: list[GetFreePlaceSchema]
+
+    @classmethod
+    def to_schema(
+        cls, row: Row, taken_places: set
+    ) -> "GetFreeRowPlacesSchema":
+        return cls(
+            id=row.id,
+            number=row.number,
+            capacity=row.capacity,
+            places=[
+                GetFreePlaceSchema.to_schema(
+                    place=place, taken_places=taken_places
+                )
+                for place in row.places
+            ],
         )
