@@ -32,9 +32,7 @@ class TestFilmAPI:
             "film_id": film.id,
             "hall_id": hall.id,
             "date_time": current_date_time.strftime("%Y-%m-%d"),
-            "price": faker.pyfloat(
-                max_value=10000, min_value=100, right_digits=2
-            ),
+            "price": faker.pyint(min_value=100, max_value=1000),
         }
         response = await client.post(self.get_list_url(), json=payload)
         assert response.status_code == 200

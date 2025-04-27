@@ -24,7 +24,12 @@ class Order(Base, IntegerIdMixin):
     )
     email: Mapped[str] = mapped_column(String(255), nullable=True)
     filmsession_id: Mapped[int] = mapped_column(
-        ForeignKey("filmsessions.id", onupdate="CASCADE", ondelete="SET NULL")
+        ForeignKey(
+            "filmsessions.id",
+            onupdate="CASCADE",
+            ondelete="SET NULL",
+            name="fk_orders_filmsession_id",
+        )
     )
     place_id: Mapped[int] = mapped_column(
         ForeignKey("places.id", onupdate="CASCADE", ondelete="SET NULL")

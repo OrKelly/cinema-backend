@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Integer, Numeric
+from sqlalchemy import DateTime, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.database.base import Base
@@ -20,18 +20,28 @@ class FilmSession(Base, IntegerIdMixin):
 
     film_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey("films.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey(
+            "films.id",
+            onupdate="CASCADE",
+            ondelete="CASCADE",
+            name="fk_filmsessions_film_id",
+        ),
         nullable=False,
     )
     hall_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey("halls.id", onupdate="CASCADE", ondelete="SET NULL"),
+        ForeignKey(
+            "halls.id",
+            onupdate="CASCADE",
+            ondelete="SET NULL",
+            name="fk_filmsessions_hall_id",
+        ),
         nullable=True,
     )
     date_time: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
-    price: Mapped[float] = mapped_column(Numeric(10, 2))
+    price: Mapped[int] = mapped_column(Integer, default=0)
 
     film: Mapped["Film"] = relationship("Film", back_populates="filmsessions")
     hall: Mapped["Hall"] = relationship("Hall", back_populates="filmsessions")

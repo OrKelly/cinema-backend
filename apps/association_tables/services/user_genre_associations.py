@@ -32,6 +32,6 @@ class ORMUserGenreAssociationService(
         )
         if new_genre_ids:
             return await self.repository.insert_user_genre_association(
-                user_id=user_id, genre_ids=genre_ids
+                user_id=user_id, genre_ids=new_genre_ids
             )
         return genre_ids

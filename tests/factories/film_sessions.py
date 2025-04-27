@@ -17,7 +17,7 @@ class FilmSessionCreate(BaseFakeSchema):
     film_id = SubFactory(factory=FilmFactory)
     hall_id = SubFactory(factory=HallFactory)
     date_time: datetime = fake.date_time
-    price: float = fake.pydecimal(left_digits=8, right_digits=2)
+    price: int = fake.pyint(min_value=100, max_value=1000)
 
     class Meta:
         model = FilmSession
