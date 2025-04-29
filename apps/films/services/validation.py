@@ -10,6 +10,7 @@ from apps.films.exceptions.rent_date import (
 )
 from apps.films.services.film_sessions import BaseFilmSessionService
 from apps.films.services.films import BaseFilmService
+from apps.films.services.genres import BaseGenreService
 from apps.films.exceptions.genres import GenreExistValidateException
 
 
