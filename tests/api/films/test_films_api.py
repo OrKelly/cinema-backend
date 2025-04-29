@@ -30,6 +30,7 @@ class TestFilmAPI:
             "status": film["status"].value,
             "date_rent_start": date_rent_start.isoformat(),
             "date_rent_end": date_rent_end.isoformat(),
+            "genres": film["genres"],
         }
 
     @pytest.mark.asyncio
@@ -139,6 +140,43 @@ class TestFilmAPI:
         response_json = response.json()["data"]
         assert response.status_code == 200
         assert len(response_json["genres"]) == amount_genres
+
+    @pytest.mark.asyncio
+    async def test_create_film_with_genres(
+        self,
+        client: AsyncClient,
+        container,
+        fake_file,
+        faker
+    ):
+        amount_genres = faker.pyint(max_value=5)
+        await GenreFactory().create_batch(amount_genres)
+        response_genres = await client.get(self.get_list_url("genres"))
+        response_json = response_genres.json()["data"]
+
+        date_rent_start = datetime.now(UTC) + timedelta(4)
+        payload = await self.generate_payload(
+            date_rent_start=date_rent_start,
+            date_rent_end=date_rent_start + timedelta(1),
+        )
+        payload["genres"] = response_json["genres"][:2]
+        files = {"poster": ("fake_image.jpg", fake_file, "image/jpeg")}
+        response = await client.post(
+            self.get_list_url(), data=payload, files=files
+        )
+
+        assert response.status_code == 200
+        film_service = container.resolve(BaseFilmService)
+        film = await film_service.get_by_id(response.json()["data"]["id"])
+        assert film.id == response.json()["data"]["id"]
+        payload.pop("date_rent_start")
+        payload.pop("date_rent_end")
+        for attr, value in payload.items():
+            if hasattr(film, attr):
+                if isinstance(getattr(film, attr), Enum):
+                    assert getattr(film, attr).value == value
+                else:
+                    assert getattr(film, attr) == value
 
     async def test_get_film_by_id(
         self, client: AsyncClient, faker, prepare_database

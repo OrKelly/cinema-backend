@@ -11,6 +11,16 @@ from apps.association_tables.services.user_genre_associations import (
     BaseUserGenreAssociationService,
     ORMUserGenreAssociationService,
 )
+
+from apps.association_tables.models import film_genre_association
+from apps.association_tables.repositories.film_genre_associations import (
+    BaseFilmGenreAssociationRepository,
+    ORMFilmGenreAssociationRepository,
+)
+from apps.association_tables.services.film_genre_associations import (
+    BaseFilmGenreAssociationService,
+    ORMFilmGenreAssociationService,
+)
 from apps.cinema.models.halls import Hall
 from apps.cinema.models.places import Place
 from apps.cinema.models.rows import Row
@@ -160,6 +170,12 @@ def _initialize_repositories(container: punq.Container) -> None:
         model_class=user_genre_association,
     )
 
+    container.register(
+        BaseFilmGenreAssociationRepository,
+        ORMFilmGenreAssociationRepository,
+        model_class=film_genre_association,
+    )
+
     # apps/cinema
     container.register(BaseHallRepository, ORMHallRepository, model_class=Hall)
     container.register(BaseRowRepository, ORMRowRepository, model_class=Row)
@@ -225,9 +241,19 @@ def _initialize_services(container: punq.Container) -> None:
             ]
         )
 
+    def build_film_genres_validators() -> BaseFilmValidatorService:
+        return ComposedFilmValidatorService(
+            validators=[
+                container.resolve(FilmGenresValidatorService),
+            ]          
+        )
+
     # apps/association_tables
     container.register(
         BaseUserGenreAssociationService, ORMUserGenreAssociationService
+    )
+    container.register(
+        BaseFilmGenreAssociationService, ORMFilmGenreAssociationService
     )
 
     # apps/cinema
@@ -253,6 +279,10 @@ def _initialize_services(container: punq.Container) -> None:
         BaseFilmSessionValidatorService, factory=build_film_session_validators
     )
     container.register(BaseGenreService, ORMGenreService)
+    container.register(FilmGenresValidatorService)
+    container.register(
+        BaseFilmValidatorService, factory=build_film_genres_validators
+    )
 
     # apps/mail_service
     container.register(BaseMailClient, HtmlMailClient)
